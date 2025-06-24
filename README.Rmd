@@ -68,10 +68,6 @@ This is important as it would more easily localize the folders where the data is
 
 Open the Markdown 00QualityCheck.Rmd
 
-```{r, echo=FALSE}
-knitr::include_graphics('Images/MainScript.png')
-```
-
 ## Conditions
 
 You should have an excel file that have the following sheets, with these names: <br>
@@ -166,11 +162,11 @@ The following column names and some relevant fields are checked:
 - `LAT_PIC_CENTER`: This field is mandatory.<br>
 - `LON_PIC_CENTER`: This field is mandatory.<br>
 - `PLANE_FLIGHT_HEIGHT`: This field is mandatory. <br>
-- `PIC_AREA_ANALYSED`: This field is mandatory. Some variation is expected.<br>
+- `PIC_AREA_ANALYSED`: This field is mandatory.<br>
 - `GLARE`: This field is mandatory. <br>
 - `SEASTATE`: This field is mandatory. <br>
 - `TURBIDITY`: This field is mandatory. <br>
-- `ICE`: Usually 0 = No Ice. This field is mandatory.<br>
+- `ICE`: This field is mandatory. Use 0 is no Ice.<br>
 - `CLARITY`: This field is mandatory. <br>
 - `PIC_QUALITY`: This field is mandatory. <br>
 - `PIC_FILENAME`: Can be left blank. <br>
@@ -258,7 +254,7 @@ The process uses the markdown from `02PlausabilityCheck.Rmd` to generate a repor
 **Basis**:<br>
 - `DATE`: Must be presented as YYYYMMDD to automatically extract the month and classify the season.<br>
 - `LAT_PIC_CENTER`: Column name must fit to automatically create the survey effort maps.<br>
-- `LON_PIC_CENTER`: Column name must fit to automatically create the survey effort maps.<<br>
+- `LON_PIC_CENTER`: Column name must fit to automatically create the survey effort maps.<br>
 - `GLARE`: Some variation is expected.<br>
 - `SEASTATE`: Some variation is expected.<br>
 - `TURBIDITY`: Some variation is expected.<br>
@@ -271,7 +267,7 @@ The process uses the markdown from `02PlausabilityCheck.Rmd` to generate a repor
 - `ENGLISH_NAME`: It must be written exactly as it appears in EURING, maintaining the spacing, capitalization, or use of slashes. <br> 
 - `ID_MATCH_MISMATCH`: The selection of images for inspection should be random. The persons in the screening and ID control roles should not know whether they are determining a sighting (or during screening) or checking the determination (blind control). At the ID control level, care must be taken to ensure that the controls include as many species and taxonomic groups as possible. At least 20% of the identifications are expected to be audited, and that the error is above 70-80%. In addition, ensure that there is no observer bias, such as when a large number of individuals from one species are consistently misidentified. <br>
 - `DETECTION_STEP`: At least 20% of the screenings should be reviewed. The initial screener and the auditor are expected to achieve a minimum of 90% agreement in detection. <br>
-- `ACTIVITY`: Check that its filled for all observation. NAs are only allowed for abiotic structures. In general a balanced proportion between flying and swimming is expected.<br>
+- `ACTIVITY`: Check that its filled for all observation. 0s are only allowed for abiotic structures. In general a balanced proportion between flying and swimming is expected.<br>
 - `AGE_CLASS` and `AGE_YEAR`: Check that the information is plausible.<br>
 - `LAT_OBJECT` and `LON_OBJECT`: Used to plot the spatial distribution for each morphological group<br> 
 
@@ -330,7 +326,7 @@ The first map shows the survey and observation positions
 knitr::include_graphics('Images/Maps_1check.png')
 ```
 
-Hover over a blue dot with the cursor `r fa("mouse-pointer", fill = 'black')` When the icon changes to `r fa("hand-point-up", fill = 'black')`, click it to view the position ID and species information.<br> 
+Hover over a blue dot with the cursor. When the icon changes, click it to view the position ID and species information.<br> 
 
 ```{r, echo=FALSE,fig.height=2}
 knitr::include_graphics('Images/Maps_2check.png')
@@ -349,7 +345,7 @@ Enables the selection of specific layers corresponding to morphological grouping
 knitr::include_graphics('Images/Maps_4check.png')
 ```
 
-Hover over a blue dot with the cursor `r fa("mouse-pointer", fill = 'black')` When the icon changes to `r fa("hand-point-up", fill = 'black')`, click it to view the position ID and species information.<br> 
+Hover over a blue dot with the cursor. When the icon changes, click it to view the position ID and species information.<br> 
 
 ```{r, echo=FALSE,fig.height=2}
 knitr::include_graphics('Images/Maps_5check.png')

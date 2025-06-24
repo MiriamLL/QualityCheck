@@ -54,8 +54,6 @@ would more easily localize the folders where the data is and the Rmds.
 
 Open the Markdown 00QualityCheck.Rmd
 
-<img src="Images/MainScript.png" width="100%" />
-
 ## Conditions
 
 You should have an excel file that have the following sheets, with these
@@ -133,12 +131,11 @@ The following column names and some relevant fields are checked:
 - `LAT_PIC_CENTER`: This field is mandatory.<br>
 - `LON_PIC_CENTER`: This field is mandatory.<br>
 - `PLANE_FLIGHT_HEIGHT`: This field is mandatory. <br>
-- `PIC_AREA_ANALYSED`: This field is mandatory. Some variation is
-  expected.<br>
+- `PIC_AREA_ANALYSED`: This field is mandatory.<br>
 - `GLARE`: This field is mandatory. <br>
 - `SEASTATE`: This field is mandatory. <br>
 - `TURBIDITY`: This field is mandatory. <br>
-- `ICE`: Usually 0 = No Ice. This field is mandatory.<br>
+- `ICE`: This field is mandatory. Use 0 is no Ice.<br>
 - `CLARITY`: This field is mandatory. <br>
 - `PIC_QUALITY`: This field is mandatory. <br>
 - `PIC_FILENAME`: Can be left blank. <br>
@@ -167,7 +164,7 @@ The following column names and some relevant fields are checked:
   ABIOTIC_STRUCTURES or ABIOTIC_OBSERVATIONS.<br>
 - `DETECTION_STEP`: Leave blank if the position was not audited.<br>
 - `BEHAVIOUR`: Leave blank if no BEHAVIOUR was observed.<br>
-- `ACTIVITY`: This field is mandatory. NAs are only allowed for abiotic
+- `ACTIVITY`: This field is mandatory. 0s are only allowed for abiotic
   structures. <br>
 - `GROUP`: Leave blank if no GROUP was observed.<br>
 - `FAMILY_GROUP`: Leave blank if no FAMILY GROUP was observed.<br>
@@ -237,7 +234,7 @@ sightings must at least reach 20% of all sightings.<br>
 extract the month and classify the season.<br> - `LAT_PIC_CENTER`:
 Column name must fit to automatically create the survey effort
 maps.<br> - `LON_PIC_CENTER`: Column name must fit to automatically
-create the survey effort maps.\<<br> - `GLARE`: Some variation is
+create the survey effort maps.<br> - `GLARE`: Some variation is
 expected.<br> - `SEASTATE`: Some variation is expected.<br> -
 `TURBIDITY`: Some variation is expected.<br> - `CLARITY`: Some variation
 is expected.<br> - `PIC_QUALITY`: Some variation is expected. Percentage
@@ -260,7 +257,7 @@ number of individuals from one species are consistently misidentified.
 <br> - `DETECTION_STEP`: At least 20% of the screenings should be
 reviewed. The initial screener and the auditor are expected to achieve a
 minimum of 90% agreement in detection. <br> - `ACTIVITY`: Check that its
-filled for all observation. NAs are only allowed for abiotic structures.
+filled for all observation. 0s are only allowed for abiotic structures.
 In general a balanced proportion between flying and swimming is
 expected.<br> - `AGE_CLASS` and `AGE_YEAR`: Check that the information
 is plausible.<br> - `LAT_OBJECT` and `LON_OBJECT`: Used to plot the
@@ -307,4 +304,45 @@ sightings per group. Instructions are included.
 
 ## Conditions
 
-Check position accuracy and plausibility of observations.
+Position accuracy and plausibility of observations should be plausible.
+
+## Output
+
+The first map shows the survey and observation positions
+
+<img src="Images/Maps_1check.png" width="100%" />
+
+Hover over a blue dot with the cursor. When the icon changes, click it
+to view the position ID and species information.<br>
+
+<img src="Images/Maps_2check.png" width="100%" />
+
+Enables the selection of specific layers corresponding to morphological
+groupings and information of other features.
+
+<img src="Images/Maps_3check.png" width="100%" />
+
+Enables the selection of specific layers corresponding to morphological
+groupings
+
+<img src="Images/Maps_4check.png" width="100%" />
+
+Hover over a blue dot with the cursor. When the icon changes, click it
+to view the position ID and species information.<br>
+
+<img src="Images/Maps_5check.png" width="100%" />
+
+# Citation
+
+Please consider citing this repository.
+
+Lerma, M. (2025). QualityCheck. GitHub.
+<https://github.com/MiriamLL/QualityCheck>
+
+Additional references:
+
+- Kotzerka, J., Markones, N., Dierschke, V., & Auniņš, A. (2021).
+  Guidelines for monitoring seabirds at sea. In Helsinki Commission.
+  <https://helcom.fi/wp-content/uploads/2021/11/HELCOM-Monitoring-guidelines-for-seabirds-at-sea-monitoring.pdf>
+
+- ESAS data model. <https://esas-docs.ices.dk/>
