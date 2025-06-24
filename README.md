@@ -6,15 +6,19 @@
 This repository includes the parametrized script to run Quality Checks
 in R.
 
-Contains: QualityCheck.Rproj 00QualityCheck.Rmd
-01FormalCheckandDataValidation.Rmd 02PlausabilityCheck.Rmd
-03MapsInteractive.Rmd
+Includes: <br> - **QualityCheck.Rproj** — RStudio project file <br> -
+**00QualityCheck.Rmd** — Initial quality check script <br> -
+**01FormalCheckandDataValidation.Rmd** — Formal checks and data
+validation<br> - **02PlausabilityCheck.Rmd** — Plausibility checks<br> -
+**03MapsInteractive.Rmd** — Interactive map visualizations<br>
 
 # Installation
 
-Download/Fork
+Download or Fork from <https://github.com/MiriamLL/QualityCheck>
 
-# Start
+<img src="Images/Fork_1example.png" width="100%" />
+
+# Dependencies
 
 The following packages are required. Install if missing.
 
@@ -41,77 +45,33 @@ install.packages("tmap") #for creating maps with layers
 install.packages("fontawesome") #for adding icons
 ```
 
-Open the Project (QualityCheck.Rproj) This is important as it would more
-easily localize the folders where the data is and the Rmds.
+# Start
+
+Open the Project (QualityCheck.Rproj). <br> This is important as it
+would more easily localize the folders where the data is and the Rmds.
 
 # Main script
 
 Open the Markdown 00QualityCheck.Rmd
 
-## Data
-
-You should have an excel file that have the following sheets, with these
-names: Tripdaten Basisdaten Observations Please provide this order
-and/or these names for the sheets, or adjust the script accordingly.
-
-Copy/save the Excel file in the **00Data** directory. Next, paste the
-file name into the designated code chunk. To run the chunk, click the
-green triangle icon in the top-right corner of the code chunk (the “Run
-Current Chunk” button, shown highlighted in a red square).
-
-``` r
-knitr::include_graphics('Images/MainScript.png')
-```
-
 <img src="Images/MainScript.png" width="100%" />
 
-Check that the files were downloaded correctly. If there is any manual
-correction needed please add on the chunk allocated for this.
+## Conditions
 
-``` r
-Corrections<-'No manual corrections were needed'
-```
+You should have an excel file that have the following sheets, with these
+names: <br> - Tripdaten <br> - Basisdaten <br> - Observations <br>
+Please provide this order and/or these names for the sheets, or adjust
+the script accordingly. <br>
 
 # Formal check
 
-The process uses the markdown from `01FormalCheckandDataValidation.Rmd`
-to generate a report that summarizes the results of column name
-verification and field completion checks.
+Copy/save the Excel file in the **00Data** directory. <br> Next, paste
+the file name into the designated code chunk. <br> To run the chunk,
+click the green triangle icon in the top-right corner of the code chunk
+(the “Run Current Chunk” button, shown highlighted in a red square).
+<br>
 
-By running the script, the report is return in html format.
-
-``` r
-knitr::include_graphics('Images/FormalCheck_ScreenShot.png')
-```
-
-<img src="Images/FormalCheck_ScreenShot.png" width="100%" />
-
-It verifies that all column names are correct and identifies any column
-names that do not match the expected ones.
-
-``` r
-knitr::include_graphics('Images/FormalCheck_ColumnName_ScreenShot.png')
-```
-
-<img src="Images/FormalCheck_ColumnName_ScreenShot.png" width="100%" />
-
-It verifies that required fields are not only filled but also correctly
-completed.
-
-``` r
-knitr::include_graphics('Images/FormalCheck_Filled_ScreenShot.png')
-```
-
-<img src="Images/FormalCheck_Filled_ScreenShot.png" width="100%" />
-
-If any required columns are missing, the fields cannot be checked, and
-the following warning is displayed.
-
-``` r
-knitr::include_graphics('Images/FormalCheck_Warning_ScreenShot.png')
-```
-
-<img src="Images/FormalCheck_Warning_ScreenShot.png" width="100%" />
+<img src="Images/MainScript.png" width="100%" />
 
 ## Conditions
 
@@ -229,77 +189,51 @@ The following column names and some relevant fields are checked:
 - `LON_OBJECT`: This field is mandatory.<br>
 - `NOTES`: Can be left blank.<br>
 
+## Output
+
+The process uses the markdown from `01FormalCheckandDataValidation.Rmd`
+to generate a report that summarizes the results of column name
+verification and field completion checks.
+
+<img src="Images/FormalCheck_ScreenShot.png" width="100%" />
+
+It verifies that all column names are correct and identifies any column
+names that do not match the expected ones.
+
+<img src="Images/FormalCheck_ColumnName_ScreenShot.png" width="100%" />
+
+It verifies that required fields are not only filled but also correctly
+completed.
+
+<img src="Images/FormalCheck_Filled_ScreenShot.png" width="100%" />
+
+If any required columns are missing, the fields cannot be checked, and
+the following warning is displayed.
+
+<img src="Images/FormalCheck_Warning_ScreenShot.png" width="100%" /> If
+there is any manual correction needed please add on the chunk allocated
+for this and re-run this part.<br>
+
+``` r
+Corrections<-'No manual corrections were needed'
+```
+
 # Plausability check
 
 The process uses the markdown from `02PlausabilityCheck.Rmd` to generate
 a report in word that checks if the information reaches the expected
 conditions.
 
-1.  Revision of **control steps**. Including Area observed, Area
-    controlled.
-
-``` r
-knitr::include_graphics('Images/Plausability_1checks.png')
-```
-
-<img src="Images/Plausability_1checks.png" width="100%" />
-
-2.  Revision of **survey area**. Including the season and a map of the
-    surveyed area.
-
-``` r
-knitr::include_graphics('Images/Plausability_2checks.png')
-```
-
-<img src="Images/Plausability_2checks.png" width="100%" />
-
-3.  Revision of **environmental conditions**. Visualization of
-    environmental conditions during the survey.
-
-``` r
-knitr::include_graphics('Images/Plausability_3checks.png')
-```
-
-<img src="Images/Plausability_3checks.png" width="100%" />
-
-4.  Revision of **Observations**. Including species list, check that the
-    codes correspond to the species name, check the proportion of birds
-    and mammals, check the most common species observed during the
-    survey. Check errors in identifications.
-
-``` r
-knitr::include_graphics('Images/Plausability_4checks.png')
-```
-
-<img src="Images/Plausability_4checks.png" width="100%" />
-
-5.  Revision of **Plausibility** in the columns Activity, Age class and
-    Sex.
-
-``` r
-knitr::include_graphics('Images/Plausability_5checks.png')
-```
-
-<img src="Images/Plausability_5checks.png" width="100%" />
-
-6.  **Spatial distribution** per taxonomic/morphological groups.
-
-``` r
-knitr::include_graphics('Images/Plausability_6checks.png')
-```
-
-<img src="Images/Plausability_6checks.png" width="100%" />
-
 ## Conditions
 
-**Trip**: - `STRIP_WIDHT`: Must reach a minimum of 400 m. <br> -
+**Trip**:<br> - `STRIP_WIDHT`: Must reach a minimum of 400 m. <br> -
 `AREA_OBSERVED` and `AREA_ANALYSED`: Percentage of area analysed is
 expected to be a minimum of 70%.<br> - `AREA_ANALYSED` and
 `AREA_CONTROLLED`: Percentage of area controlled is expected to reach a
 minimum of 20%. <br> - `ID_CONTROLLED`: The number of controlled
 sightings must at least reach 20% of all sightings.<br>
 
-**Basis**: - `DATE`: Must be presented as YYYYMMDD to automatically
+**Basis**:<br> - `DATE`: Must be presented as YYYYMMDD to automatically
 extract the month and classify the season.<br> - `LAT_PIC_CENTER`:
 Column name must fit to automatically create the survey effort
 maps.<br> - `LON_PIC_CENTER`: Column name must fit to automatically
@@ -309,7 +243,7 @@ expected.<br> - `SEASTATE`: Some variation is expected.<br> -
 is expected.<br> - `PIC_QUALITY`: Some variation is expected. Percentage
 of good quality pictures is expected to be above 80%. <br>
 
-**Observations** - `ABIOTIC_STRUCTURES`: Can be left blank if no
+**Observations:**<br> - `ABIOTIC_STRUCTURES`: Can be left blank if no
 ABIOTIC_STRUCTURES were detected.<br> - `ABIOTIC_OBSERVATIONS`: Can be
 left blank if no ABIOTIC_OBSERVATIONS were detected.<br> -
 `ENGLISH_NAME`: It must be written exactly as it appears in EURING,
@@ -332,6 +266,39 @@ expected.<br> - `AGE_CLASS` and `AGE_YEAR`: Check that the information
 is plausible.<br> - `LAT_OBJECT` and `LON_OBJECT`: Used to plot the
 spatial distribution for each morphological group<br>
 
+## Output
+
+1.  Revision of **control steps**. Including Area observed, Area
+    controlled.
+
+<img src="Images/Plausability_1checks.png" width="100%" />
+
+2.  Revision of **survey area**. Including the season and a map of the
+    surveyed area.
+
+<img src="Images/Plausability_2checks.png" width="100%" />
+
+3.  Revision of **environmental conditions**. Visualization of
+    environmental conditions during the survey.
+
+<img src="Images/Plausability_3checks.png" width="100%" />
+
+4.  Revision of **Observations**. Including species list, check that the
+    codes correspond to the species name, check the proportion of birds
+    and mammals, check the most common species observed during the
+    survey. Check errors in identifications.
+
+<img src="Images/Plausability_4checks.png" width="100%" />
+
+5.  Revision of **Plausibility** in the columns Activity, Age class and
+    Sex.
+
+<img src="Images/Plausability_5checks.png" width="100%" />
+
+6.  **Spatial distribution** per taxonomic/morphological groups.
+
+<img src="Images/Plausability_6checks.png" width="100%" />
+
 # Maps
 
 The process uses the markdown from `03MapsInteractive.Rmd` to create a
@@ -341,5 +308,3 @@ sightings per group. Instructions are included.
 ## Conditions
 
 Check position accuracy and plausibility of observations.
-
-# End of document
