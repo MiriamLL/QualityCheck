@@ -7,8 +7,6 @@ output: html_document
 
 # Packages
 
-Just run if you don't have them installed already. 
-
 Load the packages.
 
 ```{r, warning=FALSE, include=FALSE}
@@ -23,7 +21,7 @@ library(here)
 Please tell me where is the data
 
 ```{r}
-ThisDirectory<-(here::here('00Data')) #change to the directory where that you want to check the excel file is.
+ThisDirectory<-(here::here('00Data')) 
 ```
 
 Run me to show you the files in the folder
@@ -38,25 +36,25 @@ Tell me which file do you want to report
 ThisFile<- "Test_20250616_AreaA.xlsx"
 ```
 
-# Tripdaten
+## Tripdaten
 
 ```{r}
 TripDaten<-read_excel(path=paste0(ThisDirectory,'\\',ThisFile),sheet="Tripdaten",col_names = TRUE)
 ```
 
-# BasisDaten
+## BasisDaten
 
 ```{r}
 BasisDaten<-read_excel(path=paste0(ThisDirectory,'\\',ThisFile),sheet = "Basisdaten",col_names = TRUE)
 ```
 
-# Observations
+## Observations
 
 ```{r, warning=FALSE}
 Observations<-read_excel(path=paste0(ThisDirectory,'\\',ThisFile),sheet="Observations",, col_types = "text")
 ```
 
-# Corrections
+## Corrections
 
 ```{r}
 Corrections<-'No manual corrections were needed'
@@ -67,12 +65,12 @@ Corrections<-'No manual corrections were needed'
 
 This part checks that all columns are correct and whether NA's occurred. 
 
-## Define folders
+## Define folder
 
 Where is the function?
 
 ```{r input1}
-FormalCheck_input_folder <- here() #Where is the parametrization file
+FormalCheck_input_folder <- here() 
 FormalCheck_input_file <- paste0(FormalCheck_input_folder,"\\01FormalCheck.Rmd") 
 FormalCheck_input_file
 ```
@@ -132,13 +130,13 @@ What base to use?
 
 ```{r}
 Plausability_input_folder<-here() 
-Plausability_input_file<- paste0(Plausability_input_folder,"\\02PlausabilityCheck.Rmd") #What is the name of the Rmd file
+Plausability_input_file<- paste0(Plausability_input_folder,"\\02PlausabilityCheck.Rmd") 
 ```
 
 How do you want the output to be saved?
 
 ```{r input}
-PlausabilityCheck_output_folder <- paste0(Plausability_input_folder,"\\02PlausabilityCheck\\") #Where do you want the output
+PlausabilityCheck_output_folder <- paste0(Plausability_input_folder,"\\02PlausabilityCheck\\") 
 PlausabilityCheck_output_folder
 ```
 
@@ -188,27 +186,28 @@ beep(sound = 1, expr = NULL)
 
 # Maps
 
-## Where is the function?
+## Define folder
+Where is the function?
 
 ```{r input}
 Maps_input_folder<-here() #Where is the parametrization file
-Maps_input_file <- paste0(Maps_input_folder,"\\03Maps_Interactive.Rmd") #What is the name of the file
+Maps_input_file <- paste0(Maps_input_folder,"\\03MapsInteractive.Rmd") 
 ```
 
 ## Define names
 How do you want the output to be named?
 
 ```{r input}
-Maps_output_folder <- paste0(Maps_input_folder,"\\03Maps\\") #Where do you want the output
+Maps_output_folder <- paste0(Maps_input_folder,"\\03Maps\\") 
 ```
 
 ```{r}
-Maps_name<-FormalCheck_file_name
-Maps_date<-FormalCheck_file_date
-Maps_TripDaten<-TripDaten 
-Maps_BasisDaten<-BasisDaten 
-Maps_Observations<-Observations
-Maps_output_name <- paste0(Maps_output_folder,"03Maps_",Maps_name,"_DATE_",Maps_date,"_1_TRIPIDs.html") 
+Maps_output_name <- paste0(Maps_output_folder,
+                           "03Maps_DATE_",
+                           as.character(TripDaten$DATE[1]),
+                           "_AREA_",
+                           as.character(TripDaten$CLUSTER[1]),
+                           ".html") 
 Maps_output_name 
 ```
 
@@ -224,8 +223,8 @@ rmarkdown::render(
   params = list(
     ThisDirectory = ThisDirectory,
     ThisFile = ThisFile,
-    Survey_BasisDaten = Maps_BasisDaten,
-    Survey_Observations = Maps_Observations
+    BasisDaten = BasisDaten,
+    Observations = Observations
   ),
   run_pandoc = TRUE,
   output_file = Maps_output_name

@@ -125,7 +125,7 @@ unique(Season$season)
 
 The **spatial extent** of the survey.
 
-```{r SurveyMap,echo=FALSE, fig.height=4, fig.width=6}
+```{r SurveyMap,echo=FALSE, fig.height=5, fig.width=4}
 Study_areas<-st_transform(GermanNorthSea::Study_areas,4326)
 Protected_SCA<- st_transform(GermanNorthSea::German_SCA,4326)
 Land<- st_transform(GermanNorthSea::German_land,4326)
@@ -159,13 +159,12 @@ ggplot(data = Basis_sf) +
   scale_y_continuous(labels = function(x) paste0(x, '\u00B0', "N")) 
 ```
 
-\newpage
 
 ## Plane height
 
 Some variation in plane height during the survey is expected. 
 
-```{r FlightHeightPlot, echo=F, fig.width=10, fig.height=4.5, warning=FALSE}
+```{r FlightHeightPlot, echo=F, fig.width=10, fig.height=4, warning=FALSE}
 ggplot(data=Plausability_Basis,aes(x=POSITION_ID,y=PLANE_FLIGHT_HEIGHT),color=CAMERA_NUMBER)+
     geom_point(aes(colour = factor(PLANE_FLIGHT_HEIGHT)), size = 1,color='darkblue') +
     xlab("Picture_ID")+ylab('Plane height')+
@@ -178,7 +177,9 @@ ggplot(data=Plausability_Basis,aes(x=POSITION_ID,y=PLANE_FLIGHT_HEIGHT),color=CA
   theme(axis.text.x = element_text(angle=90,size=8))
 ```
 
-## Environmental conditions during the surveys
+\newpage
+
+# Environmental conditions during the surveys
 
 The conditions are plotted with the x axis being the POSITION_ID and the y axis the conditions.  
 For each POSITION_ID, all cameras are plotted but are one on top of the other. Therefore, the cameras will only be noticeable if the camera report different conditions for the same POSITION_ID.  
@@ -235,6 +236,8 @@ PlotConditions(EjeY=as.numeric(Plausability_Basis$SEASTATE))+
                               "6"="#e63946", #6
                               "7"="#e63946"))#7
 ```
+
+\newpage
 
 ## Turbidity
 Turbidity goes from 1-3. Classification corresponds to: 1= no turbidity, 2= medium turbidity, 3=strong turbidity. Note: 0 is not allowed and is shown is marked in red. 
@@ -389,8 +392,9 @@ names(Controlled_Table)<- c("survey dates (YYYYMMDD)",
 knitr::kable(Controlled_Table)
 ```
 
-## Abiotic structures
+\newpage
 
+# Abiotic structures
 
 ```{r TableAbioticStructures, echo=FALSE}
 if (nrow(Observations %>% filter(!is.na(ABIOTIC_STRUCTURES))) == 0) {
@@ -414,7 +418,7 @@ if (nrow(Observations %>% filter(!is.na(ABIOTIC_STRUCTURES))) == 0) {
           }
 ```
 
-## Abiotic observations
+# Abiotic observations
 
 ```{r TableAbioticObservations, echo=FALSE}
 if (nrow(Plausability_Observations %>% filter(!is.na(ABIOTIC_OBSERVATION))) == 0) {
@@ -440,13 +444,15 @@ if (nrow(Plausability_Observations %>% filter(!is.na(ABIOTIC_OBSERVATION))) == 0
 ```
 
 
+<br>
 
 ```{r AbioticObservations, echo=FALSE, comment=NA, message=FALSE}
 #Create a column with mammal or birds
 sprintf("Note: %d abiotic structures and abiotic observations that will not be included in the next steps",length(which(is.na(Plausability_Observations$OBSERVATION))))
 ```
+\newpage
 
-## Species list
+# Species list
 
 List all **species** sighted during the surveys with number of sightings and check the codes.
 
@@ -521,7 +527,7 @@ if (length(unique(Names_6taxmissing$ENGLISH_NAME)) == 0) {
 
 \newpage
 
-## Match mismatch
+# Match mismatch
 
 The selection of images for inspection should be random. The persons in the screening and ID control roles should not know whether they are determining a sighting (or during screening) or checking the determination (blind control). 
 
@@ -568,6 +574,8 @@ names(Table_Identification)<-c('Match','Mismatch','Not Audited','Audited [%]','M
 knitr::kable(Table_Identification)}
 ```
 
+## Mismatch
+
 How many animals were first **misidentified**?
 
 ```{r, echo=FALSE}
@@ -593,6 +601,22 @@ knitr::kable(Audited_5check)
 }
 ```
 
+## Biases
+
+Are there any species that require revision due to frequent misidentification? If so, consider conducting a reevaluation. For example, that the errors were more frequent than the matches. 
+
+```{r, echo=FALSE}
+if ("2" %in% Audited_1check$ID_MATCH_MISMATCH==FALSE){
+    print("Missing 2 in ID_MATCH_MISMATCH, biases can not be calculated")
+  }else{
+Audited_7check<-Audited_5check %>%
+  mutate(Commonly_mistaken=ID_mismatch>ID_match)%>%
+  filter(Commonly_mistaken==TRUE)%>%
+  select(ENGLISH_NAME,ID_match,ID_mismatch)
+knitr::kable(Audited_7check)}
+```
+
+\newpage
 
 Ensure that there is no observer bias, such as when a large number of individuals from one species are consistently misidentified.
 
@@ -620,22 +644,11 @@ if ("2" %in% Audited_1check$ID_MATCH_MISMATCH==FALSE){
 }
 ```
 
-Are there any species that require revision due to frequent misidentification? If so, consider conducting a reevaluation.
 
-```{r, echo=FALSE}
-if ("2" %in% Audited_1check$ID_MATCH_MISMATCH==FALSE){
-    print("Missing 2 in ID_MATCH_MISMATCH, biases can not be calculated")
-  }else{
-Audited_7check<-Audited_5check %>%
-  mutate(Commonly_mistaken=ID_mismatch>ID_match)%>%
-  filter(Commonly_mistaken==TRUE)%>%
-  select(ENGLISH_NAME,ID_match,ID_mismatch)
-knitr::kable(Audited_7check)}
-```
 
 \newpage
 
-## Detection Step
+# Detection Step
 
 Gives insights on the proportion of missed animals during the screening process.
 
@@ -717,7 +730,7 @@ knitr::kable(Table_FormulaDetection)
 
 \newpage
 
-## Proportion animals
+# Proportion animals
 
 How many **marine mammals** and **birds** were sighted?
 
@@ -775,7 +788,7 @@ ggplot(Birds_3check, aes(x=ENGLISH_NAME,
 
 ### All bird sighthings
 
-```{r BirdsSightingsPlot, echo=FALSE, fig.height=16}
+```{r BirdsSightingsPlot, echo=FALSE, fig.height=10, fig.width=8}
 Birds_4check<-Animals_1check %>% filter(Taxa=='Birds')
 Birds_5check<-Birds_4check %>% 
   group_by(ENGLISH_NAME,OBSERVATION,Artificial_tax_class) %>%
@@ -844,15 +857,21 @@ Activity_Table<-Activity_Table %>%
          Flying="2",
          Submerged="3",
          Breaching_surface="4",
-         Associated_with_platform="5")%>%
+         Associated_with_platform="5",
+         Undeclared="0")%>%
   mutate(Swimming = replace_na(Swimming, 0),
          Flying= replace_na(Flying, 0),
          Submerged= replace_na(Submerged, 0),
          Breaching_surface= replace_na(Breaching_surface, 0),
-         Associated_with_platform= replace_na(Associated_with_platform, 0)
-         #Undeclared= replace_na(Undeclared, 0)
+         Associated_with_platform= replace_na(Associated_with_platform, 0),
+         Undeclared= replace_na(Undeclared, 0)
          )%>%
-  relocate(ENGLISH_NAME,Swimming,Flying,Submerged,Breaching_surface,Associated_with_platform)
+  relocate(ENGLISH_NAME,Swimming,Flying,Submerged,Breaching_surface,Associated_with_platform)%>%
+  rename('Swimming'=Swimming,
+         'Flying'=Flying,
+         'Submerged'=Submerged,
+         'Breaching'=Breaching_surface,
+         'Association'=Associated_with_platform)
 knitr::kable(Activity_Table)
 ```
 
@@ -1008,6 +1027,7 @@ Species occurring in the survey
 ```{r TernsMap, echo=FALSE, comment=NA,fig.width=14, fig.height=10}
 CheckGroup(Group='Terns')
 ```
+\newpage
 
 ### Ducks and Shelducks
 

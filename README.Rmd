@@ -192,7 +192,7 @@ The following column names and some relevant fields are checked:
 - `ENGLISH_NAME`: Leave blank if the entry corresponds to ABIOTIC_STRUCTURES or ABIOTIC_OBSERVATIONS.<br> 
 - `DETECTION_STEP`: Leave blank if the position was not audited.<br>
 - `BEHAVIOUR`: Leave blank if no BEHAVIOUR was observed.<br>
-- `ACTIVITY`: This field is mandatory. NAs are only allowed for abiotic structures. <br>
+- `ACTIVITY`: This field is mandatory. 0s are only allowed for abiotic structures. <br>
 - `GROUP`: Leave blank if no GROUP was observed.<br>
 - `FAMILY_GROUP`: Leave blank if no FAMILY GROUP was observed.<br>
 - `ASSOCIATIONS`: Leave blank if no ASSOCIATION was observed.<br>
@@ -320,7 +320,49 @@ The process uses the markdown from `03MapsInteractive.Rmd` to create a map showi
 
 ## Conditions
 
-Check position accuracy and plausibility of observations.  
+Position accuracy and plausibility of observations should be plausible.  
+
+## Output
+
+The first map shows the survey and observation positions
+
+```{r, echo=FALSE,fig.height=2}
+knitr::include_graphics('Images/Maps_1check.png')
+```
+
+Hover over a blue dot with the cursor `r fa("mouse-pointer", fill = 'black')` When the icon changes to `r fa("hand-point-up", fill = 'black')`, click it to view the position ID and species information.<br> 
+
+```{r, echo=FALSE,fig.height=2}
+knitr::include_graphics('Images/Maps_2check.png')
+```
+
+Enables the selection of specific layers corresponding to morphological groupings and information of other features.  
+
+```{r, echo=FALSE,fig.height=2}
+knitr::include_graphics('Images/Maps_3check.png')
+```
 
 
+Enables the selection of specific layers corresponding to morphological groupings
 
+```{r, echo=FALSE,fig.height=2}
+knitr::include_graphics('Images/Maps_4check.png')
+```
+
+Hover over a blue dot with the cursor `r fa("mouse-pointer", fill = 'black')` When the icon changes to `r fa("hand-point-up", fill = 'black')`, click it to view the position ID and species information.<br> 
+
+```{r, echo=FALSE,fig.height=2}
+knitr::include_graphics('Images/Maps_5check.png')
+```
+
+# Citation
+
+Please consider citing this repository. 
+
+Lerma, M. (2025). QualityCheck. GitHub. https://github.com/MiriamLL/QualityCheck
+
+Additional references:
+
+- Kotzerka, J., Markones, N., Dierschke, V., & Auniņš, A. (2021). Guidelines for monitoring seabirds at sea. In Helsinki Commission.  https://helcom.fi/wp-content/uploads/2021/11/HELCOM-Monitoring-guidelines-for-seabirds-at-sea-monitoring.pdf
+
+- ESAS data model. https://esas-docs.ices.dk/

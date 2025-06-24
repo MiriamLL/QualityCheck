@@ -565,13 +565,14 @@ Values provided in **ID_MATCH_MISMATCH**. 1 = Matches between the identifier and
 ```{r}
 unique(Observations$ID_MATCH_MISMATCH,na.rm=TRUE)
 ```
+
 **BEHAVIOUR** is not mandatory field. Values are presented as numerical codes.
 
 ```{r}
 unique(Observations$BEHAVIOUR)
 ```
 
-**ACTIVITY** is not mandatory field. Values should be 1 = Swimming, 2 = Flying, 3 = Submerged, 4 = Breaching surface, 5 = On artificial platform, 0 = Unknown
+**ACTIVITY** is not mandatory field. Values should be 1 = Swimming, 2 = Flying, 3 = Submerged, 4 = Breaching surface, 5 = On artificial platform, 0 = Unknown. 0s are only allowed for abiotic structures.
 
 ```{r}
 unique(Observations$ACTIVITY)
