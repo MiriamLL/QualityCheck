@@ -50,11 +50,11 @@ install.packages("fontawesome") #for adding icons
 Open the Project (QualityCheck.Rproj). <br> This is important as it
 would more easily localize the folders where the data is and the Rmds.
 
+<img src="Images/MainScript_1example.png" width="100%" />
+
 # Main script
 
 Open the Markdown 00QualityCheck.Rmd
-
-<img src="Images/MainScript_1example.png" width="100%" />
 
 ## Conditions
 
