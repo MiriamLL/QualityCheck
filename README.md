@@ -54,6 +54,8 @@ would more easily localize the folders where the data is and the Rmds.
 
 Open the Markdown 00QualityCheck.Rmd
 
+<img src="Images/MainScript_1example.png" width="100%" />
+
 ## Conditions
 
 You should have an excel file that have the following sheets, with these

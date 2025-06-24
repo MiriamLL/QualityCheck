@@ -68,6 +68,10 @@ This is important as it would more easily localize the folders where the data is
 
 Open the Markdown 00QualityCheck.Rmd
 
+```{r, echo=FALSE}
+knitr::include_graphics('Images/MainScript_1example.png')
+```
+
 ## Conditions
 
 You should have an excel file that have the following sheets, with these names: <br>
@@ -98,7 +102,6 @@ write_xlsx(Test_20250616_AreaA, path = paste0(Data_directory,"/Test_20250616_Are
 Copy/save the Excel file in the **00Data** directory. <br>
 Next, paste the file name into the designated code chunk. <br>
 To run the chunk, click the green triangle icon in the top-right corner of the code chunk (the "Run Current Chunk" button, shown highlighted in a red square). <br>
-
 
 ```{r, echo=FALSE}
 knitr::include_graphics('Images/MainScript.png')
