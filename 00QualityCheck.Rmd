@@ -1,0 +1,237 @@
+---
+title: "Quality checks"
+author: "Seabird Monitoring"
+date: "Last update: 16/06/2025"
+output: html_document
+---
+
+# Packages
+
+Just run if you don't have them installed already. 
+
+Load the packages.
+
+```{r, warning=FALSE, include=FALSE}
+library(tidyverse)
+library(readxl)
+library(beepr)
+library(here)
+```
+
+# Data
+
+Please tell me where is the data
+
+```{r}
+ThisDirectory<-(here::here('00Data')) #change to the directory where that you want to check the excel file is.
+```
+
+Run me to show you the files in the folder
+
+```{r}
+list.files(ThisDirectory,pattern = ".xlsx")
+```
+
+Tell me which file do you want to report
+
+```{r}
+ThisFile<- "Test_20250616_AreaA.xlsx"
+```
+
+# Tripdaten
+
+```{r}
+TripDaten<-read_excel(path=paste0(ThisDirectory,'\\',ThisFile),sheet="Tripdaten",col_names = TRUE)
+```
+
+# BasisDaten
+
+```{r}
+BasisDaten<-read_excel(path=paste0(ThisDirectory,'\\',ThisFile),sheet = "Basisdaten",col_names = TRUE)
+```
+
+# Observations
+
+```{r, warning=FALSE}
+Observations<-read_excel(path=paste0(ThisDirectory,'\\',ThisFile),sheet="Observations",, col_types = "text")
+```
+
+# Corrections
+
+```{r}
+Corrections<-'No manual corrections were needed'
+```
+
+# ~~~~~~~~~~~
+# Formal Check
+
+This part checks that all columns are correct and whether NA's occurred. 
+
+## Define folders
+
+Where is the function?
+
+```{r input1}
+FormalCheck_input_folder <- here() #Where is the parametrization file
+FormalCheck_input_file <- paste0(FormalCheck_input_folder,"\\01FormalCheck.Rmd") 
+FormalCheck_input_file
+```
+
+Where should the output be saved?
+Ideally there would be a folder 01FormalCheck to store the results.
+
+```{r}
+FormalCheck_output_folder <-paste0(FormalCheck_input_folder,"\\01FormalCheck\\") 
+```
+
+## Define names
+
+Define the name of the file using the information provided in the Trip information. 
+
+```{r}
+FormalCheck_file_date<-as.character(TripDaten$DATE[1])
+FormalCheck_file_date
+FormalCheck_file_area<-as.character(TripDaten$CLUSTER[1])
+FormalCheck_file_area
+FormalCheck_output_name<-paste0(FormalCheck_output_folder,
+                                "FormalCheck_DATE_",FormalCheck_file_date,
+                                "_AREA_",FormalCheck_file_area,".html")
+FormalCheck_output_name 
+```
+
+## Run 
+
+Run to export document
+
+```{r render validation, include=FALSE, cache=TRUE}
+rmarkdown::render(
+  input= FormalCheck_input_file, 
+  output_format = "html_document",
+  output_dir = FormalCheck_output_folder,
+  params = list(
+    ThisDirectory = ThisDirectory,
+    ThisFile = ThisFile,
+    TripDaten = TripDaten,
+    BasisDaten = BasisDaten,
+    Observations = Observations
+  ),
+  run_pandoc = TRUE,
+  output_file = FormalCheck_output_name  
+)
+beep(sound = 1, expr = NULL)
+```
+
+
+# ~~~~~~~~~
+
+# Report
+
+## Define folder
+
+What base to use?
+
+```{r}
+Plausability_input_folder<-here() 
+Plausability_input_file<- paste0(Plausability_input_folder,"\\02PlausabilityCheck.Rmd") #What is the name of the Rmd file
+```
+
+How do you want the output to be saved?
+
+```{r input}
+PlausabilityCheck_output_folder <- paste0(Plausability_input_folder,"\\02PlausabilityCheck\\") #Where do you want the output
+PlausabilityCheck_output_folder
+```
+
+## Define names
+
+```{r}
+unique(TripDaten$TRIP_ID)
+```
+
+If there are several TRIP_IDs, make reports separately by TRIP_ID
+
+```{r}
+Plausability_output_folder<-paste0(Plausability_input_folder,"\\02PlausabilityCheck\\") 
+Plausability_file_date<-as.character(TripDaten$DATE[1])
+Plausability_file_date
+Plausability_file_area<-as.character(TripDaten$CLUSTER[1])
+Plausability_file_area
+Plausability_output_name<-paste0(Plausability_output_folder,
+                                "Plausability_DATE_",Plausability_file_date,
+                                "_AREA_",Plausability_file_area,".doc")
+Plausability_output_name 
+```
+
+## Run
+
+Run to export document
+
+```{r render validation, include=FALSE}
+rmarkdown::render(
+  input= Plausability_input_file, 
+  output_format = "word_document", #can be changed to html document
+  output_dir = Plausability_output_folder,
+  params = list(
+    ThisDirectory = ThisDirectory,
+    ThisFile = ThisFile,
+    TripDaten = TripDaten,
+    BasisDaten = BasisDaten,
+    Observations = Observations
+  ),
+  run_pandoc = TRUE,
+  output_file = Plausability_output_name 
+)
+beep(sound = 1, expr = NULL)
+```
+
+# ~~~~~~~~~~
+
+# Maps
+
+## Where is the function?
+
+```{r input}
+Maps_input_folder<-here() #Where is the parametrization file
+Maps_input_file <- paste0(Maps_input_folder,"\\03Maps_Interactive.Rmd") #What is the name of the file
+```
+
+## Define names
+How do you want the output to be named?
+
+```{r input}
+Maps_output_folder <- paste0(Maps_input_folder,"\\03Maps\\") #Where do you want the output
+```
+
+```{r}
+Maps_name<-FormalCheck_file_name
+Maps_date<-FormalCheck_file_date
+Maps_TripDaten<-TripDaten 
+Maps_BasisDaten<-BasisDaten 
+Maps_Observations<-Observations
+Maps_output_name <- paste0(Maps_output_folder,"03Maps_",Maps_name,"_DATE_",Maps_date,"_1_TRIPIDs.html") 
+Maps_output_name 
+```
+
+## Run
+
+Run to export maps
+
+```{r render validation, include=FALSE}
+rmarkdown::render(
+  input= Maps_input_file, 
+  output_format = "html_document",
+  output_dir = Maps_output_folder,
+  params = list(
+    ThisDirectory = ThisDirectory,
+    ThisFile = ThisFile,
+    Survey_BasisDaten = Maps_BasisDaten,
+    Survey_Observations = Maps_Observations
+  ),
+  run_pandoc = TRUE,
+  output_file = Maps_output_name
+)
+beep(sound = 1, expr = NULL)
+```
+
+
+**End of document**

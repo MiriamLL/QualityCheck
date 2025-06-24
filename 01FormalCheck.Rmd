@@ -1,0 +1,649 @@
+---
+title: "FormalCheck"
+author: "Seabird Monitoring"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+params:
+  ThisDirectory: ThisDirectory
+  ThisFile: ThisFile
+  TripDaten: TripDaten
+  BasisDaten: BasisDaten
+  Observations: Observations
+  
+---
+
+# Intro
+
+Using data from `r params$ThisFile` excel file.  
+
+Here we will:  
+
+-  Check **relevant** columns to see if they are all filled and valid.  
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r packages, include=F}
+library(readxl)
+library(knitr)
+library(ggplot2)
+```
+
+Corrections included:
+
+```{r, echo=FALSE}
+if(length(Corrections==0)==FALSE){
+         print(paste0("No corrections needed"))
+        }else{  
+           print(paste0("Corrections were made: ",Corrections))
+      }
+```
+
+
+```{r}
+TripDaten<-TripDaten
+```
+
+# 1.Trip Data
+At this part we would check that all the columns have information, and what type of information they contain. 
+
+```{r Elements on the document, include=T, comment=NA, echo=FALSE}
+cat(paste('The document contains',nrow(TripDaten),'rows, and',ncol(TripDaten),'columns.'))
+cat(paste('The columns names are: '))
+cat(colnames(TripDaten))
+```
+
+## Column checks
+
+```{r, include=FALSE, echo=FALSE}
+TripDatenExpectedColumns<-c("TRIP","TRIP_ID","Dataset_ID","CRUISENO","OWPAS","PROJECT","CLUSTER","LAB","SCIENTIST","DATATYPE","TECHNIQUE","OBSERVER","PLANE","NUMBER_OF_PLANES","DOUBLE_PLATFORM","DATE","STARTTIME","ENDTIME","CAMERA_SYSTEM","RESOLUTION","PLANE_FLIGHT_HEIGHT_PLANED" ,"STRIP_WIDTH","PLANE_SPEED","POSITION_ACCURACY","METHOD_ID","AREA_OBSERVED","AREA_ANALYSED","AREA_CONTROLLED", "ID_CONTROLLED","SCREENING_CONTROL_DIFFERENCE","ID_CONTROL_DIFFERENCE","QUALITY_IMPROVEMENT","POSITIONSYSTEM","POSIT_PRECISION_CODE","REFSYSTEM","NOTES")
+```
+
+```{r Check columns1, include=T, echo=F, comment=NA}
+cat(paste('\n Expected',length(TripDatenExpectedColumns),'columns and',ncol(TripDaten),'provided', sep=" "))
+```
+
+```{r, echo=FALSE}
+ExpectedColumns<-TripDatenExpectedColumns
+ProvidedColumns<-colnames(TripDaten)
+MaxColumns <- max(length(ExpectedColumns), length(ProvidedColumns))
+length(ExpectedColumns) <- MaxColumns                      
+length(ProvidedColumns) <- MaxColumns
+ExpectedColumns<-data.frame(name=c(ExpectedColumns),expected=ExpectedColumns)
+ProvidedColumns<-data.frame(name=c(ProvidedColumns),provided=ProvidedColumns)
+ComparisonColumns<-merge(ExpectedColumns,ProvidedColumns,by='name',all=TRUE)
+colnames(ComparisonColumns)<-c('Name','Expected','Provided')
+ComparisonColumns<-ComparisonColumns %>% drop_na(Name)
+```
+
+```{r, echo=FALSE}
+ComparisonTripDaten<-ComparisonColumns %>% dplyr::select(Expected,Provided)
+colnames(ComparisonTripDaten)<-c("Expected","Provided")
+```
+
+Check if the name of the columns in the documents coincide, if 'TRUE' they coincide, if 'FALSE' please check.
+
+```{r, echo=FALSE, include=FALSE}
+TripDatenColumns<-colnames(TripDaten)
+class(TripDatenExpectedColumns)
+class(TripDatenColumns)
+```
+
+```{r, echo=FALSE}
+CheckColumnNames<-function(DatenColumns=DatenColumns,DatenOriginalColumns=DatenOriginalColumns){
+    DifferentTripDaten<-setdiff(TripDatenExpectedColumns,TripDatenColumns)
+      if(length(DifferentTripDaten==0)==FALSE){
+         print(paste0("All columns names seem to be correct or were corrected manually"))
+        }else{  
+           print(paste0("Please check that all columns are correct named. ",DifferentTripDaten," does not coincide with expected names."))
+      }
+}
+```
+
+```{r, echo=FALSE}
+CheckColumnNames(DatenColumns=TripDatenColumns,DatenOriginalColumns=TripDatenExpectedColumns)
+```
+
+Values **NA** indicate if the columns were provided or are missing. 
+
+```{r TableCol, echo=FALSE}
+knitr::kable(ComparisonTripDaten)
+```
+
+Missing columns include:
+
+```{r}
+if((nrow(ComparisonTripDaten %>%
+  filter(is.na(Provided)))>0)==FALSE){
+         cat(("There are no missing columns"))
+        }else{knitr::kable(ComparisonTripDaten %>%
+  filter(is.na(Provided)))}
+```
+
+**TRIP_ID** is a mandatory field. There must be 0% missing values, otherwise please check.
+
+```{r, include=T,comment=NA}
+cat(paste(round(100*sum(is.na(TripDaten$TRIP_ID))/nrow(TripDaten),1),"%","missing values",sep=" "))
+```
+
+Values provided in TRIP_ID. 
+
+```{r}
+unique(TripDaten$TRIP_ID)
+```
+
+**DATE** is a mandatory field. There must be 0% missing values, otherwise please check.
+
+```{r, include=T,comment=NA}
+cat(paste(round(100*sum(is.na(TripDaten$DATE))/nrow(TripDaten),1),"%","missing values",sep=" "))
+```
+
+Values provided for **DATE**.
+Format expected (YYYYMMDD).
+Format provided:
+
+```{r}
+unique(TripDaten$DATE)
+```
+
+**START_TIME** is a mandatory field. There must be 0% missing values, otherwise please check.
+
+```{r timecolumn2, include=T,comment=NA}
+cat(paste(round(100*sum(is.na(TripDaten$STARTTIME))/nrow(TripDaten),1),"%","missing values",sep=" "))
+```
+
+Values provided for TIME. Format expected (hh:mm:ss). Format provided
+
+```{r}
+unique(TripDaten$STARTTIME,na.rm=TRUE)
+```
+
+**END_TIME** is a mandatory field. There must be 0% missing values, otherwise please check.
+
+```{r timecolumn3, include=T,comment=NA}
+cat(paste(round(100*sum(is.na(TripDaten$ENDTIME))/nrow(TripDaten),1),"%","missing values",sep=" "))
+```
+
+Values provided for TIME. Format expected (hh:mm:ss). Format provided:
+
+```{r}
+unique(TripDaten$ENDTIME,na.rm=TRUE)
+```
+**STRIP_WIDTH** is a mandatory field. There must be 0% missing values, otherwise please check.
+
+```{r, include=T,comment=NA}
+cat(paste(round(100*sum(is.na(TripDaten$STRIP_WIDTH))/nrow(TripDaten),1),"%","missing values",sep=" "))
+```
+
+Values provided for STRIP_WIDTH
+
+```{r}
+unique(TripDaten$STRIP_WIDTH)
+```
+
+**AREA_ANALYSED** is a mandatory field. There must be 0% missing values, otherwise please check.
+
+```{r, include=T,comment=NA}
+cat(paste(round(100*sum(is.na(TripDaten$AREA_ANALYSED))/nrow(TripDaten),1),"%","missing values",sep=" "))
+```
+
+Values provided for AREA_ANALYSED
+
+```{r}
+unique(TripDaten$AREA_ANALYSED)
+```
+
+**AREA_CONTROLLED** is a mandatory field. There must be 0% missing values, otherwise please check.
+
+```{r, include=T,comment=NA}
+cat(paste(round(100*sum(is.na(TripDaten$AREA_CONTROLLED))/nrow(TripDaten),1),"%","missing values",sep=" "))
+```
+
+Values provided for AREA_CONTROLLED  
+
+```{r}
+unique(TripDaten$AREA_CONTROLLED)
+```
+
+#  2. BasisDaten
+
+```{r PosFolder, include=F, echo=FALSE}
+BasisDaten
+BasisDatenColumns<-colnames(BasisDaten)
+```
+
+```{r, include=F, echo=FALSE}
+BasisDatenExpectedColumns<-c("POSITIONS","POSITION_ID","POSITION_ID_CONTROLLED", "Dataset_ID","TRIP_ID","CRUISENO","CAMERA_NUMBER","TRANSECT_NUMBER","DATE","TIME","LAT_PIC_CENTER","LON_PIC_CENTER","PLANE_FLIGHT_HEIGHT","PIC_AREA_ANALYSED","GLARE","SEASTATE","TURBIDITY","ICE","CLARITY","PIC_QUALITY","PIC_FILENAME","NOTES")
+```
+
+In this part we would check that all the columns are correctly imported.
+
+```{r,error=TRUE, comment=NA, include=TRUE, echo=FALSE}
+cat(paste('The Basisdaten contains',nrow(BasisDaten),'rows, and',ncol(BasisDaten),'columns.'))
+cat(paste('The columns names are: '))
+cat(colnames(BasisDaten))
+```
+
+## Column checks
+
+```{r Check columns2, include=T, echo=F, comment=NA}
+cat(paste('\n Expected',length(BasisDatenExpectedColumns),'columns and',ncol(BasisDaten),'provided', sep=" "))
+```
+
+```{r, echo=FALSE}
+ExpectedColumns<-BasisDatenExpectedColumns
+ProvidedColumns<-colnames(BasisDaten)
+MaxColumns <- max(length(ExpectedColumns), length(ProvidedColumns))
+length(ExpectedColumns) <- MaxColumns                      
+length(ProvidedColumns) <- MaxColumns
+ExpectedColumns<-data.frame(name=c(ExpectedColumns),expected=ExpectedColumns)
+ProvidedColumns<-data.frame(name=c(ProvidedColumns),provided=ProvidedColumns)
+ComparisonColumns<-merge(ExpectedColumns,ProvidedColumns,by='name',all=TRUE)
+colnames(ComparisonColumns)<-c('Name','Expected','Provided')
+ComparisonColumns<-ComparisonColumns %>% drop_na(Name)
+```
+
+```{r, echo=FALSE}
+ComparisonBasisDaten<-ComparisonColumns %>% dplyr::select(Expected,Provided)
+colnames(ComparisonBasisDaten)<-c("Expected","Provided")
+```
+
+Values **NA** indicate if the columns were provided or are missing. 
+
+```{r TableColBasis, echo=FALSE}
+knitr::kable(ComparisonBasisDaten)
+```
+
+
+Missing columns include:
+
+```{r}
+if((nrow(ComparisonBasisDaten %>%
+  filter(is.na(Provided)))>0)==FALSE){
+         cat(("There are no missing columns"))
+        }else{knitr::kable(ComparisonBasisDaten %>%
+  filter(is.na(Provided)))}
+```
+
+**POSITION_ID** is a mandatory field. There must be 0% missing values, otherwise please check.
+
+```{r, include=T,comment=NA}
+cat(paste(round(100*sum(is.na(BasisDaten$POSITION_ID))/nrow(BasisDaten),1),"%","missing values",sep=" "))
+```
+
+Values provided:
+
+```{r}
+range(BasisDaten$POSITION_ID)
+```
+
+
+**POSITION_ID_CONTROLLED**. is not a mandatory field. There can be missing values.
+
+```{r, include=T,comment=NA}
+cat(paste(round(100*sum(is.na(BasisDaten$POSITION_ID_CONTROLLED))/nrow(BasisDaten),1),"%","missing values",sep=" "))
+```
+
+Enter if an image has been controlled during the screening control = 1, ID control = 2, or during both working steps = 3.
+
+```{r}
+unique(BasisDaten$POSITION_ID_CONTROLLED,na.rm=TRUE)
+```
+
+**DATE** is a mandatory field. There must be 0% missing values, otherwise please check.
+
+```{r, include=T,comment=NA}
+cat(paste(round(100*sum(is.na(BasisDaten$DATE))/nrow(BasisDaten),1),"%","missing values",sep=" "))
+```
+
+Values provided for DATE. Format expected (YYYYMMDD). Format provided:
+
+```{r}
+unique(BasisDaten$DATE,na.rm=TRUE)
+```
+
+**TIME** is a mandatory field. There must be 0% missing values, otherwise please check.
+
+```{r timecolumn, include=T,comment=NA}
+cat(paste(round(100*sum(is.na(BasisDaten$TIME))/nrow(BasisDaten),1),"%","missing values",sep=" "))
+```
+
+Values provided for TIME. Format expected (hh:mm:ss). Format provided
+
+```{r}
+range(BasisDaten$TIME,na.rm=TRUE)
+```
+
+**LAT_PIC_CENTER** is a mandatory field. There must be 0% missing values, otherwise please check.
+
+```{r, include=T,comment=NA}
+cat(paste(round(100*sum(is.na(BasisDaten$LAT_PIC_CENTER))/nrow(BasisDaten),1),"%","missing values",sep=" "))
+```
+Values provided:
+
+```{r}
+range(BasisDaten$LAT_PIC_CENTER)
+```
+
+**LON_PIC_CENTER** is a mandatory field. There must be 0% missing values, otherwise please check.
+
+```{r, include=T,comment=NA}
+cat(paste(round(100*sum(is.na(BasisDaten$LON_PIC_CENTER))/nrow(BasisDaten),1),"%","missing values",sep=" "))
+```
+Values provided:
+
+```{r}
+range(BasisDaten$LON_PIC_CENTER)
+```
+
+**PLANE_FLIGHT_HEIGHT** is a mandatory field. There must be 0% missing values, otherwise please check.
+
+```{r, include=T,comment=NA}
+cat(paste(round(100*sum(is.na(BasisDaten$PLANE_FLIGHT_HEIGHT))/nrow(BasisDaten),1),"%","missing values",sep=" "))
+```
+Values provided for PLANE_FLIGHT_HEIGHT. Variation is expected.
+
+```{r}
+range(BasisDaten$PLANE_FLIGHT_HEIGHT)
+```
+
+**PIC_AREA_ANALYSED** is a mandatory field. There must be 0% missing values, otherwise please check.
+
+```{r, include=T,comment=NA}
+cat(paste(round(100*sum(is.na(BasisDaten$PIC_AREA_ANALYSED))/nrow(BasisDaten),1),"%","missing values",sep=" "))
+```
+
+Values provided for PIC_AREA_ANALYSED. Variation is expected. 
+
+```{r}
+range(BasisDaten$PIC_AREA_ANALYSED)
+```
+
+## Environmental conditions during the surveys
+
+**GLARE** is a mandatory field. There must be 0% missing values, otherwise please check.
+
+```{r, include=T,comment=NA}
+cat(paste(round(100*sum(is.na(BasisDaten$GLARE))/nrow(BasisDaten),1),"%","missing values",sep=" "))
+```
+
+Values provided for GLARE. Values 0 to 3 are allowed. 
+
+```{r}
+unique(BasisDaten$GLARE)
+```
+
+**SEASTATE** is a mandatory field. There must be 0% missing values, otherwise please check.
+
+```{r, include=T,comment=NA}
+cat(paste(round(100*sum(is.na(BasisDaten$SEASTATE))/nrow(BasisDaten),1),"%","missing values",sep=" "))
+```
+
+Values provided for SEASTATE. Values 0 to 7 are allowed. 
+
+```{r}
+unique(BasisDaten$SEASTATE)
+```
+
+**TURBIDITY** is a mandatory field. There must be 0% missing values, otherwise please check.
+
+```{r, include=T,comment=NA}
+cat(paste(round(100*sum(is.na(BasisDaten$TURBIDITY))/nrow(BasisDaten),1),"%","missing values",sep=" "))
+```
+
+Values provided for TURBIDITY. Only 1 to 3 are allowed. 
+
+```{r}
+unique(BasisDaten$TURBIDITY)
+```
+
+**CLARITY** is a mandatory field. There must be 0% missing values, otherwise please check.
+
+```{r, include=T,comment=NA}
+cat(paste(round(100*sum(is.na(BasisDaten$CLARITY))/nrow(BasisDaten),1),"%","missing values",sep=" "))
+```
+
+Values provided for CLARITY. Only 0 to 3 are allowed. 
+
+```{r}
+unique(BasisDaten$CLARITY)
+```
+
+**PIC_QUALITY** is a mandatory field. There must be 0% missing values, otherwise please check.
+
+```{r, include=T,comment=NA}
+cat(paste(round(100*sum(is.na(BasisDaten$PIC_QUALITY))/nrow(BasisDaten),1),"%","missing values",sep=" "))
+```
+
+Values provided for PIC_QUALITY. Only 1 and 2 are allowed. 
+
+```{r}
+range(BasisDaten$PIC_QUALITY)
+```
+
+# 3.Observations
+
+```{r ObsFolder, include=F, echo=FALSE}
+ObservationsColumns<-colnames(Observations)
+```
+
+```{r, include=F, echo=FALSE}
+ObservationsExpectedColumns<-c("OBSERVATIONS","OBSERVATION_ID","POSITION_ID","Dataset_ID","CRUISENO",
+                               "ABIOTIC_STRUCTURES","ABIOTIC_OBSERVATION","OBSERVATION",
+                               "ENGLISH_NAME_BEFORE_CONTROL","ENGLISH_NAME_CONTROL_ID",
+                               "ID_MATCH_MISMATCH","ENGLISH_NAME","DETECTION_STEP","BEHAVIOUR",
+                               "ACTIVITY","GROUP","FAMILY_GROUP","ASSOCIATIONS","HEADING","SUBMERGED",
+                               "AGE_CLASS","AGE_YEARS","PLUMAGE","SEX","LENGTH","WING_SPAN",
+                               "FLIGHT_HEIGHT","FLIGHT_HEIGHT_CONFIDENCE","FLIGHT_HEIGHT_METHOD_ID",
+                               "LAT_OBJECT","LON_OBJECT","NOTES")
+```
+
+In this part we would check that all the columns are correctly imported.
+
+```{r,error=TRUE, comment=NA, include=TRUE, echo=FALSE}
+cat(paste('The Observations contains',nrow(Observations),'rows, and',ncol(Observations),'columns.'))
+cat(paste('The columns names are: '))
+cat(colnames(Observations))
+```
+
+## Column checks
+
+```{r Check columns3, include=T, echo=F, comment=NA}
+cat(paste('\n Expected',length(ObservationsExpectedColumns),'columns and',ncol(Observations),'provided', sep=" "))
+```
+
+```{r, echo=FALSE}
+ExpectedColumns<-ObservationsExpectedColumns
+ProvidedColumns<-colnames(Observations)
+MaxColumns <- max(length(ExpectedColumns), length(ProvidedColumns))
+length(ExpectedColumns) <- MaxColumns                      
+length(ProvidedColumns) <- MaxColumns
+ExpectedColumns<-data.frame(name=c(ExpectedColumns),expected=ExpectedColumns)
+ProvidedColumns<-data.frame(name=c(ProvidedColumns),provided=ProvidedColumns)
+ComparisonColumns<-merge(ExpectedColumns,ProvidedColumns,by='name',all=TRUE)
+colnames(ComparisonColumns)<-c('Name','Expected','Provided')
+ComparisonColumns<-ComparisonColumns %>% drop_na(Name)
+ComparisonObservations<-ComparisonColumns %>% dplyr::select(Expected,Provided)
+colnames(ComparisonObservations)<-c("Expected","Provided")
+```
+
+Values **NA** indicate if the columns were provided or are missing. 
+
+```{r TableObs, echo=FALSE}
+knitr::kable(ComparisonObservations)
+```
+
+Missing columns include:
+
+```{r}
+if((nrow(ComparisonObservations %>%
+  filter(is.na(Provided)))>0)==FALSE){
+         cat(("There are no missing columns"))
+        }else{knitr::kable(ComparisonObservations %>%
+  filter(is.na(Provided)))}
+```
+
+**OBSERVATION_ID** is a mandatory field. There must be 0% missing values, otherwise please check.
+
+```{r, include=T,comment=NA}
+cat(paste(round(100*sum(is.na(Observations$OBSERVATION_ID))/nrow(Observations),1),"%","missing values",sep=" "))
+```
+
+Values provided for OBSERVATION_ID
+
+```{r}
+Observations$OBSERVATION_ID<-as.numeric(Observations$OBSERVATION_ID)
+range(Observations$OBSERVATION_ID,na.rm=TRUE)
+```
+
+**POSITION_ID** is a mandatory field. There must be 0% missing values, otherwise please check. 
+
+```{r, include=T,comment=NA}
+cat(paste(round(100*sum(is.na(Observations$POSITION_ID))/nrow(Observations),1),"%","missing values",sep=" "))
+```
+
+Values provided for POSITION_ID.
+
+```{r}
+Observations$POSITION_ID<-as.numeric(Observations$POSITION_ID)
+range(Observations$POSITION_ID,na.rm=TRUE)
+```
+
+**OBSERVATION** is a mandatory field, but there might be missing values if there are **ABIOTIC_OBSERVATION** or **ABIOTIC_STRUCTURE**.
+
+```{r, include=T,comment=NA}
+cat(paste(round(100*sum(is.na(Observations$OBSERVATION))/nrow(Observations),1),"%","missing values",sep=" "))
+```
+
+Number of values missing: 
+
+```{r}
+sum(is.na(Observations$OBSERVATION))
+```
+
+Number of **ABIOTIC_STRUCTURE** observations.
+
+```{r, include=T,comment=NA}
+cat(paste(round(((Observations %>%
+  drop_na(ABIOTIC_STRUCTURES)%>%
+  count())$n)),"values in ABIOTIC_STRUCTURES",sep=" "))
+```
+
+Number of **ABIOTIC_OBSERVATION** observations.
+
+```{r, include=T,comment=NA}
+cat(paste(((Observations %>%
+  drop_na(ABIOTIC_OBSERVATION)%>%
+  count())$n)),"values in ABIOTIC_OBSERVATION",sep=" ")
+```
+
+Values provided in ABIOTIC_STRUCTURES.
+
+```{r}
+unique(Observations$ABIOTIC_STRUCTURES,na.rm=TRUE)
+```
+
+Values provided in ABIOTIC_OBSERVATION.
+
+```{r}
+unique(Observations$ABIOTIC_OBSERVATION,na.rm=TRUE)
+```
+
+**ID_MATCH_MISMATCH** is a not mandatory field. There can be missing values.
+
+```{r, include=T,comment=NA}
+if("ID_MATCH_MISMATCH" %in% colnames(Observations)){
+         cat(paste(round(100*sum(is.na(Observations$ID_MATCH_MISMATCH))/nrow(Observations),1),"%","missing values",sep=" "))
+        }else{  
+          print(paste0("The column ID_MATCH_MISSMATCH is missing"))
+           }
+```
+
+Values provided in **ID_MATCH_MISMATCH**. 1 = Matches between the identifier and the auditor, 2 = Mismatches between identifier and the auditor. 
+
+```{r}
+unique(Observations$ID_MATCH_MISMATCH,na.rm=TRUE)
+```
+**BEHAVIOUR** is not mandatory field. Values are presented as numerical codes.
+
+```{r}
+unique(Observations$BEHAVIOUR)
+```
+
+**ACTIVITY** is not mandatory field. Values should be 1 = Swimming, 2 = Flying, 3 = Submerged, 4 = Breaching surface, 5 = On artificial platform, 0 = Unknown
+
+```{r}
+unique(Observations$ACTIVITY)
+```
+
+**GROUP** is not mandatory field. Values should be Consecutive number of groups; same number for all individuals of the same group.
+
+```{r}
+unique(Observations$GROUP)
+```
+
+**ASSOCIATIONS** is not mandatory field. Values are presented as numerical codes.
+
+```{r}
+unique(Observations$ASSOCIATIONS)
+```
+
+**HEADING** is not mandatory field. Values should be 45, 90, 135, 180, 225, 270, 315, 360.
+
+```{r}
+unique(Observations$HEADING)
+```
+
+**SUBMERGE** is not mandatory field. If filled values should be o,u,x.
+
+```{r}
+unique(Observations$SUBMERGED)
+```
+
+**AGE_CLASS** is not mandatory field. VIf filled values should be age of the bird; A (adult), IM (immature). 
+
+```{r}
+unique(Observations$AGE_CLASS)
+```
+
+**AGE_YEARS** is not mandatory field. If filled values should be numeric. Specification of the calender-year of the bird. 
+Values expected 1 to 5.
+
+```{r}
+unique(Observations$AGE_YEARS)
+```
+
+**SEX** is not mandatory field. If filled values should be F or M.  
+
+```{r}
+unique(Observations$SEX)
+```
+
+**LON_OBJECT** is a mandatory field. There must be 0% missing values, otherwise please check.
+
+```{r, include=T,comment=NA}
+Observations$LON_OBJECT<-as.numeric(Observations$LON_OBJECT)
+cat(paste(round(100*sum(is.na(Observations$LON_OBJECT))/nrow(Observations),1),"%","missing values",sep=" "))
+```
+
+Values should be numerical. 
+
+```{r}
+range(Observations$LON_OBJECT)
+```
+
+**LAT_OBJECT** is a mandatory field. There must be 0% missing values, otherwise please check.
+
+```{r, include=T,comment=NA}
+Observations$LAT_OBJECT<-as.numeric(Observations$LAT_OBJECT)
+cat(paste(round(100*sum(is.na(Observations$LAT_OBJECT))/nrow(Observations),1),"%","missing values",sep=" "))
+```
+
+Values should be numerical. 
+
+```{r}
+range(Observations$LAT_OBJECT)
+```
+      
+ ***End of the document. ***

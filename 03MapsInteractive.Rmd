@@ -1,0 +1,450 @@
+---
+title: "Separated Maps"
+author: "Seabird Monitoring"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+params:
+  ThisDirectory: ThisDirectory
+  ThisFile: ThisFile
+  Survey_BasisDaten: Maps_BasisDaten
+  Survey_Observations: Maps_Observations
+  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(fontawesome)
+```
+
+# Intro
+
+Using data from **`r params$ThisFile`** excel file.  
+This document presents two maps:
+
+- The first map shows the Survey Observations and base positions.
+
+- The second map displays the sightings.
+
+Please note that rendering may take some time due to the large number of points. Thank you for your patience.  ⏳
+
+```{r Packages, echo=FALSE, warnings=FALSE}
+library(sf)
+library(tmap)
+library(ggplot2)
+library(tidyverse)
+```
+
+```{r LoadShapefiles, echo=FALSE, include=FALSE, eval=TRUE}
+Study_areas<-GermanNorthSea::Study_areas
+Protected_SCA<- GermanNorthSea::German_SCA
+Alemania<- GermanNorthSea::German_land
+Protected_natura <- GermanNorthSea::German_natura
+WindFarms<- GermanNorthSea::OWF_EMODnet
+```
+
+## Position accuracy
+
+Basis position and Observations positions are plotted on the map.<br> 
+
+Once the map has loaded, temporary **unselect** the layer BP (Basis Points).<br>  
+Then, zoom into your area of interest using the blue dots as a reference.<br> 
+After zooming, re-enable the BP layer.<br> 
+This saves rendering time.<br> 
+
+Points shown in  <span style="color: #ff595e;">red</span> represent data from **Basis**, based on their longitude and latitude.<br>
+Points shown in <span style="color: #1982c4;"> blue</span>represent data from **Observations**, based on their longitude and latitude. <br> 
+
+You can interact with the map using the following controls:<br> 
+Using `r fa("plus", fill = 'black')` **zoom-in** to examine points in detail.<br> 
+Using `r fa("minus", fill = 'black')` **zoom-out** for a broader view.<br>  
+Using `r fa("layer-group", fill = 'black')` toogle **layers** on and off.<br>  
+Hover over a blue dot with the cursor `r fa("mouse-pointer", fill = 'black')` When the icon changes to `r fa("hand-point-up", fill = 'black')`, click it to view the position ID and species information.<br> 
+
+
+```{r AccuracyBase, include=FALSE, echo=FALSE, eval=TRUE}
+BasisPos<-params$Survey_BasisDaten
+ObsPos<-params$Survey_Observations
+```
+
+```{r substitute, echo=FALSE, eval=FALSE}
+BasisPos<-Maps_BasisDaten
+ObsPos<-Maps_Observations
+```
+
+```{r BasisFortify, echo=FALSE}
+BasisPosition<-fortify(BasisPos)
+BasisPosition<-as.data.frame(BasisPosition) #ADDED 13-04-2021
+BasisPosition$lat<-as.numeric(BasisPosition$LAT_PIC_CENTER)
+BasisPosition$lon<-as.numeric(BasisPosition$LON_PIC_CENTER)
+BasisPosition <- BasisPosition[!is.na(BasisPosition$lat), ] #Eliminar NAs
+BasisPositionC <- st_as_sf(BasisPosition, coords = c("lon", "lat"),crs = 4326, agr = "constant")
+```
+
+```{r ObsFortify, include=FALSE, echo=FALSE, warnings=FALSE, eval=TRUE}
+ObsPos$OBSERVATION_ID<-ObsPos$Observation_ID
+ObservedPositionDots<-fortify(ObsPos)
+ObservedPositionDots<-as.data.frame(ObservedPositionDots)
+ObservedPositionDots$lat<-ObservedPositionDots$LAT_OBJECT
+ObservedPositionDots$lon<-ObservedPositionDots$LON_OBJECT
+ObservedPositionC <- ObservedPositionDots
+ObservedPositionC <- ObservedPositionC[!is.na(ObservedPositionC$lat), ] #Eliminar NAs
+ObservedPositionC<- st_as_sf(ObservedPositionC, coords = c("lon", "lat"), crs = 4326)
+```
+
+```{r SubsetColumns, echo=FALSE, eval=FALSE}
+BasisPositionC<-BasisPositionC[,c("POSITION_ID","CAMERA_NUMBER")]
+ObservedPositionC<-ObservedPositionC[,c("OBSERVATION_ID","ENGLISH_NAME")]
+```
+
+```{r StaticMap, include=FALSE, echo=FALSE, warnings=FALSE, eval=TRUE}
+PlotSurvey<-tm_shape(BasisPositionC) + 
+  tm_dots(id = "CRUISENO",
+          col="red",
+          popup.vars=c("Position_ID"="POSITION_ID","Camera"="CAMERA_NUMBER"))+
+  tm_shape(ObservedPositionC) + 
+  tm_dots(id = "CRUISENO",
+          col="blue",
+          popup.vars=c("Observation_ID"="OBSERVATION_ID","Specie"="ENGLISH_NAME"))+
+  tm_layout(legend.bg.color = 'white',  #Fondo de la etiqueta
+            legend.position = c(0.1,"bottom"),  #Position de la etiqueta
+            legend.frame = TRUE) #Frame de la etiqueta
+```
+
+```{r Vista, echo=FALSE, include=FALSE, eval=TRUE}
+tmap_mode("view") #interactive tmap_mode("view")
+```
+
+```{r PlotSurveyDynamic, echo=FALSE, include=TRUE, warning=FALSE, message=FALSE, eval=TRUE}
+PlotSurvey
+```
+
+## Sightings
+
+This map contains all the **sightings** separated by taxonomic group.  
+Each taxonomic groups is separated by **color**  
+
+Ducks and Shelducks in <span style="color: #ffca3a;">yellow</span>; 
+Swans and Geese in <span style="color: #c5ca30;">green-yellow</span>; 
+Divers in <span style="color: #ff595e;">red</span>; 
+Grebes in <span style="color: #1982c4;">light blue</span>; 
+Gannets and cormorants <span style="color: #ff924c;">orange</span>; 
+Auks in <span style="color: #36949d;">grey blue</span>; 
+Gulls in <span style="color: #565aa0;">light purple</span>; 
+Skuas in <span style="color: #8ac926;">green</span>; 
+Terns in <span style="color: #6a4c93;">purple</span>; 
+Waders in <span style="color: #4267ac;">darkblue</span>; 
+Other seabirds and other species in  <span style="color: #333533;">grey</span>; 
+Marine mammals in  <span style="color: #202020;">black</span>.
+
+
+```{r Separate groups, include=FALSE, echo=FALSE, warnings=FALSE}
+Euring<-seamonas::Code_Euring %>%
+  rename(ENGLISH_NAME=English_name)
+ObservedPositionC_1<-subset(ObservedPositionC, ObservedPositionC$ENGLISH_NAME != "0")
+ObservedPositionC_2<-merge(ObservedPositionC_1,Euring,by='ENGLISH_NAME')
+ObservedPositionC_2<-ObservedPositionC_2 %>%
+  rename(TaxGroups=Artificial_tax_class)
+```
+
+```{r CheckGroups, include=FALSE, echo=FALSE}
+ObservedPositionC_3group<-ObservedPositionC_2 %>%
+  group_by(TaxGroups) %>%
+  count(TaxGroups)
+```
+
+```{r BaseMap,echo=FALSE}
+BaseMap<- tm_shape(Study_areas)+  #Grid de Study_areas
+  tm_polygons(col='#74c69d')+
+  tm_shape(Protected_SCA)+  #Area protegida Este
+  tm_polygons(col='#40916c')+
+  tm_shape(Protected_natura)+  #Area protegida Oeste
+  tm_polygons(col='#40916c')+ 
+  tm_shape(WindFarms)+  #WindFarms
+  tm_polygons(col='#9d0208')
+```
+
+```{r BaseMapDinamic,echo=FALSE, eval=FALSE}
+tmap_mode("view") 
+BaseMap
+```
+
+```{r AddGulls, echo=FALSE}
+SeparateGulls<-function(TaxonomicGroup=TaxonomicGroup){
+  GullsSub<-subset(ObservedPositionC_2,ObservedPositionC_2$TaxGroups==TaxonomicGroup)
+    if(nrow(GullsSub) == 0) {
+        print(paste("No",TaxonomicGroup,"occurred in the survey"))
+        } else {
+         print(paste(TaxonomicGroup,"will be included in the map"))
+        BaseMap<-BaseMap+
+           tm_shape(GullsSub) + 
+             tm_dots(id = "TaxGroups",
+                       col="#565aa0",
+                        popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME"))
+  assign('BaseMap',BaseMap,envir=globalenv())}
+  }
+```
+
+```{r AssignGulls, echo=FALSE, comment=NA}
+SeparateGulls(TaxonomicGroup='Gulls')
+```
+
+```{r AddSkuas, echo=FALSE}
+SeparateSkuas<-function(TaxonomicGroup=TaxonomicGroup){
+  SkuasSub<-subset(ObservedPositionC_2,ObservedPositionC_2$TaxGroups==TaxonomicGroup)
+    if(nrow(SkuasSub) == 0) {
+        print(paste("No",TaxonomicGroup,"occurred in the survey"))
+        } else {
+         print(paste(TaxonomicGroup,"will be included in the map"))
+          BaseMap<-BaseMap+
+           tm_shape(SkuasSub) + 
+            tm_dots(id = "TaxGroups",
+              col="#8ac926",
+                popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME"))
+  assign('BaseMap',BaseMap,envir=globalenv())}
+  }
+```
+
+```{r AssignSkuas, echo=FALSE, comment=NA}
+SeparateSkuas(TaxonomicGroup="Skuas")
+```
+
+```{r AddGannets, echo=FALSE}
+SeparateGannets<-function(TaxonomicGroup=TaxonomicGroup){
+  GannetsSub<-subset(ObservedPositionC_2,ObservedPositionC_2$TaxGroups==TaxonomicGroup)
+    if(nrow(GannetsSub) == 0) {
+        print(paste("No",TaxonomicGroup,"occurred in the survey"))
+        } else {
+          print(paste(TaxonomicGroup,"will be included in the map"))
+         BaseMap<-BaseMap+
+           tm_shape(GannetsSub) + 
+             tm_dots(id = "TaxGroups",
+                       col="#ff924c",
+                        popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME"))
+  assign('BaseMap',BaseMap,envir=globalenv())}
+  }
+```
+
+```{r AssignGannets, echo=FALSE, comment=NA}
+SeparateGannets(TaxonomicGroup='Gannets_Cormorants')
+```
+
+```{r AddAuks, echo=FALSE}
+SeparateAuks<-function(TaxonomicGroup=TaxonomicGroup){
+  AuksSub<-subset(ObservedPositionC_2,ObservedPositionC_2$TaxGroups==TaxonomicGroup)
+    if(nrow(AuksSub) == 0) {
+        print(paste("No",TaxonomicGroup,"occurred in the survey"))
+        } else {
+         print(paste(TaxonomicGroup,"will be included in the map"))
+         BaseMap<-BaseMap+
+           tm_shape(AuksSub) + 
+            tm_dots(id = "TaxGroups",
+              col="#36949d",
+                popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME"))
+    assign('BaseMap',BaseMap,envir=globalenv())}
+  }
+```
+
+```{r AssignAuks, echo=FALSE, comment=NA}
+SeparateAuks(TaxonomicGroup="Auks")
+```
+
+```{r AddTerns, echo=FALSE}
+SeparateTerns<-function(TaxonomicGroup=TaxonomicGroup){
+  TernsSub<-subset(ObservedPositionC_2,ObservedPositionC_2$TaxGroups==TaxonomicGroup)
+    if(nrow(TernsSub) == 0) {
+        print(paste("No",TaxonomicGroup,"occurred in the survey"))
+        } else {
+          print(paste(TaxonomicGroup,"will be included in the map"))
+         BaseMap<-BaseMap+
+           tm_shape(TernsSub) + 
+            tm_dots(id = "TaxGroups",
+                     col="#6a4c93",
+                      popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME"))
+  assign('BaseMap',BaseMap,envir=globalenv())}
+  }
+```
+
+```{r AssignTerns, echo=FALSE, comment=NA}
+SeparateTerns(TaxonomicGroup='Terns')
+```
+
+```{r AddDucks, echo=FALSE}
+SeparateDucksShelducks<-function(TaxonomicGroup=TaxonomicGroup){
+  DucksShelducksSub<-subset(ObservedPositionC_2,ObservedPositionC_2$TaxGroups==TaxonomicGroup)
+    if(nrow(DucksShelducksSub) == 0) {
+        print(paste("No",TaxonomicGroup,"occurred in the survey"))
+        } else {
+           print(paste(TaxonomicGroup,"will be included in the map"))
+         BaseMap<-BaseMap+
+           tm_shape(DucksShelducksSub) + 
+            tm_dots(id = "TaxGroups",
+                     col="#ffca3a",
+                      popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME"))
+         #substitutes base map adding the layer
+  assign('BaseMap',BaseMap,envir=globalenv())}
+  }
+```
+
+```{r AssignDucks,  echo=FALSE, comment=NA}
+SeparateDucksShelducks(TaxonomicGroup="Ducks_Shelducks")
+```
+
+```{r AddGeeseSwan,echo=FALSE}
+SeparateSwanGeese<-function(TaxonomicGroup=TaxonomicGroup){
+ SwanGeeseSub<-subset(ObservedPositionC_2,ObservedPositionC_2$TaxGroups==TaxonomicGroup)
+    if(nrow(SwanGeeseSub) == 0) {
+        print(paste("No",TaxonomicGroup,"occurred in the survey"))
+        } else {
+           print(paste(TaxonomicGroup,"will be included in the map"))
+         BaseMap<-BaseMap+
+           tm_shape(SwanGeeseSub) + 
+            tm_dots(id = "TaxGroups",
+                     col="#c5ca30",
+                     popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME"))
+  assign('BaseMap',BaseMap,envir=globalenv())}
+  }
+```
+
+```{r AssignGesseSwan,  echo=FALSE, comment=NA}
+SeparateSwanGeese(TaxonomicGroup="Swan_Geese")
+```
+
+```{r AddDivers, echo=FALSE}
+SeparateDivers<-function(TaxonomicGroup=TaxonomicGroup){
+ DiversSub<-subset(ObservedPositionC_2,ObservedPositionC_2$TaxGroups==TaxonomicGroup)
+    if(nrow(DiversSub) == 0) {
+        print(paste("No",TaxonomicGroup,"occurred in the survey"))
+        } else {
+           print(paste(TaxonomicGroup,"will be included in the map"))
+         BaseMap<-BaseMap+
+           tm_shape(DiversSub) + 
+            tm_dots(id = "TaxGroups",
+                     col="#ff595e",
+                      popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME"))
+  assign('BaseMap',BaseMap,envir=globalenv())}
+  }
+```
+
+```{r AssignDivers, echo=FALSE, comment=NA}
+SeparateDivers(TaxonomicGroup='Divers')
+```
+
+```{r AddGrebes, echo=FALSE}
+SeparateGrebes<-function(TaxonomicGroup=TaxonomicGroup){
+  GrebesSub<-subset(ObservedPositionC_2,ObservedPositionC_2$TaxGroups==TaxonomicGroup)
+    if(nrow(GrebesSub) == 0) {
+        print(paste("No",TaxonomicGroup,"occurred in the survey"))
+        } else {
+          print(paste(TaxonomicGroup,"will be included in the map"))
+         BaseMap<-BaseMap+
+           tm_shape(GrebesSub) + 
+             tm_dots(id = "TaxGroups",
+                       col="#1982c4",
+                       popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME"))
+  assign('BaseMap',BaseMap,envir=globalenv())}
+  }
+```
+
+```{r AssignGrebes,  echo=FALSE, comment=NA}
+SeparateGrebes(TaxonomicGroup='Grebes')
+```
+
+```{r AddWaders, echo=FALSE}
+SeparateWaders<-function(TaxonomicGroup=TaxonomicGroup){
+  WadersSub<-subset(ObservedPositionC_2,ObservedPositionC_2$TaxGroups==TaxonomicGroup)
+    if(nrow(WadersSub) == 0) {
+        print(paste("No",TaxonomicGroup,"occurred in the survey"))
+        } else {
+         BaseMap<-BaseMap+
+           tm_shape(WadersSub) + 
+             tm_dots(id = "TaxGroups",
+                       col="#4267ac",
+                        popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME"))
+  assign('BaseMap',BaseMap,envir=globalenv())}
+  }
+```
+
+```{r AssignWaders, echo=FALSE, comment=NA}
+SeparateWaders(TaxonomicGroup='Waders')
+```
+
+```{r AddSeabirds, echo=FALSE}
+SeparateSeabirds<-function(TaxonomicGroup=TaxonomicGroup){
+  OtherSeabirdsSub<-subset(ObservedPositionC_2,ObservedPositionC_2$TaxGroups==TaxonomicGroup)
+    if(nrow(OtherSeabirdsSub) == 0) {
+        print(paste("No",TaxonomicGroup,"occurred in the survey"))
+        } else {
+         print(paste(TaxonomicGroup,"will be included in the map"))
+          BaseMap<-BaseMap+
+           tm_shape(OtherSeabirdsSub) + 
+            tm_dots(id = "TaxGroups",
+                     col="#333533",
+                      popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME"))
+   assign('BaseMap',BaseMap,envir=globalenv())}
+  }
+```
+
+```{r AssingSeabirds,  echo=FALSE, comment=NA}
+SeparateSeabirds(TaxonomicGroup='Other_seabirds')
+```
+
+```{r AddOthers, echo=FALSE}
+SeparateOthers<-function(TaxonomicGroup=TaxonomicGroup){
+  OtherBirdsSub<-subset(ObservedPositionC_2,ObservedPositionC_2$TaxGroups==TaxonomicGroup)
+    if(nrow(OtherBirdsSub) == 0) {
+        print(paste("No",TaxonomicGroup,"occurred in the survey"))
+        } else {
+         print(paste(TaxonomicGroup,"will be included in the map"))
+          BaseMap<-BaseMap+
+           tm_shape(OtherBirdsSub) + 
+            tm_dots(id = "TaxGroups",
+                     col="#333533",
+                     popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME"))
+  assign('BaseMap',BaseMap,envir=globalenv())}
+  }
+```
+
+```{r AssignOthers,  echo=FALSE, comment=NA}
+SeparateOthers(TaxonomicGroup='Other_species')
+```
+
+```{r AddMammals, echo=FALSE}
+SeparateMarineMammals<-function(TaxonomicGroup=TaxonomicGroup){
+ MarineMammalsSub<-subset(ObservedPositionC_2,ObservedPositionC_2$TaxGroups==TaxonomicGroup)
+    if(nrow(MarineMammalsSub) == 0) {
+        print(paste("No",TaxonomicGroup,"occurred in the survey"))
+        } else {
+          print(paste(TaxonomicGroup,"will be included in the map"))
+          BaseMap<-BaseMap+
+           tm_shape(MarineMammalsSub) + 
+            tm_dots(id = "TaxGroups",
+                     col="#202020",
+                     popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME"))
+  assign('BaseMap',BaseMap,envir=globalenv())}
+  }
+```
+
+```{r AssignMarineMammals,  echo=FALSE, comment=NA}
+SeparateMarineMammals(TaxonomicGroup="Marine_mammals")
+```
+
+You can interact with the map using the following controls:<br> 
+Using `r fa("layer-group", fill = 'black')` to toogle **morphological** groups on and off.<br> 
+Using `r fa("plus", fill = 'black')` to **zoom-in** and explore the points in more detail.<br>  
+Using `r fa("minus", fill = 'black')` to **zoom-out** for a broader view.<br> 
+Click on a point `r fa("mouse-pointer", fill = 'black')` to view the species information.<br> 
+
+```{r BaseMapView, echo=FALSE, include=FALSE, eval=TRUE}
+tmap_mode("view") #interactive tmap_mode("view")
+```
+
+```{r FinalMap, echo=FALSE, warnings=FALSE, message=FALSE, comment=FALSE}
+BaseMap+
+  tm_layout(legend.bg.color = 'white',
+            legend.position = c(0.1,"bottom"), 
+            legend.frame = TRUE) 
+```
+
+
+
+# End of document
