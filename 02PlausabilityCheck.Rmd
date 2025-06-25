@@ -27,7 +27,7 @@ In this document you will find:
 
 ```{r PackageNames, echo=FALSE,message=FALSE, warning=FALSE}
 #LAST UPDATE 2025-06-16
-PackageList<-c('sp','dplyr','ggplot2','beepr','sf','readxl','tmap','seamonas') 
+PackageList<-c('sp','dplyr','ggplot2','beepr','sf','readxl','tmap','seamonas','kableExtra') 
 LoadPackages<-function(x){sapply(x, require, character.only = TRUE)}
 ```
 
@@ -53,16 +53,21 @@ Plausability_Observations<-Observations
 
 ## Survey info
 
-Surveys must avoid noon due to problems with glare. The transect width must be at least 400 m.
+Surveys must avoid noon due to problems with glare. Condition is that the transect width must be at least 400 m.
 
 ```{r TableStripWidth, echo=FALSE}
-Survey_names<-unique(Plausability_Trip$CRUISENO)
-Survey_dates<-unique(Plausability_Trip$DATE)
 Table_Survey<-Plausability_Trip %>%
   dplyr::select(TRIP_ID,DATE,STARTTIME,ENDTIME,STRIP_WIDTH)%>%
-  mutate(CONDITION=case_when(STRIP_WIDTH >= 400 ~ "Reached min 400 m",
-                             TRUE ~ "Didnt reach min 400 m"))
-knitr::kable(Table_Survey)
+  mutate(CONDITION=case_when(STRIP_WIDTH >= 400 ~ "Reached (400m)",
+                             TRUE ~ "Not reached (400m)"))
+Table_Survey <- flextable(Table_Survey)
+# Set column widths manually (in inches)
+Table_Survey<- set_table_properties(Table_Survey, width = 1, layout = "autofit") %>%
+  width(j = 1, width = 2) %>%   
+  width(j = 2, width = 1.5) %>% 
+  width(j = 3, width = 1.2)     
+# Print table 
+Table_Survey
 ```
 
 ## Area observed
@@ -71,16 +76,22 @@ What was the proportion of **area analysed** in relation to the **area observed*
 A minimum proportion of 70% of the recorded images or videos must be analyzable. Otherwise surveys must be repeated (at company's expenses). 
 
 ```{r TableAreas,echo=FALSE}
-Table_Areas <- data.frame(survey_dates = as.character(Table_Survey$DATE),
-                         area_observed = Plausability_Trip$AREA_OBSERVED,
-                         area_analysed= Plausability_Trip$AREA_ANALYSED,
-                         area_proportion = round(((Plausability_Trip$AREA_ANALYSED*100)/Plausability_Trip$AREA_OBSERVED),2)
-)
+Table_Areas <- data.frame(survey_dates = as.character(unique(Plausability_Trip$DATE)),
+                         area_observed = sum(Plausability_Trip$AREA_OBSERVED),
+                         area_analysed= sum(Plausability_Trip$AREA_ANALYSED))
 Table_Areas<-Table_Areas %>%
-    mutate(CONDITION=case_when(area_proportion > 70 ~ "Reached min 70%",
-                             TRUE ~ "Didnt reach min 70%"))
+  mutate(area_proportion = round(((area_analysed*100)/area_observed),2))%>%
+  mutate(CONDITION=case_when(area_proportion > 70 ~ "Reached (70%)",
+                             TRUE ~ "Not reached (70%)"))
 names(Table_Areas) <- c("survey dates (YYYYMMDD)","area observed [km^2]","area analysed [km^2]","Proportion [%]","CONDITION")
-knitr::kable(Table_Areas)
+Table_Areas<- flextable(Table_Areas)
+Table_Areas <- set_table_properties(Table_Areas, width = 1, layout = "autofit")%>%
+  width(j = 1, width = 2) %>%   
+  width(j = 2, width = 2) %>% 
+  width(j = 3, width = 2)  %>% 
+  width(j = 4, width = 2)      
+# Print table 
+Table_Areas
 ```
 
 ## Area controlled
@@ -97,10 +108,17 @@ Table_Controlled <- data.frame(survey_dates = as.character(Plausability_Trip$DAT
   mutate(area_controlled_prop = round((area_controlled / area_analysed) * 100, 2)
   )
 Table_Controlled<-Table_Controlled %>%
-    mutate(CONDITION=case_when(area_controlled_prop > 20 ~ "Reached the min 20%",
-                             TRUE ~ "Didnt reach the min 20%"))
+    mutate(CONDITION=case_when(area_controlled_prop > 20 ~ "Reached (20%)",
+                             TRUE ~ "Not reached (20%)"))
 names(Table_Controlled) <- c("survey dates (YYYYMMDD)","area analysed [km^2]","area controlled [km^2]","area controlled [%]","CONDITION")
-knitr::kable(Table_Controlled)
+Table_Controlled<- flextable(Table_Controlled)
+Table_Controlled<- set_table_properties(Table_Controlled, width = 1, layout = "autofit") %>%
+  width(j = 1, width = 2) %>%   
+  width(j = 2, width = 2) %>% 
+  width(j = 3, width = 2)  %>% 
+  width(j = 4, width = 2) %>% 
+  width(j = 5, width = 2) 
+Table_Controlled
 ```
 
 
@@ -125,7 +143,7 @@ unique(Season$season)
 
 The **spatial extent** of the survey.
 
-```{r SurveyMap,echo=FALSE, fig.height=5, fig.width=4}
+```{r SurveyMap,echo=FALSE, fig.width=6}
 Study_areas<-st_transform(GermanNorthSea::Study_areas,4326)
 Protected_SCA<- st_transform(GermanNorthSea::German_SCA,4326)
 Land<- st_transform(GermanNorthSea::German_land,4326)
@@ -134,6 +152,7 @@ Protected_natura <- st_transform(GermanNorthSea::German_natura,4326)
 Basis_df<-fortify(Plausability_Basis)
 Basis_df$lat<-as.numeric(Basis_df$LAT_PIC_CENTER)
 Basis_df$lon<-as.numeric(Basis_df$LON_PIC_CENTER)
+Basis_df <- Basis_df[!is.na(Basis_df$lat) & !is.na(Basis_df$lon), ]
 Basis_sf <- st_as_sf(Basis_df, coords = c("lon", "lat"),crs = 4326, agr = "constant")
 
 ggplot(data = Basis_sf) +
@@ -159,12 +178,11 @@ ggplot(data = Basis_sf) +
   scale_y_continuous(labels = function(x) paste0(x, '\u00B0', "N")) 
 ```
 
-
 ## Plane height
 
 Some variation in plane height during the survey is expected. 
 
-```{r FlightHeightPlot, echo=F, fig.width=10, fig.height=4, warning=FALSE}
+```{r FlightHeightPlot, echo=F, fig.width=10, fig.height=3, warning=FALSE}
 ggplot(data=Plausability_Basis,aes(x=POSITION_ID,y=PLANE_FLIGHT_HEIGHT),color=CAMERA_NUMBER)+
     geom_point(aes(colour = factor(PLANE_FLIGHT_HEIGHT)), size = 1,color='darkblue') +
     xlab("Picture_ID")+ylab('Plane height')+
@@ -284,13 +302,24 @@ Table_Picture<- data.frame(survey = FlightName,
                            bad_quality = BadQuality$n)
 Table_Picture<-Table_Picture %>%
   mutate(pic_quality_percent = (good_quality*100)/(good_quality+bad_quality))
-
+Table_Picture<- Table_Picture %>%
+  mutate(CONDITION=case_when(pic_quality_percent > 80 ~ "Reached (80%)",
+                             TRUE ~ "Not reached (80%)"))
 names(Table_Picture) <- c("survey",
-                             "Good quality pictures (n)",
-                             "Bad quality pictures (n)",
-                             "Percentage good quality [%]")
-  
-knitr::kable(Table_Picture)
+                          "Good (n)",
+                          "Bad (n)",
+                          "Percentage good quality [%]",
+                          "CONDITION")
+Table_Picture <- flextable(Table_Picture)
+# Set column widths manually (in inches)
+Table_Picture<- set_table_properties(Table_Picture, width = 1, layout = "autofit") %>%
+  width(j = 1, width = 2) %>%   # column 1 = 2 inches
+  width(j = 2, width = 1.5) %>% 
+  width(j = 3, width = 1.5) %>% 
+  width(j = 4, width = 2) %>% 
+  width(j = 5, width = 2) 
+# Print table 
+Table_Picture
 ```
 
 Picture quality classification corresponds to: 1= the image has been analysed, 2= image quality too bad for analysis (in red).
@@ -330,7 +359,9 @@ Table_Densities<-Table_Densities %>%
          'Total no. of individuals'=Number_individuals,
          'Area analysed [km2]'=Area_analysed,
          'Density [ind/km2]'=Densities)
-knitr::kable(Table_Densities)
+Table_Densities<- flextable(Table_Densities)
+Table_Densities <- set_table_properties(Table_Densities, width = 1, layout = "autofit")
+Table_Densities
 ```
 
 ## Controlled sightings per survey
@@ -389,7 +420,9 @@ names(Controlled_Table)<- c("survey dates (YYYYMMDD)",
 ```
 
 ```{r ControlledTableKnitr, echo=FALSE, eval=TRUE}
-knitr::kable(Controlled_Table)
+Controlled_Table<- flextable(Controlled_Table)
+Controlled_Table <- set_table_properties(Controlled_Table, width = 1, layout = "autofit")
+Controlled_Table
 ```
 
 \newpage
@@ -414,7 +447,9 @@ if (nrow(Observations %>% filter(!is.na(ABIOTIC_STRUCTURES))) == 0) {
             left_join(Abiotic_Descriptions,by='ABIOTIC_STRUCTURES')%>%
             drop_na()%>%
             select(ABIOTIC_STRUCTURES,ABIOTIC_STRUCTURE_DESCRIPTION,n)
-          knitr::kable(Abiotic_Structures)
+Abiotic_Structures<- flextable(Abiotic_Structures)
+Abiotic_Structures<- set_table_properties(Abiotic_Structures, width = 1, layout = "autofit") 
+Abiotic_Structures
           }
 ```
 
@@ -439,7 +474,9 @@ if (nrow(Plausability_Observations %>% filter(!is.na(ABIOTIC_OBSERVATION))) == 0
     drop_na()%>%
     select(ABIOTIC_OBSERVATION,ABIOTIC_OBSERVATION_DESCRIPTION,n)
     
-  knitr::kable(Abiotic_Observations)
+Abiotic_Observations<- flextable(Abiotic_Observations)
+Abiotic_Observations<- set_table_properties(Abiotic_Observations, width = 1, layout = "autofit") 
+Abiotic_Observations
 }
 ```
 
@@ -456,10 +493,8 @@ sprintf("Note: %d abiotic structures and abiotic observations that will not be i
 
 List all **species** sighted during the surveys with number of sightings and check the codes.
 
-Often names are not equal as there is no space between the diagonals (e.g.  seal / small cetacean provided and  seal/small cetacean expected) or missing a word (e.g. Red-necked/Great Crested Grebe provided and Red-necked Grebe/Great Crested Grebe expected, the word Grebe is missing). 
-
-```{r SpeciesList, echo=FALSE, comment=NA}
-Names_1check<-Plausability_Observations %>% drop_na(OBSERVATION)
+```{r Species_Table, echo=FALSE}
+Names_1check<-Observations %>% drop_na(OBSERVATION)
 Names_2check<-Names_1check %>% 
     group_by(ENGLISH_NAME,OBSERVATION) %>%
    count()
@@ -488,19 +523,27 @@ Names_3check<-Names_2check %>%
 Names_4check<-Names_3check %>%
   select('Code provided','Name provided','Name fitting',n)
 
-knitr::kable(Names_4check)
+Species_Table<- flextable(Names_4check)
+Species_Table <- set_table_properties(Species_Table, width = 1, layout = "autofit")
+Species_Table
 ```
 
-```{r CodesInternalCheck, echo=FALSE, eval=FALSE}
+
+These species will not be included in the map.
+
+```{r CodesInternalCheck, echo=FALSE}
 # Check names not fitting
-if (nrow(filter(Names_3check, 'Name fitting' == FALSE)) == 0) {
+if (nrow(filter(Names_3check, `Name fitting` == FALSE)) == 0) {
   cat("There are no missing names")
 } else {
     cat("Please correct the following names")
-  knitr::kable(filter(Names_3check, 'Name fitting' == FALSE))
+  knitr::kable(
+  Names_3check %>%
+    filter(`Name fitting` == FALSE)%>%
+  select('Code provided','Code expected','Name provided','Name expected','Name fitting',n)
+  )
 }
 ```
-Check that all species names are part of a morphological/taxonomic group. Otherwise they wont be plotted in the maps. 
 
 ```{r CodesTax, echo=FALSE}
 Euring_Tax<-seamonas::Code_Euring %>%
@@ -514,14 +557,17 @@ Names_4tax<- subset(Names_1check, OBSERVATION != "0")
 Names_5tax<-left_join(Names_4tax,Euring_Tax,by='ENGLISH_NAME')
 Names_6taxmissing<-Names_5tax %>% 
   filter(is.na(Artificial_tax_class))
-#unique(Names_6taxmissing$ENGLISH_NAME)
+
+Names_7taxmissing<-Names_6taxmissing %>% 
+  group_by(ENGLISH_NAME,Artificial_tax_class)%>% 
+  tally()
 
 # Check names not fitting
-if (length(unique(Names_6taxmissing$ENGLISH_NAME)) == 0) {
+if (length(unique(Names_7taxmissing$ENGLISH_NAME)) == 0) {
   cat("There are no species missing tax/morphological classification.")
 } else {
   cat("These species are missing tax/morphological classification.")
-  knitr::kable(Names_6taxmissing)
+  knitr::kable(Names_7taxmissing)
 }
 ```
 
@@ -571,7 +617,14 @@ Table_Identification<-Observations %>%
   mutate(Proportion_matched=(Match*100)/(Match+Mismatch))%>%
   mutate(Proportion_matched=round(Proportion_matched,2))
 names(Table_Identification)<-c('Match','Mismatch','Not Audited','Audited [%]','Matched [%]')
-knitr::kable(Table_Identification)}
+Table_Identification<- flextable(Table_Identification)
+# Set column widths manually (in inches)
+Table_Identification<- set_table_properties(Table_Identification, width = 1, layout = "autofit") %>%
+  width(j = 1, width = 2) %>%   # column 1 = 2 inches
+  width(j = 2, width = 2) %>% 
+  width(j = 3, width = 2) 
+# Print table 
+Table_Identification}
 ```
 
 ## Mismatch
@@ -597,9 +650,18 @@ Audited_4check<-Audited_3check %>%
   
 Audited_5check<-Audited_4check %>% select(ENGLISH_NAME,ID_match,ID_mismatch)
 
-knitr::kable(Audited_5check)    
+Table_biases <- flextable(Audited_5check)
+# Set column widths manually (in inches)
+Table_biases<- set_table_properties(Table_biases, width = 1, layout = "autofit") %>%
+  width(j = 1, width = 2) %>%   # column 1 = 2 inches
+  width(j = 2, width = 2) %>% 
+  width(j = 3, width = 2) 
+# Print table 
+Table_biases
 }
 ```
+
+\newpage
 
 ## Biases
 
@@ -613,10 +675,11 @@ Audited_7check<-Audited_5check %>%
   mutate(Commonly_mistaken=ID_mismatch>ID_match)%>%
   filter(Commonly_mistaken==TRUE)%>%
   select(ENGLISH_NAME,ID_match,ID_mismatch)
-knitr::kable(Audited_7check)}
+Audited_7check<- flextable(Audited_7check)
+Audited_7check<- set_table_properties(Audited_7check, width = 1, layout = "autofit") 
+Audited_7check}
 ```
 
-\newpage
 
 Ensure that there is no observer bias, such as when a large number of individuals from one species are consistently misidentified.
 
@@ -672,8 +735,8 @@ Screening_3check<-Screening_2check %>%
   pivot_wider(names_from=SCREENING, values_from=n) 
 ```
 
-```{r TableDetectionChecked, echo=FALSE}
-Table_Detection<-Screening_3check %>%
+```{r Detection_Table, echo=FALSE}
+Detection_Table<-Screening_3check %>%
   mutate(Proportion_reviewed=(DETECTED_1SCREENING+DETECTED_2CONTROL+DETECTED_3AGREEMENT)*100/
            (DETECTED_1SCREENING+DETECTED_2CONTROL+DETECTED_3AGREEMENT+NOT_CHECKED))%>%
   mutate(Proportion_reviewed=round(Proportion_reviewed,2))%>%
@@ -687,7 +750,11 @@ Table_Detection<-Screening_3check %>%
          'Reviewed [%]'=Proportion_reviewed,
          'Agreement [%]'=Proportion_agreement
   )
-knitr::kable(Table_Detection)
+Table_Detection<- flextable(Detection_Table)
+# Set column widths manually (in inches)
+Table_Detection<- set_table_properties(Table_Detection, width = 1, layout = "autofit") 
+# Print table 
+Table_Detection
 ```
 
 
@@ -699,7 +766,7 @@ Since the screener and the auditor are assigned randomly and therefore interchan
 Assuming 20% of the area audited, the efficiency for this 20% is defined as db = (M+C-R)/N. If the efficiency of the entire process is to be calculated then rl = (dc*0.2)+(sc*0.8).  However, the actual number of animals remains unknown and therefore the number of missed animals is underestimated . 
 
 ```{r TableFormulaDetection, echo=FALSE}
-Table_FormulaDetection<-Table_Detection %>%
+FormulaDetection_Table<-Detection_Table %>%
   dplyr::select(Screener,Reviewer,Agreement)%>%
   rename(m=Screener,
          c=Reviewer,
@@ -724,7 +791,14 @@ Table_FormulaDetection<-Table_Detection %>%
 ```
 
 ```{r TableFormulaDetectionKnitr, echo=FALSE}
-knitr::kable(Table_FormulaDetection)
+Table_FormulaDetection <- flextable(FormulaDetection_Table)
+# Set column widths manually (in inches)
+Table_FormulaDetection<- set_table_properties(Table_FormulaDetection, width = 1, layout = "autofit") %>%
+  width(j = 1, width = 2) %>%   # column 1 = 2 inches
+  width(j = 2, width = 1.5) %>% # column 2 = 1.5 inches
+  width(j = 3, width = 1.2)     # etc.
+# Print table 
+Table_FormulaDetection
 ```
 
 
@@ -829,23 +903,37 @@ Table_Activity<-Plausability_Observations %>%
   group_by(ACTIVITY)%>%
   tally()%>%
   pivot_wider(names_from=ACTIVITY, values_from=n)%>%
+  # Fill missing activity columns with 0
+  mutate(
+    `3` = if (!"3" %in% names(.)) 0 else `3`,
+    `4` = if (!"4" %in% names(.)) 0 else `4`,
+    `5` = if (!"5" %in% names(.)) 0 else `5`,
+    `NA` = if (!"NA" %in% names(.)) NA else `NA`
+  )%>%
   rename(Swimming="1",
          Flying="2",
          Submerged="3",
          Breaching_surface="4",
-         Associated_with_platform="5")%>%
+         Associated_with_platform="5",
+         Undeclared="NA")%>%
   mutate(Prop_flying=(Flying*100)/(Flying+Swimming))%>%
   mutate(Prop_flying=round(Prop_flying,2))%>%
   mutate(Prop_swimming=round(100-Prop_flying,2))%>%
+  select(Prop_swimming,Prop_flying,Swimming,Flying)%>%
   rename('Swimming'=Swimming,
          'Flying'=Flying,
-         #'Undeclared'=,
          'Flying [%]'=Prop_flying,
          'Swimming [%]'=Prop_swimming)
-knitr::kable(Table_Activity)
+Table_Activity <- flextable(Table_Activity)
+# Set column widths manually (in inches)
+Table_Activity<- set_table_properties(Table_Activity, width = 1, layout = "autofit") %>%
+  width(j = 1, width = 2) %>%   
+  width(j = 2, width = 2) %>% 
+  width(j = 3, width = 2.5) 
+Table_Activity
 ```
 
-Expected that birds are flying or swimming. Marine mammals swimming or porpoising. 
+Expected that birds are flying or swimming. Marine mammals swimming or porpoising. Undeclared for animals is not allowed. 
 
 ```{r ActivityTable,echo=FALSE}
 Activity_Table<-Observations %>%
@@ -853,6 +941,12 @@ Activity_Table<-Observations %>%
   tally()%>%
   pivot_wider(names_from=ACTIVITY,values_from=n)
 Activity_Table<-Activity_Table %>%
+   mutate(
+    `3` = if (!"3" %in% names(.)) 0 else `3`,
+    `4` = if (!"4" %in% names(.)) 0 else `4`,
+    `5` = if (!"5" %in% names(.)) 0 else `5`,
+    `0` = if (!"0" %in% names(.)) NA else `0`
+  )%>%
   rename(Swimming="1",
          Flying="2",
          Submerged="3",
@@ -872,7 +966,13 @@ Activity_Table<-Activity_Table %>%
          'Submerged'=Submerged,
          'Breaching'=Breaching_surface,
          'Association'=Associated_with_platform)
-knitr::kable(Activity_Table)
+Activity_Table <- flextable(Activity_Table)
+# Set column widths manually (in inches)
+Activity_Table<- set_table_properties(Activity_Table, width = 1, layout = "autofit") %>%
+  width(j = 1, width = 2) %>%   
+  width(j = 2, width = 2) %>% 
+  width(j = 3, width = 2.5) 
+Activity_Table
 ```
 
 
@@ -903,7 +1003,10 @@ Age_table <- Age_table %>%
   group_by(ENGLISH_NAME) %>%
   summarise(across(everything(), ~sum(.x, na.rm = TRUE))) %>%
   relocate(ENGLISH_NAME, starts_with("IM_"), A, Undeclared)
-knitr::kable(Age_table)
+Age_table <- flextable(Age_table)
+# Set column widths manually (in inches)
+Age_table<- set_table_properties(Age_table, width = 1, layout = "autofit") 
+Age_table
 }
 ```
 
@@ -923,7 +1026,10 @@ if (!any(c("F", "M") %in% Observations$SEX)) {
     drop_na(F)%>%
     select(ENGLISH_NAME,F,M)
   Table_Sex
-knitr::kable(Table_Sex)
+Table_Sex <- flextable(Table_Sex)
+# Set column widths manually (in inches)
+Table_Sex<- set_table_properties(Table_Sex, width = 1, layout = "autofit") 
+Table_Sex
 } 
 ```
 
@@ -935,10 +1041,10 @@ knitr::kable(Table_Sex)
 All observation will be plotted by taxonomic/morphological group. **If you can not see all species is likely that is because they are overlapping, please refer to the dynamic maps to see the location of each species.** Dynamic maps are under the folder 03Maps. The name of the files correspond to the survey. There you can zoom in and out and click on the dots to get information on the species sighted. 
 
 ```{r SpatialPlotAxis,echo=FALSE}
-y_start<-min(as.numeric(Plausability_Basis$LAT_PIC_CENTER))-0.5
-y_end<-max(as.numeric(Plausability_Basis$LAT_PIC_CENTER))+0.5
-x_start<-min(as.numeric(Plausability_Basis$LON_PIC_CENTER))-1
-x_end<-max(as.numeric(Plausability_Basis$LON_PIC_CENTER))+1
+y_start<-min(as.numeric(Plausability_Basis$LAT_PIC_CENTER), na.rm = TRUE)-0.5
+y_end<-max(as.numeric(Plausability_Basis$LAT_PIC_CENTER), na.rm = TRUE)+0.5
+x_start<-min(as.numeric(Plausability_Basis$LON_PIC_CENTER), na.rm = TRUE)-1
+x_end<-max(as.numeric(Plausability_Basis$LON_PIC_CENTER), na.rm = TRUE)+1
 ```
 
 ```{r SpatialPlotFunction, echo=FALSE}
@@ -946,13 +1052,13 @@ CheckGroup <- function(Group) {
   SelectedBirds <- subset(Animals_1check, Artificial_tax_class == Group)
   
   if(nrow(SelectedBirds) == 0) {
-        print(paste("No",TaxonomicGroup,"occurred in the survey, therefore there is nothing to be plotted"))
+        print(paste("No",Group,"occurred in the survey, therefore there is nothing to be plotted"))
    } else {
           
   SelectedBirds$lat<-as.numeric(SelectedBirds$LAT_OBJECT)
   SelectedBirds$lon<-as.numeric(SelectedBirds$LON_OBJECT)
   
-  SelectedBirds <- SelectedBirds[!is.na(SelectedBirds$lat) & !is.na(SelectedBirds$lon), ] #Eliminar NAs
+  SelectedBirds <- SelectedBirds[!is.na(SelectedBirds$lat) & !is.na(SelectedBirds$lon), ]
   SelectedBirds_sf <- st_as_sf(SelectedBirds, coords = c("lon", "lat"),crs = 4326, agr = "constant")
   
   ggplot(data = SelectedBirds_sf) +

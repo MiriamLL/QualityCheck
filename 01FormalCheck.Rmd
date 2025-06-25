@@ -170,6 +170,7 @@ Values provided for TIME. Format expected (hh:mm:ss). Format provided:
 ```{r}
 unique(TripDaten$ENDTIME,na.rm=TRUE)
 ```
+
 **STRIP_WIDTH** is a mandatory field. There must be 0% missing values, otherwise please check.
 
 ```{r, include=T,comment=NA}
@@ -279,16 +280,28 @@ range(BasisDaten$POSITION_ID)
 ```
 
 
-**POSITION_ID_CONTROLLED**. is not a mandatory field. There can be missing values.
+**POSITION_ID_CONTROLLED** is not a mandatory field. There can be missing values.
 
 ```{r, include=T,comment=NA}
-cat(paste(round(100*sum(is.na(BasisDaten$POSITION_ID_CONTROLLED))/nrow(BasisDaten),1),"%","missing values",sep=" "))
+if ("POSITION_ID_CONTROLLED" %in% colnames(BasisDaten)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(BasisDaten$POSITION_ID_CONTROLLED))/nrow(BasisDaten),1),"%","missing values",sep=" "))
+} else {
+  # Column does not exist
+  print("Column POSITION_ID_CONTROLLED is missing. Check names of the columns. ")
+}
 ```
 
 Enter if an image has been controlled during the screening control = 1, ID control = 2, or during both working steps = 3.
 
 ```{r}
-unique(BasisDaten$POSITION_ID_CONTROLLED,na.rm=TRUE)
+if ("POSITION_ID_CONTROLLED" %in% colnames(BasisDaten)) {
+  # Column exists
+  unique(BasisDaten$POSITION_ID_CONTROLLED,na.rm=TRUE)
+} else {
+  # Column does not exist
+  print("Column POSITION_ID_CONTROLLED_is missing. Check names of the columns. ")
+}
 ```
 
 **DATE** is a mandatory field. There must be 0% missing values, otherwise please check.
@@ -331,6 +344,7 @@ range(BasisDaten$LAT_PIC_CENTER)
 ```{r, include=T,comment=NA}
 cat(paste(round(100*sum(is.na(BasisDaten$LON_PIC_CENTER))/nrow(BasisDaten),1),"%","missing values",sep=" "))
 ```
+
 Values provided:
 
 ```{r}
@@ -342,6 +356,7 @@ range(BasisDaten$LON_PIC_CENTER)
 ```{r, include=T,comment=NA}
 cat(paste(round(100*sum(is.na(BasisDaten$PLANE_FLIGHT_HEIGHT))/nrow(BasisDaten),1),"%","missing values",sep=" "))
 ```
+
 Values provided for PLANE_FLIGHT_HEIGHT. Variation is expected.
 
 ```{r}
@@ -487,7 +502,13 @@ if((nrow(ComparisonObservations %>%
 **OBSERVATION_ID** is a mandatory field. There must be 0% missing values, otherwise please check.
 
 ```{r, include=T,comment=NA}
-cat(paste(round(100*sum(is.na(Observations$OBSERVATION_ID))/nrow(Observations),1),"%","missing values",sep=" "))
+if ("OBSERVATION_ID" %in% colnames(Observations)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(Observations$OBSERVATION_ID))/nrow(Observations),1),"%","missing values",sep=" "))
+} else {
+  # Column does not exist
+  print("Column OBSERVATION_ID is missing. Check names of the columns. ")
+}
 ```
 
 Values provided for OBSERVATION_ID
@@ -602,7 +623,7 @@ unique(Observations$HEADING)
 unique(Observations$SUBMERGED)
 ```
 
-**AGE_CLASS** is not mandatory field. VIf filled values should be age of the bird; A (adult), IM (immature). 
+**AGE_CLASS** is not mandatory field. If filled values should be age of the bird; A (adult), IM (immature). 
 
 ```{r}
 unique(Observations$AGE_CLASS)
@@ -646,5 +667,89 @@ Values should be numerical.
 ```{r}
 range(Observations$LAT_OBJECT)
 ```
-      
- ***End of the document. ***
+
+## English names
+
+List all **species** sighted during the surveys with number of sightings and check the codes.
+
+```{r SpeciesList, echo=FALSE, comment=NA}
+Names_1check<-Observations %>% drop_na(OBSERVATION)
+Names_2check<-Names_1check %>% 
+    group_by(ENGLISH_NAME,OBSERVATION) %>%
+   count()
+Names_2check<-Names_2check%>% arrange(as.numeric(OBSERVATION))
+
+Euring<-seamonas::Code_Euring %>%
+  rename(ENGLISH_NAME=English_name)%>%
+  mutate(Code=as.numeric(Code))%>%
+  select(Code,ENGLISH_NAME)%>%
+  # update Arctic Tern Code
+  mutate(Code=case_when(Code==6169~6159,TRUE ~ Code))
+
+Names_3check<-Names_2check %>%
+  mutate(Code=as.numeric(OBSERVATION))%>%
+  left_join(Euring,by='Code')%>%
+  rename(ENGLISH_NAME_provided=ENGLISH_NAME.x,
+         ENGLISH_NAME_expected=ENGLISH_NAME.y)%>%
+  mutate(check=(ENGLISH_NAME_provided==ENGLISH_NAME_expected))%>%
+  relocate(Code,OBSERVATION,ENGLISH_NAME_expected, ENGLISH_NAME_provided,n)%>%
+  rename('Code provided'=OBSERVATION,
+         'Code expected'=Code,
+         'Name provided'=ENGLISH_NAME_provided,
+         'Name expected'=ENGLISH_NAME_expected,
+         'Name fitting'=check)
+
+Names_4check<-Names_3check %>%
+  select('Code provided','Name provided','Name fitting',n)
+
+knitr::kable(Names_4check)
+```
+
+
+
+Often names are not equal as there is no space between the diagonals (e.g.  seal / small cetacean provided and  seal/small cetacean expected) or missing a word (e.g. Red-necked/Great Crested Grebe provided and Red-necked Grebe/Great Crested Grebe expected, the word Grebe is missing). 
+
+```{r CodesInternalCheck, echo=FALSE}
+# Check names not fitting
+if (nrow(filter(Names_3check, `Name fitting` == FALSE)) == 0) {
+  cat("There are no missing names")
+} else {
+    cat("Please correct the following names")
+  knitr::kable(
+  Names_3check %>%
+    filter(`Name fitting` == FALSE)%>%
+  select('Code provided','Code expected','Name provided','Name expected','Name fitting',n)
+  )
+}
+```
+
+Check that all species names are part of a morphological/taxonomic group. Otherwise they wont be plotted in the maps in the Plausability Check. Usually the problem is that the name doesnt fit the Euring. 
+
+```{r CodesTax, echo=FALSE}
+Euring_Tax<-seamonas::Code_Euring %>%
+  rename(ENGLISH_NAME=English_name)%>%
+  mutate(Code=as.numeric(Code))%>%
+  select(Code,ENGLISH_NAME,Artificial_tax_class)%>%
+  # update Arctic Tern Code
+  mutate(Code=case_when(Code==6169~6159,TRUE ~ Code))
+
+Names_4tax<- subset(Names_1check, OBSERVATION != "0")
+Names_5tax<-left_join(Names_4tax,Euring_Tax,by='ENGLISH_NAME')
+Names_6taxmissing<-Names_5tax %>% 
+  filter(is.na(Artificial_tax_class))
+
+Names_7taxmissing<-Names_6taxmissing %>% 
+  group_by(ENGLISH_NAME,Artificial_tax_class)%>% 
+  tally()
+
+# Check names not fitting
+if (length(unique(Names_7taxmissing$ENGLISH_NAME)) == 0) {
+  cat("There are no species missing tax/morphological classification.")
+} else {
+  cat("These species are missing tax/morphological classification.")
+  knitr::kable(Names_7taxmissing)
+}
+```
+
+
+***End of the document. ***

@@ -51,7 +51,7 @@ BasisDaten<-read_excel(path=paste0(ThisDirectory,'\\',ThisFile),sheet = "Basisda
 ## Observations
 
 ```{r, warning=FALSE}
-Observations<-read_excel(path=paste0(ThisDirectory,'\\',ThisFile),sheet="Observations",, col_types = "text")
+Observations<-read_excel(path=paste0(ThisDirectory,'\\',ThisFile),sheet="Observations", col_types = "text")
 ```
 
 ## Corrections

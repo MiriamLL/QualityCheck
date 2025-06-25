@@ -351,7 +351,7 @@ display: none;
 
 <h1 class="title toc-ignore">FormalCheck</h1>
 <h4 class="author">Seabird Monitoring</h4>
-<h4 class="date">24 June, 2025</h4>
+<h4 class="date">25 June, 2025</h4>
 
 </div>
 
@@ -731,7 +731,7 @@ missing values, otherwise please check.</p>
 <pre><code>0 % missing values</code></pre>
 <p>Values provided:</p>
 <pre><code>## [1]     1 74400</code></pre>
-<p><strong>POSITION_ID_CONTROLLED</strong>. is not a mandatory field.
+<p><strong>POSITION_ID_CONTROLLED</strong> is not a mandatory field.
 There can be missing values.</p>
 <pre><code>1 % missing values</code></pre>
 <p>Enter if an image has been controlled during the screening control =
@@ -990,7 +990,8 @@ presented as numerical codes.</p>
 ## [18] &quot;44&quot;  &quot;30&quot;  &quot;40&quot;  &quot;42&quot;  &quot;43&quot;  &quot;46&quot;  &quot;95&quot;  &quot;68&quot;  &quot;65&quot;  &quot;77&quot;  &quot;78&quot;  &quot;79&quot;  &quot;89&quot;  &quot;122&quot; &quot;123&quot; &quot;80&quot;</code></pre>
 <p><strong>ACTIVITY</strong> is not mandatory field. Values should be 1
 = Swimming, 2 = Flying, 3 = Submerged, 4 = Breaching surface, 5 = On
-artificial platform, 0 = Unknown</p>
+artificial platform, 0 = Unknown. 0s are only allowed for abiotic
+structures.</p>
 <pre><code>## [1] &quot;2&quot; &quot;0&quot; &quot;1&quot; &quot;3&quot; &quot;4&quot; &quot;5&quot;</code></pre>
 <p><strong>GROUP</strong> is not mandatory field. Values should be
 Consecutive number of groups; same number for all individuals of the
@@ -1006,7 +1007,7 @@ presented as numerical codes.</p>
 <p><strong>SUBMERGE</strong> is not mandatory field. If filled values
 should be o,u,x.</p>
 <pre><code>## [1] NA  &quot;o&quot; &quot;u&quot; &quot;x&quot;</code></pre>
-<p><strong>AGE_CLASS</strong> is not mandatory field. VIf filled values
+<p><strong>AGE_CLASS</strong> is not mandatory field. If filled values
 should be age of the bird; A (adult), IM (immature).</p>
 <pre><code>## [1] NA   &quot;A&quot;  &quot;IM&quot;</code></pre>
 <p><strong>AGE_YEARS</strong> is not mandatory field. If filled values
@@ -1026,6 +1027,891 @@ missing values, otherwise please check.</p>
 <pre><code>0 % missing values</code></pre>
 <p>Values should be numerical.</p>
 <pre><code>## [1] 55.06525 55.90415</code></pre>
+</div>
+<div id="english-names" class="section level2">
+<h2>English names</h2>
+<p>List all <strong>species</strong> sighted during the surveys with
+number of sightings and check the codes.</p>
+<table>
+<colgroup>
+<col width="17%" />
+<col width="62%" />
+<col width="16%" />
+<col width="3%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Code provided</th>
+<th align="left">Name provided</th>
+<th align="left">Name fitting</th>
+<th align="right">n</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">0</td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="right">16</td>
+</tr>
+<tr class="even">
+<td align="left">20</td>
+<td align="left">Red-throated Diver</td>
+<td align="left">TRUE</td>
+<td align="right">38</td>
+</tr>
+<tr class="odd">
+<td align="left">30</td>
+<td align="left">Black-throated Diver</td>
+<td align="left">TRUE</td>
+<td align="right">26</td>
+</tr>
+<tr class="even">
+<td align="left">40</td>
+<td align="left">Great Northern Diver</td>
+<td align="left">TRUE</td>
+<td align="right">10</td>
+</tr>
+<tr class="odd">
+<td align="left">50</td>
+<td align="left">White-billed Diver</td>
+<td align="left">TRUE</td>
+<td align="right">10</td>
+</tr>
+<tr class="even">
+<td align="left">59</td>
+<td align="left">unidentified diver</td>
+<td align="left">TRUE</td>
+<td align="right">17</td>
+</tr>
+<tr class="odd">
+<td align="left">90</td>
+<td align="left">Great Crested Grebe</td>
+<td align="left">TRUE</td>
+<td align="right">26</td>
+</tr>
+<tr class="even">
+<td align="left">100</td>
+<td align="left">Red-necked Grebe</td>
+<td align="left">TRUE</td>
+<td align="right">13</td>
+</tr>
+<tr class="odd">
+<td align="left">110</td>
+<td align="left">Slavonian Grebe</td>
+<td align="left">TRUE</td>
+<td align="right">12</td>
+</tr>
+<tr class="even">
+<td align="left">120</td>
+<td align="left">Black-necked Grebe</td>
+<td align="left">TRUE</td>
+<td align="right">4</td>
+</tr>
+<tr class="odd">
+<td align="left">127</td>
+<td align="left">Red-necked Grebe/Great Crested Grebe</td>
+<td align="left">TRUE</td>
+<td align="right">4</td>
+</tr>
+<tr class="even">
+<td align="left">128</td>
+<td align="left">Slavonian Grebe/Black-necked Grebe</td>
+<td align="left">TRUE</td>
+<td align="right">4</td>
+</tr>
+<tr class="odd">
+<td align="left">129</td>
+<td align="left">unidentified grebe</td>
+<td align="left">TRUE</td>
+<td align="right">23</td>
+</tr>
+<tr class="even">
+<td align="left">220</td>
+<td align="left">Northern Fulmar</td>
+<td align="left">TRUE</td>
+<td align="right">18</td>
+</tr>
+<tr class="odd">
+<td align="left">430</td>
+<td align="left">Sooty Shearwater</td>
+<td align="left">TRUE</td>
+<td align="right">19</td>
+</tr>
+<tr class="even">
+<td align="left">710</td>
+<td align="left">Northern Gannet</td>
+<td align="left">TRUE</td>
+<td align="right">27</td>
+</tr>
+<tr class="odd">
+<td align="left">720</td>
+<td align="left">Great Cormorant</td>
+<td align="left">TRUE</td>
+<td align="right">21</td>
+</tr>
+<tr class="even">
+<td align="left">800</td>
+<td align="left">European Shag</td>
+<td align="left">TRUE</td>
+<td align="right">19</td>
+</tr>
+<tr class="odd">
+<td align="left">809</td>
+<td align="left">Great Cormorant/European Shag</td>
+<td align="left">TRUE</td>
+<td align="right">10</td>
+</tr>
+<tr class="even">
+<td align="left">1210</td>
+<td align="left">Great Egret</td>
+<td align="left">TRUE</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="left">1220</td>
+<td align="left">Grey Heron</td>
+<td align="left">TRUE</td>
+<td align="right">3</td>
+</tr>
+<tr class="even">
+<td align="left">1520</td>
+<td align="left">Mute Swan</td>
+<td align="left">TRUE</td>
+<td align="right">9</td>
+</tr>
+<tr class="odd">
+<td align="left">1532</td>
+<td align="left">Bewick’s Swan</td>
+<td align="left">TRUE</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">1540</td>
+<td align="left">Whooper Swan</td>
+<td align="left">TRUE</td>
+<td align="right">10</td>
+</tr>
+<tr class="odd">
+<td align="left">1559</td>
+<td align="left">unidentified swan</td>
+<td align="left">TRUE</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">1569</td>
+<td align="left">unidentified goose</td>
+<td align="left">TRUE</td>
+<td align="right">16</td>
+</tr>
+<tr class="odd">
+<td align="left">1580</td>
+<td align="left">Pink-footed Goose</td>
+<td align="left">TRUE</td>
+<td align="right">6</td>
+</tr>
+<tr class="even">
+<td align="left">1590</td>
+<td align="left">Greater White-fronted Goose</td>
+<td align="left">TRUE</td>
+<td align="right">19</td>
+</tr>
+<tr class="odd">
+<td align="left">1610</td>
+<td align="left">Greylag Goose</td>
+<td align="left">TRUE</td>
+<td align="right">12</td>
+</tr>
+<tr class="even">
+<td align="left">1660</td>
+<td align="left">Canada Goose</td>
+<td align="left">TRUE</td>
+<td align="right">2</td>
+</tr>
+<tr class="odd">
+<td align="left">1670</td>
+<td align="left">Barnacle Goose</td>
+<td align="left">TRUE</td>
+<td align="right">15</td>
+</tr>
+<tr class="even">
+<td align="left">1680</td>
+<td align="left">Brent Goose</td>
+<td align="left">TRUE</td>
+<td align="right">23</td>
+</tr>
+<tr class="odd">
+<td align="left">1730</td>
+<td align="left">Common Shelduck</td>
+<td align="left">TRUE</td>
+<td align="right">18</td>
+</tr>
+<tr class="even">
+<td align="left">1790</td>
+<td align="left">Eurasian Wigeon</td>
+<td align="left">TRUE</td>
+<td align="right">10</td>
+</tr>
+<tr class="odd">
+<td align="left">1820</td>
+<td align="left">Gadwall</td>
+<td align="left">TRUE</td>
+<td align="right">3</td>
+</tr>
+<tr class="even">
+<td align="left">1840</td>
+<td align="left">Eurasian Teal</td>
+<td align="left">TRUE</td>
+<td align="right">12</td>
+</tr>
+<tr class="odd">
+<td align="left">1860</td>
+<td align="left">Mallard</td>
+<td align="left">TRUE</td>
+<td align="right">7</td>
+</tr>
+<tr class="even">
+<td align="left">1890</td>
+<td align="left">Northern Pintail</td>
+<td align="left">TRUE</td>
+<td align="right">8</td>
+</tr>
+<tr class="odd">
+<td align="left">1940</td>
+<td align="left">Northern Shoveler</td>
+<td align="left">TRUE</td>
+<td align="right">9</td>
+</tr>
+<tr class="even">
+<td align="left">1980</td>
+<td align="left">Common Pochard</td>
+<td align="left">TRUE</td>
+<td align="right">7</td>
+</tr>
+<tr class="odd">
+<td align="left">2030</td>
+<td align="left">Tufted Duck</td>
+<td align="left">TRUE</td>
+<td align="right">21</td>
+</tr>
+<tr class="even">
+<td align="left">2040</td>
+<td align="left">Greater Scaup</td>
+<td align="left">TRUE</td>
+<td align="right">13</td>
+</tr>
+<tr class="odd">
+<td align="left">2060</td>
+<td align="left">Common Eider</td>
+<td align="left">TRUE</td>
+<td align="right">29</td>
+</tr>
+<tr class="even">
+<td align="left">2120</td>
+<td align="left">Long-tailed Duck</td>
+<td align="left">TRUE</td>
+<td align="right">36</td>
+</tr>
+<tr class="odd">
+<td align="left">2130</td>
+<td align="left">Common Scoter</td>
+<td align="left">TRUE</td>
+<td align="right">31</td>
+</tr>
+<tr class="even">
+<td align="left">2139</td>
+<td align="left">Common Scoter/Velvet Scoter</td>
+<td align="left">TRUE</td>
+<td align="right">17</td>
+</tr>
+<tr class="odd">
+<td align="left">2150</td>
+<td align="left">Velvet Scoter</td>
+<td align="left">TRUE</td>
+<td align="right">29</td>
+</tr>
+<tr class="even">
+<td align="left">2180</td>
+<td align="left">Common Goldeneye</td>
+<td align="left">TRUE</td>
+<td align="right">5</td>
+</tr>
+<tr class="odd">
+<td align="left">2210</td>
+<td align="left">Red-breasted Merganser</td>
+<td align="left">TRUE</td>
+<td align="right">19</td>
+</tr>
+<tr class="even">
+<td align="left">2230</td>
+<td align="left">Goosander</td>
+<td align="left">TRUE</td>
+<td align="right">5</td>
+</tr>
+<tr class="odd">
+<td align="left">2239</td>
+<td align="left">unidentified merganser/goosander</td>
+<td align="left">TRUE</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">2269</td>
+<td align="left">unidentified duck</td>
+<td align="left">TRUE</td>
+<td align="right">25</td>
+</tr>
+<tr class="odd">
+<td align="left">2310</td>
+<td align="left">European Honey-Buzzard</td>
+<td align="left">TRUE</td>
+<td align="right">13</td>
+</tr>
+<tr class="even">
+<td align="left">2390</td>
+<td align="left">Kite</td>
+<td align="left">TRUE</td>
+<td align="right">13</td>
+</tr>
+<tr class="odd">
+<td align="left">2600</td>
+<td align="left">Eurasian Marsh Harrier</td>
+<td align="left">TRUE</td>
+<td align="right">3</td>
+</tr>
+<tr class="even">
+<td align="left">2610</td>
+<td align="left">Hen Harrier</td>
+<td align="left">TRUE</td>
+<td align="right">7</td>
+</tr>
+<tr class="odd">
+<td align="left">2690</td>
+<td align="left">Eurasian Sparrowhawk</td>
+<td align="left">TRUE</td>
+<td align="right">19</td>
+</tr>
+<tr class="even">
+<td align="left">2870</td>
+<td align="left">Common Buzzard</td>
+<td align="left">TRUE</td>
+<td align="right">4</td>
+</tr>
+<tr class="odd">
+<td align="left">3009</td>
+<td align="left">unidentified bird of prey</td>
+<td align="left">TRUE</td>
+<td align="right">6</td>
+</tr>
+<tr class="even">
+<td align="left">3010</td>
+<td align="left">Osprey</td>
+<td align="left">TRUE</td>
+<td align="right">4</td>
+</tr>
+<tr class="odd">
+<td align="left">3040</td>
+<td align="left">Common Kestrel</td>
+<td align="left">TRUE</td>
+<td align="right">22</td>
+</tr>
+<tr class="even">
+<td align="left">3200</td>
+<td align="left">Peregrine Falcon</td>
+<td align="left">TRUE</td>
+<td align="right">7</td>
+</tr>
+<tr class="odd">
+<td align="left">4290</td>
+<td align="left">Common Coot</td>
+<td align="left">TRUE</td>
+<td align="right">14</td>
+</tr>
+<tr class="even">
+<td align="left">4330</td>
+<td align="left">Common Crane</td>
+<td align="left">TRUE</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="left">4500</td>
+<td align="left">Eurasian Oystercatcher</td>
+<td align="left">TRUE</td>
+<td align="right">26</td>
+</tr>
+<tr class="even">
+<td align="left">4560</td>
+<td align="left">Avocet</td>
+<td align="left">TRUE</td>
+<td align="right">19</td>
+</tr>
+<tr class="odd">
+<td align="left">4850</td>
+<td align="left">European Golden Plover</td>
+<td align="left">TRUE</td>
+<td align="right">24</td>
+</tr>
+<tr class="even">
+<td align="left">4860</td>
+<td align="left">Grey Plover</td>
+<td align="left">TRUE</td>
+<td align="right">19</td>
+</tr>
+<tr class="odd">
+<td align="left">4930</td>
+<td align="left">Northern Lapwing</td>
+<td align="left">TRUE</td>
+<td align="right">21</td>
+</tr>
+<tr class="even">
+<td align="left">4960</td>
+<td align="left">Red Knot</td>
+<td align="left">TRUE</td>
+<td align="right">13</td>
+</tr>
+<tr class="odd">
+<td align="left">5120</td>
+<td align="left">Dunlin</td>
+<td align="left">TRUE</td>
+<td align="right">23</td>
+</tr>
+<tr class="even">
+<td align="left">5129</td>
+<td align="left">unidentified sandpiper</td>
+<td align="left">TRUE</td>
+<td align="right">4</td>
+</tr>
+<tr class="odd">
+<td align="left">5190</td>
+<td align="left">Snipe</td>
+<td align="left">TRUE</td>
+<td align="right">7</td>
+</tr>
+<tr class="even">
+<td align="left">5340</td>
+<td align="left">Bar-tailed Godwit</td>
+<td align="left">TRUE</td>
+<td align="right">10</td>
+</tr>
+<tr class="odd">
+<td align="left">5380</td>
+<td align="left">Whimbrel</td>
+<td align="left">TRUE</td>
+<td align="right">4</td>
+</tr>
+<tr class="even">
+<td align="left">5410</td>
+<td align="left">Eurasian Curlew</td>
+<td align="left">TRUE</td>
+<td align="right">9</td>
+</tr>
+<tr class="odd">
+<td align="left">5480</td>
+<td align="left">Common Greenshank</td>
+<td align="left">TRUE</td>
+<td align="right">4</td>
+</tr>
+<tr class="even">
+<td align="left">5659</td>
+<td align="left">unidentified wader</td>
+<td align="left">TRUE</td>
+<td align="right">38</td>
+</tr>
+<tr class="odd">
+<td align="left">5660</td>
+<td align="left">Pomarine Skua</td>
+<td align="left">TRUE</td>
+<td align="right">7</td>
+</tr>
+<tr class="even">
+<td align="left">5670</td>
+<td align="left">Arctic Skua</td>
+<td align="left">TRUE</td>
+<td align="right">14</td>
+</tr>
+<tr class="odd">
+<td align="left">5680</td>
+<td align="left">Long-tailed Skua</td>
+<td align="left">TRUE</td>
+<td align="right">4</td>
+</tr>
+<tr class="even">
+<td align="left">5690</td>
+<td align="left">Great Skua</td>
+<td align="left">TRUE</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="left">5699</td>
+<td align="left">Arctic Skua/Pomarine Skua/Long-tailed Skua</td>
+<td align="left">TRUE</td>
+<td align="right">4</td>
+</tr>
+<tr class="even">
+<td align="left">5709</td>
+<td align="left">unidentified skua</td>
+<td align="left">TRUE</td>
+<td align="right">9</td>
+</tr>
+<tr class="odd">
+<td align="left">5780</td>
+<td align="left">Little Gull</td>
+<td align="left">TRUE</td>
+<td align="right">39</td>
+</tr>
+<tr class="even">
+<td align="left">5820</td>
+<td align="left">Black-headed Gull</td>
+<td align="left">TRUE</td>
+<td align="right">52</td>
+</tr>
+<tr class="odd">
+<td align="left">5900</td>
+<td align="left">Common Gull</td>
+<td align="left">TRUE</td>
+<td align="right">73</td>
+</tr>
+<tr class="even">
+<td align="left">5909</td>
+<td align="left">unidentified small gull</td>
+<td align="left">TRUE</td>
+<td align="right">72</td>
+</tr>
+<tr class="odd">
+<td align="left">5910</td>
+<td align="left">Lesser Black-backed Gull</td>
+<td align="left">TRUE</td>
+<td align="right">72</td>
+</tr>
+<tr class="even">
+<td align="left">5920</td>
+<td align="left">Herring Gull</td>
+<td align="left">TRUE</td>
+<td align="right">56</td>
+</tr>
+<tr class="odd">
+<td align="left">5929</td>
+<td align="left">Herring Gull/Caspian Gull/Yellow-legged Gull</td>
+<td align="left">TRUE</td>
+<td align="right">19</td>
+</tr>
+<tr class="even">
+<td align="left">6000</td>
+<td align="left">Great Black-backed Gull</td>
+<td align="left">TRUE</td>
+<td align="right">39</td>
+</tr>
+<tr class="odd">
+<td align="left">6004</td>
+<td align="left">Common Gull/Herring Gull</td>
+<td align="left">TRUE</td>
+<td align="right">22</td>
+</tr>
+<tr class="even">
+<td align="left">6005</td>
+<td align="left">unidentified large gull</td>
+<td align="left">TRUE</td>
+<td align="right">52</td>
+</tr>
+<tr class="odd">
+<td align="left">6008</td>
+<td align="left">Great Black-backed Gull/Lesser Black-backed Gull</td>
+<td align="left">TRUE</td>
+<td align="right">21</td>
+</tr>
+<tr class="even">
+<td align="left">6009</td>
+<td align="left">unidentified Larus gull</td>
+<td align="left">TRUE</td>
+<td align="right">12</td>
+</tr>
+<tr class="odd">
+<td align="left">6020</td>
+<td align="left">Black-legged Kittiwake</td>
+<td align="left">TRUE</td>
+<td align="right">49</td>
+</tr>
+<tr class="even">
+<td align="left">6048</td>
+<td align="left">fulmar/gull</td>
+<td align="left">TRUE</td>
+<td align="right">30</td>
+</tr>
+<tr class="odd">
+<td align="left">6049</td>
+<td align="left">unidentified gull</td>
+<td align="left">TRUE</td>
+<td align="right">46</td>
+</tr>
+<tr class="even">
+<td align="left">6110</td>
+<td align="left">Sandwich Tern</td>
+<td align="left">TRUE</td>
+<td align="right">46</td>
+</tr>
+<tr class="odd">
+<td align="left">6150</td>
+<td align="left">Common Tern</td>
+<td align="left">TRUE</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">6159</td>
+<td align="left">Common Tern/Arctic Tern</td>
+<td align="left">TRUE</td>
+<td align="right">68</td>
+</tr>
+<tr class="odd">
+<td align="left">6160</td>
+<td align="left">Arctic Tern</td>
+<td align="left">TRUE</td>
+<td align="right">9</td>
+</tr>
+<tr class="even">
+<td align="left">6240</td>
+<td align="left">Little Tern</td>
+<td align="left">TRUE</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="left">6259</td>
+<td align="left">unidentified Sterna tern</td>
+<td align="left">TRUE</td>
+<td align="right">6</td>
+</tr>
+<tr class="even">
+<td align="left">6270</td>
+<td align="left">Black Tern</td>
+<td align="left">TRUE</td>
+<td align="right">4</td>
+</tr>
+<tr class="odd">
+<td align="left">6318</td>
+<td align="left">tern/small gull</td>
+<td align="left">TRUE</td>
+<td align="right">32</td>
+</tr>
+<tr class="even">
+<td align="left">6319</td>
+<td align="left">unidentified tern</td>
+<td align="left">TRUE</td>
+<td align="right">46</td>
+</tr>
+<tr class="odd">
+<td align="left">6340</td>
+<td align="left">Common Guillemot</td>
+<td align="left">TRUE</td>
+<td align="right">58</td>
+</tr>
+<tr class="even">
+<td align="left">6345</td>
+<td align="left">Common Guillemot/Razorbill</td>
+<td align="left">TRUE</td>
+<td align="right">35</td>
+</tr>
+<tr class="odd">
+<td align="left">6360</td>
+<td align="left">Razorbill</td>
+<td align="left">TRUE</td>
+<td align="right">28</td>
+</tr>
+<tr class="even">
+<td align="left">6380</td>
+<td align="left">Black Guillemot</td>
+<td align="left">TRUE</td>
+<td align="right">10</td>
+</tr>
+<tr class="odd">
+<td align="left">6540</td>
+<td align="left">Atlantic Puffin</td>
+<td align="left">TRUE</td>
+<td align="right">2</td>
+</tr>
+<tr class="even">
+<td align="left">6549</td>
+<td align="left">unidentified auk</td>
+<td align="left">TRUE</td>
+<td align="right">14</td>
+</tr>
+<tr class="odd">
+<td align="left">6657</td>
+<td align="left">Feral Pigeon</td>
+<td align="left">TRUE</td>
+<td align="right">10</td>
+</tr>
+<tr class="even">
+<td align="left">6680</td>
+<td align="left">Stock Pigeon</td>
+<td align="left">TRUE</td>
+<td align="right">15</td>
+</tr>
+<tr class="odd">
+<td align="left">6700</td>
+<td align="left">Common Wood Pigeon</td>
+<td align="left">TRUE</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">7680</td>
+<td align="left">Short-eared Owl</td>
+<td align="left">TRUE</td>
+<td align="right">19</td>
+</tr>
+<tr class="odd">
+<td align="left">7950</td>
+<td align="left">Common Swift</td>
+<td align="left">TRUE</td>
+<td align="right">21</td>
+</tr>
+<tr class="even">
+<td align="left">11870</td>
+<td align="left">Common Blackbird</td>
+<td align="left">TRUE</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="left">11980</td>
+<td align="left">Fieldfare</td>
+<td align="left">TRUE</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">12010</td>
+<td align="left">Redwing</td>
+<td align="left">TRUE</td>
+<td align="right">7</td>
+</tr>
+<tr class="odd">
+<td align="left">15600</td>
+<td align="left">Eurasian Jackdaw</td>
+<td align="left">TRUE</td>
+<td align="right">3</td>
+</tr>
+<tr class="even">
+<td align="left">15630</td>
+<td align="left">Rook</td>
+<td align="left">TRUE</td>
+<td align="right">3</td>
+</tr>
+<tr class="odd">
+<td align="left">15670</td>
+<td align="left">Crow</td>
+<td align="left">TRUE</td>
+<td align="right">16</td>
+</tr>
+<tr class="even">
+<td align="left">15671</td>
+<td align="left">Carrion Crow</td>
+<td align="left">TRUE</td>
+<td align="right">7</td>
+</tr>
+<tr class="odd">
+<td align="left">15673</td>
+<td align="left">Hooded Crow</td>
+<td align="left">TRUE</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">16360</td>
+<td align="left">Chaffinch</td>
+<td align="left">TRUE</td>
+<td align="right">8</td>
+</tr>
+<tr class="odd">
+<td align="left">19998</td>
+<td align="left">unidentified bird</td>
+<td align="left">TRUE</td>
+<td align="right">59</td>
+</tr>
+<tr class="even">
+<td align="left">19999</td>
+<td align="left">unidentified songbird</td>
+<td align="left">TRUE</td>
+<td align="right">24</td>
+</tr>
+<tr class="odd">
+<td align="left">60000</td>
+<td align="left">unidentified marine mammal</td>
+<td align="left">TRUE</td>
+<td align="right">21</td>
+</tr>
+<tr class="even">
+<td align="left">60010</td>
+<td align="left">seal/small cetacean</td>
+<td align="left">TRUE</td>
+<td align="right">7</td>
+</tr>
+<tr class="odd">
+<td align="left">61010</td>
+<td align="left">unidentified whale</td>
+<td align="left">TRUE</td>
+<td align="right">2</td>
+</tr>
+<tr class="even">
+<td align="left">62260</td>
+<td align="left">Minke Whale</td>
+<td align="left">TRUE</td>
+<td align="right">16</td>
+</tr>
+<tr class="odd">
+<td align="left">63110</td>
+<td align="left">unidentified dolphin</td>
+<td align="left">TRUE</td>
+<td align="right">19</td>
+</tr>
+<tr class="even">
+<td align="left">63270</td>
+<td align="left">White-beaked Dolphin</td>
+<td align="left">TRUE</td>
+<td align="right">2</td>
+</tr>
+<tr class="odd">
+<td align="left">63510</td>
+<td align="left">Harbour Porpoise</td>
+<td align="left">TRUE</td>
+<td align="right">45</td>
+</tr>
+<tr class="even">
+<td align="left">64310</td>
+<td align="left">unidentified pinniped (Grey Seal/Harbour Seal)</td>
+<td align="left">TRUE</td>
+<td align="right">27</td>
+</tr>
+<tr class="odd">
+<td align="left">64320</td>
+<td align="left">Grey Seal</td>
+<td align="left">TRUE</td>
+<td align="right">18</td>
+</tr>
+<tr class="even">
+<td align="left">64330</td>
+<td align="left">Harbour Seal</td>
+<td align="left">TRUE</td>
+<td align="right">35</td>
+</tr>
+<tr class="odd">
+<td align="left">66030</td>
+<td align="left">Basking Shark</td>
+<td align="left">TRUE</td>
+<td align="right">4</td>
+</tr>
+<tr class="even">
+<td align="left">67900</td>
+<td align="left">Ocean Sunfish</td>
+<td align="left">TRUE</td>
+<td align="right">1</td>
+</tr>
+</tbody>
+</table>
+<p>Often names are not equal as there is no space between the diagonals
+(e.g. seal / small cetacean provided and seal/small cetacean expected)
+or missing a word (e.g. Red-necked/Great Crested Grebe provided and
+Red-necked Grebe/Great Crested Grebe expected, the word Grebe is
+missing).</p>
+<pre><code>## There are no missing names</code></pre>
+<p>Check that all species names are part of a morphological/taxonomic
+group. Otherwise they wont be plotted in the maps in the Plausability
+Check. Usually the problem is that the name doesnt fit the Euring.</p>
+<pre><code>## There are no species missing tax/morphological classification.</code></pre>
 <p><strong><em>End of the document. </em></strong></p>
 </div>
 </div>
