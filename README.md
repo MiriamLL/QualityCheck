@@ -4,7 +4,7 @@
 # About
 
 This repository includes the parametrized script to run Quality Checks
-in R.
+for digital survey data in R.
 
 Includes: <br> - **QualityCheck.Rproj** — RStudio project file <br> -
 **00QualityCheck.Rmd** — Initial quality check script <br> -
@@ -31,7 +31,8 @@ install.packages("beepr") #for making a noise when ready
 
 #For report
 install.packages("knitr") #for exporting tables in word
-install.packages("kableExtra") #for arranging tables in word
+install.packages("kableExtra") #for arranging tables in html
+install.packages("flextable") #for arranging tables in word
 install.packages("ggplot2") #for making plots
 install.packages("sp") #for reading shapefiles
 install.packages("sf") #for plotting shapefiles
@@ -69,7 +70,9 @@ Copy/save the Excel file in the **00Data** directory. <br> Next, paste
 the file name into the designated code chunk. <br> To run the chunk,
 click the green triangle icon in the top-right corner of the code chunk
 (the “Run Current Chunk” button, shown highlighted in a red square).
-<br>
+<br> Check that once the Excel file is in R, all the columns were
+imported correctly. Otherwise you might need to declare the column type
+in `col_type`
 
 <img src="Images/MainScript.png" width="100%" />
 
@@ -209,12 +212,70 @@ completed.
 If any required columns are missing, the fields cannot be checked, and
 the following warning is displayed.
 
-<img src="Images/FormalCheck_Warning_ScreenShot.png" width="100%" /> If
-there is any manual correction needed please add on the chunk allocated
-for this and re-run this part.<br>
+<img src="Images/FormalCheck_Warning_ScreenShot.png" width="100%" />
+
+English names are often not standardize.
+
+<img src="Images/FormalCheck_Names_ScreenShot.png" width="100%" />
+
+## Corrections
+
+If there is any manual correction needed please add on the chunk
+allocated for this and re-run the Formal Check.<br>
 
 ``` r
 Corrections<-'No manual corrections were needed'
+```
+
+Examples of common corrections needed.
+
+``` r
+# Misspelling column names
+TripDaten   <- TripDaten%>% 
+  rename(AREA_OBSERVED=AREA_OBERSERVED)%>%
+# Format import
+  mutate(STARTTIME=substr(STARTTIME,12,19))%>%
+  mutate(ENDTIME=substr(STARTTIME,12,19))
+
+BasisDaten  <- BasisDaten %>% 
+# Misspelling column names
+  rename(POSITION_ID_CONTROLLED=`POSITION ID_CONTROLLED`)%>%
+# Format import
+  mutate(DATE=gsub("-","",DATE))
+
+# Misspelling column names
+Observations<- Observations %>% 
+  rename(OBSERVATION_ID = Observation_ID,
+         GROUP=Group_)
+
+Corrections<-'In Trip, renamed AREA_OBERSERVED with AREA_OBSERVED. STARTTIME and ENDTIME using substr. 
+In Basis, renamed `POSITION ID_CONTROLLED` with POSITION_ID_CONTROLLED (added underscore). DATE removed minus using gsub.
+In Observations, renamed Observation_ID with OBSERVATION_ID, and Group_ with GROUP'
+```
+
+Often names are not equal as there is no space between the diagonals
+(e.g. seal / small cetacean provided and seal/small cetacean expected)
+or missing a word (e.g. Red-necked/Great Crested Grebe provided and
+Red-necked Grebe/Great Crested Grebe expected, the word Grebe is
+missing).
+
+``` r
+Observations <- Observations %>%
+    mutate(ENGLISH_NAME=
+             case_when(# Capital letters
+                       ENGLISH_NAME=='Northern gannet'~'Northern Gannet',
+                       ENGLISH_NAME=='Common gull'~'Common Gull',
+                       ENGLISH_NAME=='Black-legged kittiwake'~'     Black-legged Kittiwake',
+                       ENGLISH_NAME=='Unidentified gull'~'unidentified gull',
+                       ENGLISH_NAME=='Harbour porpoise'~'Harbour Porpoise',
+                       ENGLISH_NAME=='Northern fulmar'~'Northern Fulmar',
+                       # Wrong code
+                       ENGLISH_NAME=='Common Guillemot'~'Common Guillemot/Razorbill',
+                       # Space between names
+                       ENGLISH_NAME=='Common guillemot / Razorbill'~'Common Guillemot/Razorbill',
+                       ENGLISH_NAME=='unidentified pinniped (Grey Seal / Harbour Seal)'~
+                         'unidentified pinniped (Grey Seal/Harbour Seal)',
+                       TRUE ~ ENGLISH_NAME))
 ```
 
 # Plausability check
@@ -348,3 +409,6 @@ Additional references:
   <https://helcom.fi/wp-content/uploads/2021/11/HELCOM-Monitoring-guidelines-for-seabirds-at-sea-monitoring.pdf>
 
 - ESAS data model. <https://esas-docs.ices.dk/>
+
+- ICES data portal.
+  <https://www.ices.dk/data/data-portals/Pages/European-Seabirds-at-sea.aspx>
