@@ -57,6 +57,8 @@ would more easily localize the folders where the data is and the Rmds.
 
 Open the Markdown 00QualityCheck.Rmd
 
+<img src="Images/MainScript.png" width="100%" />
+
 ## Conditions
 
 You should have an excel file that have the following sheets, with these
@@ -73,8 +75,6 @@ click the green triangle icon in the top-right corner of the code chunk
 <br> Check that once the Excel file is in R, all the columns were
 imported correctly. Otherwise you might need to declare the column type
 in `col_type`
-
-<img src="Images/MainScript.png" width="100%" />
 
 ## Conditions
 
