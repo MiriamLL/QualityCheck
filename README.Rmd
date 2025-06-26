@@ -73,6 +73,7 @@ knitr::include_graphics('Images/MainScript_1example.png')
 
 Open the Markdown 00QualityCheck.Rmd
 
+In a parameterized R Markdown (Rmd) report, you do not need to open or manually run the other Rmd files used within the project. The main Rmd script is responsible for: Defining parameters and producing the final output. 
 ```{r, echo=FALSE}
 knitr::include_graphics('Images/MainScript.png')
 ```
@@ -84,6 +85,8 @@ You should have an excel file that have the following sheets, with these names: 
 - Basisdaten <br>
 - Observations <br>
 Please provide this order and/or these names for the sheets, or adjust the script accordingly. <br>
+
+The repository includes an example based on a fictional survey.
 
 ```{r, echo=FALSE, eval=FALSE}
 Trip_test<-seamonas::Trip_test
@@ -108,6 +111,10 @@ Copy/save the Excel file in the **00Data** directory. <br>
 Next, paste the file name into the designated code chunk. <br>
 To run the chunk, click the green triangle icon in the top-right corner of the code chunk (the "Run Current Chunk" button, shown highlighted in a red square). <br>
 Check that once the Excel file is in R, all the columns were imported correctly. Otherwise you might need to declare the column type in `col_type`
+
+```{r, echo=FALSE}
+knitr::include_graphics('Images/MainScript_2example.png')
+```
 
 ## Conditions
 
@@ -171,7 +178,7 @@ The following column names and some relevant fields are checked:
 - `GLARE`: This field is mandatory. <br>
 - `SEASTATE`: This field is mandatory. <br>
 - `TURBIDITY`: This field is mandatory. <br>
-- `ICE`: This field is mandatory. Use 0 is no Ice.<br>
+- `ICE`: This field is mandatory. Use 0 if there was no Ice.<br>
 - `CLARITY`: This field is mandatory. <br>
 - `PIC_QUALITY`: This field is mandatory. <br>
 - `PIC_FILENAME`: Can be left blank. <br>
@@ -184,8 +191,8 @@ The following column names and some relevant fields are checked:
 - `POSITION_ID`: This field is mandatory.<br>
 - `Dataset_ID`: Leave blank if unknown.<br> 
 - `CRUISENO`: This field is mandatory. <br>
-- `ABIOTIC_STRUCTURES`: Can be left blank if no ABIOTIC_STRUCTURES were detected.<br>
-- `ABIOTIC_OBSERVATIONS`: Can be left blank if no ABIOTIC_OBSERVATIONS were detected.<br>
+- `ABIOTIC_STRUCTURES`: Can be left blank if no ABIOTIC_STRUCTURES were observed.<br>
+- `ABIOTIC_OBSERVATION`: Can be left blank if no ABIOTIC_OBSERVATION was observed.<br>
 - `OBSERVATION`: Leave blank if the entry corresponds to ABIOTIC_STRUCTURES or ABIOTIC_OBSERVATIONS. <br>
 - `ENGLISH_NAME_BEFORE_CONTROL`: Leave blank if the entry corresponds to ABIOTIC_STRUCTURES or ABIOTIC_OBSERVATIONS.<br>
 - `ENGLISH_NAME_CONTROL_ID`: Leave blank if the entry corresponds to ABIOTIC_STRUCTURES or ABIOTIC_OBSERVATIONS.<br>
@@ -274,12 +281,13 @@ Observations<- Observations %>%
   rename(OBSERVATION_ID = Observation_ID,
          GROUP=Group_)
 
-Corrections<-'In Trip, renamed AREA_OBERSERVED with AREA_OBSERVED. STARTTIME and ENDTIME using substr. 
+Corrections<-'
+In Trip, renamed AREA_OBERSERVED with AREA_OBSERVED. STARTTIME and ENDTIME using substr. 
 In Basis, renamed `POSITION ID_CONTROLLED` with POSITION_ID_CONTROLLED (added underscore). DATE removed minus using gsub.
 In Observations, renamed Observation_ID with OBSERVATION_ID, and Group_ with GROUP'
 ```
 
-Often names are not equal as there is no space between the diagonals (e.g.  seal / small cetacean provided and  seal/small cetacean expected) or missing a word (e.g. Red-necked/Great Crested Grebe provided and Red-necked Grebe/Great Crested Grebe expected, the word Grebe is missing). 
+Name mismatches often occur due to missing spaces between slashes or omitted words. 
 
 ```{r, eval=FALSE}
 Observations <- Observations %>%
@@ -287,7 +295,7 @@ Observations <- Observations %>%
              case_when(# Capital letters
                        ENGLISH_NAME=='Northern gannet'~'Northern Gannet',
                        ENGLISH_NAME=='Common gull'~'Common Gull',
-                       ENGLISH_NAME=='Black-legged kittiwake'~' 	Black-legged Kittiwake',
+                       ENGLISH_NAME=='Black-legged kittiwake'~'Black-legged Kittiwake',
                        ENGLISH_NAME=='Unidentified gull'~'unidentified gull',
                        ENGLISH_NAME=='Harbour porpoise'~'Harbour Porpoise',
                        ENGLISH_NAME=='Northern fulmar'~'Northern Fulmar',
@@ -295,7 +303,8 @@ Observations <- Observations %>%
                        ENGLISH_NAME=='Common Guillemot'~'Common Guillemot/Razorbill',
                        # Space between names
                        ENGLISH_NAME=='Common guillemot / Razorbill'~'Common Guillemot/Razorbill',
-                       ENGLISH_NAME=='unidentified pinniped (Grey Seal / Harbour Seal)'~
+                       # Missing words
+                       ENGLISH_NAME=='unidentified pinniped (Grey/Harbour Seal)'~
                          'unidentified pinniped (Grey Seal/Harbour Seal)',
                        TRUE ~ ENGLISH_NAME))
 ```
@@ -326,10 +335,11 @@ The process uses the markdown from `02PlausabilityCheck.Rmd` to generate a repor
 - `ABIOTIC_STRUCTURES`: Can be left blank if no ABIOTIC_STRUCTURES were detected.<br>
 - `ABIOTIC_OBSERVATIONS`: Can be left blank if no ABIOTIC_OBSERVATIONS were detected.<br>
 - `ENGLISH_NAME`: It must be written exactly as it appears in EURING, maintaining the spacing, capitalization, or use of slashes. <br> 
-- `ID_MATCH_MISMATCH`: The selection of images for inspection should be random. The persons in the screening and ID control roles should not know whether they are determining a sighting (or during screening) or checking the determination (blind control). At the ID control level, care must be taken to ensure that the controls include as many species and taxonomic groups as possible. At least 20% of the identifications are expected to be audited, and that the error is above 70-80%. In addition, ensure that there is no observer bias, such as when a large number of individuals from one species are consistently misidentified. <br>
+- `ID_MATCH_MISMATCH`: The selection of images for inspection should be random. The persons in the screening and ID control roles should not know whether they are determining a sighting (or during screening) or checking the determination (blind control). At the ID control level, care must be taken to ensure that the controls include as many species and taxonomic groups as possible. At least 20% of the identifications are expected to be audited, and that the correct identification reaches 70-80%. In addition, ensure that there is no observer bias, such as when a large number of individuals from one species are consistently misidentified. <br>
 - `DETECTION_STEP`: At least 20% of the screenings should be reviewed. The initial screener and the auditor are expected to achieve a minimum of 90% agreement in detection. <br>
 - `ACTIVITY`: Check that its filled for all observation. 0s are only allowed for abiotic structures. In general a balanced proportion between flying and swimming is expected.<br>
 - `AGE_CLASS` and `AGE_YEAR`: Check that the information is plausible.<br>
+- `SEX`: Check that the information is plausible.<br>
 - `LAT_OBJECT` and `LON_OBJECT`: Used to plot the spatial distribution for each morphological group<br> 
 
 ## Output
@@ -393,7 +403,7 @@ Hover over a blue dot with the cursor. When the icon changes, click it to view t
 knitr::include_graphics('Images/Maps_2check.png')
 ```
 
-Enables the selection of specific layers corresponding to morphological groupings and information of other features.  
+Enables the selection of specific layers corresponding to information of other features.  
 
 ```{r, echo=FALSE,fig.height=2}
 knitr::include_graphics('Images/Maps_3check.png')

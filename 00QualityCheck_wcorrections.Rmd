@@ -33,7 +33,7 @@ list.files(ThisDirectory,pattern = ".xlsx")
 Tell me which file do you want to report
 
 ```{r}
-ThisFile<- "Area A - spring 2023.xlsx"
+ThisFile<- ""
 ```
 
 ## Tripdaten
