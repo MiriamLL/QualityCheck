@@ -406,7 +406,7 @@ to view the position ID and species information.<br>
 
 Please consider citing this repository.
 
-Lerma, M. (2025). QualityCheck. GitHub.
+Lerma, M., Schwemmer, J. (2025). QualityCheck. GitHub.
 <https://github.com/MiriamLL/QualityCheck>
 
 Additional references:
