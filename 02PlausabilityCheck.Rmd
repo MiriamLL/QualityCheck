@@ -1,6 +1,6 @@
 ---
 title: "PlausabilityCheck"
-author: "MarBird"
+author: "Marine Vertebrate Monitoring"
 date: "`r format(Sys.time(), '%d %B %Y')`"
 output: word_document
 params:

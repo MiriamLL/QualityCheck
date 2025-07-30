@@ -1,6 +1,6 @@
 ---
 title: "FormalCheck"
-author: "Seabird Monitoring"
+author: "Marine Vertebrate Monitoring"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: html_document
 params:
