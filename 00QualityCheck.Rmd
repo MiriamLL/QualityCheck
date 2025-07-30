@@ -38,6 +38,14 @@ ThisFile<- "Test_20250616_AreaA.xlsx"
 
 ## Tripdaten
 
+The Excel file should contain the following sheets, using these exact names and in the specified order:
+
+- Tripdaten
+- Basisdaten
+- Observations
+
+Kindly ensure that the sheet names and their order are as indicated above. Alternatively, please adjust the script to align with your file’s structure. 
+
 ```{r}
 TripDaten<-read_excel(path=paste0(ThisDirectory,'\\',ThisFile),sheet="Tripdaten",col_names = TRUE)
 ```
@@ -52,6 +60,17 @@ BasisDaten<-read_excel(path=paste0(ThisDirectory,'\\',ThisFile),sheet = "Basisda
 
 ```{r, warning=FALSE}
 Observations<-read_excel(path=paste0(ThisDirectory,'\\',ThisFile),sheet="Observations", col_types = "text")
+```
+
+## Explanatory lines 
+
+If the Excel sheet contains initial explanatory rows, they can be removed using the following command. 
+Please note that this approach is only applicable to files where such explanatory rows are present, otherwise ignore.
+
+```{r}
+#TripDaten<-TripDaten[-(1:7),]
+#Observations<-Observations[-(1:7),] 
+#BasisDaten<-BasisDaten[-(1:7),] 
 ```
 
 ## Corrections
