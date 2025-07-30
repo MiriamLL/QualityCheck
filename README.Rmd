@@ -263,8 +263,8 @@ Corrections<-'No manual corrections were needed'
 Examples of common corrections needed.
 
 ```{r, eval=FALSE}
-# Misspelling column names
 TripDaten   <- TripDaten%>% 
+  # Misspelling column names
   rename(AREA_OBSERVED=AREA_OBERSERVED)%>%
 # Format import
   mutate(STARTTIME=substr(STARTTIME,12,19))%>%
@@ -426,7 +426,7 @@ knitr::include_graphics('Images/Maps_5check.png')
 
 Please consider citing this repository. 
 
-Lerma, M., Schwemmer, J. (2025). QualityCheck. GitHub. https://github.com/MiriamLL/QualityCheck
+Lerma, M., Schwemmer, H., Nachtsheim, D. (2025). QualityCheck. GitHub. https://github.com/MiriamLL/QualityCheck
 
 Additional references:
 
