@@ -69,7 +69,11 @@ names: <br> - Tripdaten <br> - Basisdaten <br> - Observations <br>
 Please provide this order and/or these names for the sheets, or adjust
 the script accordingly. <br>
 
-The repository includes an example based on a fictional survey.
+The repository includes an example based on a fictional survey. To
+download the test format [click
+here](https://github.com/MiriamLL/QualityCheck/raw/refs/heads/main/00Data/Test_20250616_AreaA.xlsx).
+
+<img src="Images/ExcelExample.png" width="100%" />
 
 # Formal check
 
@@ -237,8 +241,8 @@ Corrections<-'No manual corrections were needed'
 Examples of common corrections needed.
 
 ``` r
-# Misspelling column names
 TripDaten   <- TripDaten%>% 
+  # Misspelling column names
   rename(AREA_OBSERVED=AREA_OBERSERVED)%>%
 # Format import
   mutate(STARTTIME=substr(STARTTIME,12,19))%>%
@@ -250,15 +254,16 @@ BasisDaten  <- BasisDaten %>%
 # Format import
   mutate(DATE=gsub("-","",DATE))
 
-# Misspelling column names
 Observations<- Observations %>% 
+# Misspelling column names  
   rename(OBSERVATION_ID = Observation_ID,
-         GROUP=Group_)
+         GROUP=Group_,
+         ENGLISH_NAME_BEFORE_CONTROL=`ENGLISH_NAME_BEFORE CONTROL`)
 
 Corrections<-'
 In Trip, renamed AREA_OBERSERVED with AREA_OBSERVED. STARTTIME and ENDTIME using substr. 
 In Basis, renamed `POSITION ID_CONTROLLED` with POSITION_ID_CONTROLLED (added underscore). DATE removed minus using gsub.
-In Observations, renamed Observation_ID with OBSERVATION_ID, and Group_ with GROUP'
+In Observations, renamed Observation_ID with OBSERVATION_ID, renamed ENGLISH_NAME_BEFORE CONTROL with ENGLISH_NAME_BEFORE_CONTROL, and Group_ with GROUP'
 ```
 
 Name mismatches often occur due to missing spaces between slashes or
@@ -406,7 +411,7 @@ to view the position ID and species information.<br>
 
 Please consider citing this repository.
 
-Lerma, M., Schwemmer, J. (2025). QualityCheck. GitHub.
+Lerma, M., Schwemmer, H., Nachtsheim, D. (2025). QualityCheck. GitHub.
 <https://github.com/MiriamLL/QualityCheck>
 
 Additional references:
