@@ -62,22 +62,14 @@ BasisDaten<-read_excel(path=paste0(ThisDirectory,'\\',ThisFile),sheet = "Basisda
 Observations<-read_excel(path=paste0(ThisDirectory,'\\',ThisFile),sheet="Observations", col_types = "text")
 ```
 
-## Explanatory lines 
-
-If the Excel sheet contains initial explanatory rows, they can be removed using the following command. 
-Please note that this approach is only applicable to files where such explanatory rows are present, otherwise ignore.
-
-```{r}
-#TripDaten<-TripDaten[-(1:7),]
-#Observations<-Observations[-(1:7),] 
-#BasisDaten<-BasisDaten[-(1:7),] 
-```
-
 ## Corrections
 
 ```{r}
 Corrections<-'No manual corrections were needed'
 ```
+
+If the Excel sheet contains mistakes in column errors please correct. See examples in QualityCheck_option1. 
+If the Excel sheet contains initial explanatory rows, they can be removed. See examples in QualityCheck_option2. 
 
 # ~~~~~~~~~~~
 # Formal Check
@@ -108,11 +100,12 @@ Define the name of the file using the information provided in the Trip informati
 ```{r}
 FormalCheck_file_date<-as.character(TripDaten$DATE[1])
 FormalCheck_file_date
+Company<-substr(as.character(TripDaten$LAB[1]),1,7) #the number of characters included for company name can be modified here
 FormalCheck_file_area<-as.character(TripDaten$CLUSTER[1])
 FormalCheck_file_area
-FormalCheck_output_name<-paste0(FormalCheck_output_folder,
-                                "FormalCheck_DATE_",FormalCheck_file_date,
-                                "_AREA_",FormalCheck_file_area,".html")
+FormalCheck_output_name<-paste0("DAS_",FormalCheck_file_date,
+                                "_",Company,
+                                "_Area",FormalCheck_file_area,"_1Check.html")
 FormalCheck_output_name 
 ```
 
@@ -173,9 +166,9 @@ Plausability_file_date<-as.character(TripDaten$DATE[1])
 Plausability_file_date
 Plausability_file_area<-as.character(TripDaten$CLUSTER[1])
 Plausability_file_area
-Plausability_output_name<-paste0(Plausability_output_folder,
-                                "Plausability_DATE_",Plausability_file_date,
-                                "_AREA_",Plausability_file_area,".doc")
+Plausability_output_name<-paste0("DAS",Plausability_file_date,
+                                 "_",Company,
+                                 "_Area",Plausability_file_area,"_2Report.doc")
 Plausability_output_name 
 ```
 
@@ -221,12 +214,10 @@ Maps_output_folder <- paste0(Maps_input_folder,"\\03Maps\\")
 ```
 
 ```{r}
-Maps_output_name <- paste0(Maps_output_folder,
-                           "03Maps_DATE_",
-                           as.character(TripDaten$DATE[1]),
-                           "_AREA_",
-                           as.character(TripDaten$CLUSTER[1]),
-                           ".html") 
+Maps_output_name <- paste0("DAS",as.character(TripDaten$DATE[1]),
+                           "_",Company,
+                           "_Area",substr(as.character(TripDaten$CLUSTER[1]),5,5),
+                           "_3Maps.html") 
 Maps_output_name 
 ```
 
