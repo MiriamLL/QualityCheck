@@ -33,6 +33,7 @@ LoadPackages<-function(x){sapply(x, require, character.only = TRUE)}
 
 ```{r LoadPackages, echo=FALSE, include=FALSE, message=FALSE, warning=FALSE}
 LoadPackages(PackageList)
+library(flextable)
 ```
 
 ```{r use_params,echo=FALSE, echo=FALSE}
@@ -77,8 +78,8 @@ A minimum proportion of 70% of the recorded images or videos must be analyzable.
 
 ```{r TableAreas,echo=FALSE}
 Table_Areas <- data.frame(survey_dates = as.character(unique(Plausability_Trip$DATE)),
-                         area_observed = sum(Plausability_Trip$AREA_OBSERVED),
-                         area_analysed= sum(Plausability_Trip$AREA_ANALYSED))
+                         area_observed = sum(as.numeric(Plausability_Trip$AREA_OBSERVED)),
+                         area_analysed= sum(as.numeric(Plausability_Trip$AREA_ANALYSED)))
 Table_Areas<-Table_Areas %>%
   mutate(area_proportion = round(((area_analysed*100)/area_observed),2))%>%
   mutate(CONDITION=case_when(area_proportion > 70 ~ "Reached (70%)",
@@ -105,11 +106,12 @@ Table_Controlled <- data.frame(survey_dates = as.character(Plausability_Trip$DAT
                           area_analysed = as.numeric(Plausability_Trip$AREA_ANALYSED),
                           area_controlled= as.numeric(Plausability_Trip$AREA_CONTROLLED),
                           area_controlled_prop =  NA)%>%
-  mutate(area_controlled_prop = round((area_controlled / area_analysed) * 100, 2)
-  )
+  mutate(area_controlled_prop = round((area_controlled / area_analysed) * 100, 2))
+
 Table_Controlled<-Table_Controlled %>%
-    mutate(CONDITION=case_when(area_controlled_prop > 20 ~ "Reached (20%)",
+  mutate(CONDITION=case_when(area_controlled_prop > 20 ~ "Reached (20%)",
                              TRUE ~ "Not reached (20%)"))
+
 names(Table_Controlled) <- c("survey dates (YYYYMMDD)","area analysed [km^2]","area controlled [km^2]","area controlled [%]","CONDITION")
 Table_Controlled<- flextable(Table_Controlled)
 Table_Controlled<- set_table_properties(Table_Controlled, width = 1, layout = "autofit") %>%
@@ -183,7 +185,7 @@ ggplot(data = Basis_sf) +
 Some variation in plane height during the survey is expected. 
 
 ```{r FlightHeightPlot, echo=F, fig.width=10, fig.height=3, warning=FALSE}
-ggplot(data=Plausability_Basis,aes(x=POSITION_ID,y=PLANE_FLIGHT_HEIGHT),color=CAMERA_NUMBER)+
+ggplot(data=Plausability_Basis,aes(x=POSITION_ID,y=as.numeric(PLANE_FLIGHT_HEIGHT)),color=CAMERA_NUMBER)+
     geom_point(aes(colour = factor(PLANE_FLIGHT_HEIGHT)), size = 1,color='darkblue') +
     xlab("Picture_ID")+ylab('Plane height')+
   theme_classic()+ 
@@ -191,7 +193,7 @@ ggplot(data=Plausability_Basis,aes(x=POSITION_ID,y=PLANE_FLIGHT_HEIGHT),color=CA
         axis.ticks.x = element_blank(),
         axis.text.y = element_text(size=15),
         legend.position='none')+
-  scale_x_discrete(limits=Plausability_Basis$POSITION_ID,breaks=Plausability_Basis$POSITION_ID[seq(1,length(Plausability_Basis$POSITION_ID),by=5000)])+
+  scale_x_discrete(limits=Plausability_Basis$POSITION_ID,breaks=Plausability_Basis$POSITION_ID[seq(1,length(Plausability_Basis$POSITION_ID),by=1000)])+
   theme(axis.text.x = element_text(angle=90,size=8))
 ```
 
@@ -339,11 +341,9 @@ PlotConditions(EjeY=Plausability_Basis$PIC_QUALITY)+
 
 # Observations
 
+```{r TableDensities,  echo=FALSE, eval=FALSE}
 ## Species densities
-
-Check densities being plausible.  Note that for number of species, unidentified individuals were counted as one species.  
-
-```{r TableDensities,  echo=FALSE, eval=TRUE}
+### Check densities being plausible.  Note that for number of species, unidentified individuals were counted as one species.
 Table_Densities<-data.frame(Number_species=(Observations %>%
                              distinct(ENGLISH_NAME)%>%
                              drop_na(ENGLISH_NAME)%>%
@@ -351,7 +351,7 @@ Table_Densities<-data.frame(Number_species=(Observations %>%
            Number_individuals=(Observations %>%
                                  drop_na(ENGLISH_NAME)%>%
                                  count())$n,
-           Area_analysed=sum(TripDaten$AREA_ANALYSED)
+           Area_analysed=sum(as.numeric(TripDaten$AREA_ANALYSED))
            )
 Table_Densities<-Table_Densities %>%
   mutate(Densities=round(Number_individuals/Area_analysed,2))%>%
@@ -364,11 +364,22 @@ Table_Densities <- set_table_properties(Table_Densities, width = 1, layout = "au
 Table_Densities
 ```
 
-## Controlled sightings per survey
+# Controlled sightings per survey
 
 How large was the difference between ID and the ID control (**ID_CONTROL_DIFFERENCE**)?
 
 ```{r ControlledIDObservations,echo=FALSE, include=FALSE}
+# transform class
+if (!is.character(BasisDaten$POSITION_ID)) {
+  BasisDaten <- BasisDaten %>%
+    mutate(POSITION_ID = as.character(POSITION_ID))
+}
+
+if (!is.character(Plausability_Observations$POSITION_ID)) {
+  Plausability_Observations <- Plausability_Observations %>%
+    mutate(POSITION_ID = as.character(POSITION_ID))
+}
+
 # Total number of sightings from Observations
 Controlled_Observations<-Plausability_Observations %>%
   left_join(BasisDaten,by='POSITION_ID') %>%
@@ -425,7 +436,6 @@ Controlled_Table <- set_table_properties(Controlled_Table, width = 1, layout = "
 Controlled_Table
 ```
 
-\newpage
 
 # Abiotic structures
 
@@ -521,7 +531,7 @@ Names_3check<-Names_2check %>%
          'Name fitting'=check)
 
 Names_4check<-Names_3check %>%
-  select('Code provided','Name provided','Name fitting',n)
+  select('Code provided','Name provided',n)
 
 Species_Table<- flextable(Names_4check)
 Species_Table <- set_table_properties(Species_Table, width = 1, layout = "autofit")
@@ -529,21 +539,7 @@ Species_Table
 ```
 
 
-These species will not be included in the map.
-
-```{r CodesInternalCheck, echo=FALSE}
-# Check names not fitting
-if (nrow(filter(Names_3check, `Name fitting` == FALSE)) == 0) {
-  cat("There are no missing names")
-} else {
-    cat("Please correct the following names")
-  knitr::kable(
-  Names_3check %>%
-    filter(`Name fitting` == FALSE)%>%
-  select('Code provided','Code expected','Name provided','Name expected','Name fitting',n)
-  )
-}
-```
+These species are missing taxonomic group, likely as their name doesnt fit the expected, and can not be included in the map unless corrected to the standardize form.
 
 ```{r CodesTax, echo=FALSE}
 Euring_Tax<-seamonas::Code_Euring %>%
@@ -579,10 +575,38 @@ The selection of images for inspection should be random. The persons in the scre
 
 At the ID control level, care must be taken to ensure that the controls include as many species and taxonomic groups as possible.  
 
-```{r AuditedObservationPlot, echo=F, fig.width=10, fig.height=4.5, warning=FALSE}
+```{r AuditedObservations, echo=F, fig.width=10, fig.height=4.5, warning=FALSE}
 # Replace zeros
 Audited_1check<-Plausability_Observations%>%
   mutate(ID_MATCH_MISMATCH = replace_na(ID_MATCH_MISMATCH, "0"))
+```
+
+```{r AuditedObservationsClass, echo=F, fig.width=10, fig.height=4.5, warning=FALSE}
+if ("OBSERVATION_ID" %in% colnames(Audited_1check)) {
+  Audited_1check <- Audited_1check[order(as.numeric(Audited_1check$OBSERVATION_ID)), ]
+  cat("The column OBSERVATION_ID will be used\n")
+
+ggplot(data=Audited_1check,aes(x=as.numeric(OBSERVATION_ID),y=as.numeric(ID_MATCH_MISMATCH)))+
+    geom_point(aes(colour = factor(ID_MATCH_MISMATCH)), size = 1) +
+    xlab("Observation_ID")+ylab('Match Mismatch')+
+  theme_classic()+ 
+  theme(axis.title = element_text(size=15),
+        axis.ticks.x = element_blank(),
+        axis.text.y = element_text(size=15),
+        legend.position='none')+
+  scale_y_continuous(limits=c(-0.5,2.5))+ 
+  scale_color_manual(values=c("0"="black",
+                              "1"="#457b9d",
+                              "2"="#e63946"))+
+  scale_x_continuous(breaks=Audited_1check$OBSERVATION_ID[seq(1,length(Audited_1check$OBSERVATION_ID),by=200)])+
+  theme(axis.text.x = element_text(angle=90,size=8))+
+  NULL
+  
+}else {
+#rename
+Audited_1check <- Audited_1check %>%
+  rename(OBSERVATION_ID = Observation_ID)
+cat("The column OBSERVATION_ID was renamed from Observation_ID\n")
 
 ggplot(data=Audited_1check,aes(x=OBSERVATION_ID,y=as.numeric(ID_MATCH_MISMATCH)))+
     geom_point(aes(colour = factor(ID_MATCH_MISMATCH)), size = 1) +
@@ -596,7 +620,10 @@ ggplot(data=Audited_1check,aes(x=OBSERVATION_ID,y=as.numeric(ID_MATCH_MISMATCH))
   scale_color_manual(values=c("0"="black",
                               "1"="#457b9d",
                               "2"="#e63946"))+
+  scale_x_discrete(breaks=Audited_1check$OBSERVATION_ID[seq(1,length(Audited_1check$OBSERVATION_ID),by=200)])+
+  theme(axis.text.x = element_text(angle=90,size=8))+
   NULL
+}
 ```
 
 Shows the proportion of animal identification that were matched the initial identification.
@@ -740,15 +767,14 @@ Detection_Table<-Screening_3check %>%
   mutate(Proportion_reviewed=(DETECTED_1SCREENING+DETECTED_2CONTROL+DETECTED_3AGREEMENT)*100/
            (DETECTED_1SCREENING+DETECTED_2CONTROL+DETECTED_3AGREEMENT+NOT_CHECKED))%>%
   mutate(Proportion_reviewed=round(Proportion_reviewed,2))%>%
-  mutate(Proportion_agreement=(DETECTED_3AGREEMENT)*100/
-           (DETECTED_1SCREENING+DETECTED_2CONTROL+DETECTED_3AGREEMENT))%>%
-  mutate(Proportion_agreement=round(Proportion_agreement,2))%>%
+  select(DETECTED_1SCREENING,DETECTED_2CONTROL,DETECTED_3AGREEMENT,NOT_CHECKED,Proportion_reviewed)%>%
   rename('Screener'=DETECTED_1SCREENING,
          'Reviewer'=DETECTED_2CONTROL,
          'Agreement'=DETECTED_3AGREEMENT,
+         #'Detected during ID'=DETECTED_4ID,
          'Not Reviewed'=NOT_CHECKED,
-         'Reviewed [%]'=Proportion_reviewed,
-         'Agreement [%]'=Proportion_agreement
+         'Reviewed [%]'=Proportion_reviewed
+         #'Agreement [%]'=Proportion_agreement
   )
 Table_Detection<- flextable(Detection_Table)
 # Set column widths manually (in inches)
@@ -811,7 +837,9 @@ How many **marine mammals** and **birds** were sighted?
 ```{r Taxa, echo=FALSE}
 Animals_1check<-Names_5tax %>%
   mutate(Taxa=case_when(Artificial_tax_class == 'Marine_mammals' ~ "Mammals",
-                        TRUE ~ "Birds"))
+                        Artificial_tax_class %in% c("Gulls","Skuas","Ducks_Shelducks","Swan_Geese","Terns","Waders","Gannets_Cormorants",
+                                                    "Divers","Auks","Grebes","Other_seabirds")  ~ "Birds",
+                        TRUE ~ "Others"))
 ```
 
 ```{r TaxaPlot, echo=FALSE, fig.width=5, fig.height=4}
@@ -827,7 +855,33 @@ ggplot(Animals_2check, aes(x=Taxa, y=n, fill=Taxa))+
         axis.text.x = element_text(size=15),
         axis.text.y = element_text(size=15),
         legend.position='none')+
-  scale_fill_manual(values=c("#2a9d8f","#264653"))
+  scale_fill_manual(values=c("#2a9d8f","#264653","#669bbc"))
+```
+
+### Bird sighthings
+
+```{r BirdsSightingsPlot, echo=FALSE, fig.height=10, fig.width=8}
+Birds_4check<-Animals_1check %>% filter(Taxa == 'Birds')
+Birds_5check<-Birds_4check %>% 
+  group_by(ENGLISH_NAME,OBSERVATION,Artificial_tax_class) %>%
+  count()
+ggplot(Birds_5check, aes(x=paste(str_pad(OBSERVATION, 6, pad = "0"),
+                                 ENGLISH_NAME), 
+                         y=n,
+                         fill=Artificial_tax_class)) +
+  geom_bar(stat='identity')+
+  coord_flip() +
+  ylab("Sightings")+xlab("Species")+
+  scale_y_continuous(expand = c(0,0),
+                     limits=c(-0.5,max(Birds_5check$n)+mean(Birds_5check$n)))+
+  theme_classic()+ 
+  theme(axis.title = element_text(size=10),
+        axis.text.x = element_text(size=10),
+        axis.text.y = element_text(size=10),
+        legend.position='none')+
+  scale_fill_manual(values=c("#5f0f40","#9a031e","#fb8b24","#e36414",
+                             "#0f4c5c","#05668d","#5f0f40","#9a031e",
+                             "#fb8b24","#e36414","#0f4c5c","#05668d"))
 ```
 
 ### Most common birds per survey
@@ -860,14 +914,16 @@ ggplot(Birds_3check, aes(x=ENGLISH_NAME,
                              "#e71d36","#2ec4b6","#43aa8b","#277da1"))
 ```
 
-### All bird sighthings
+\newpage
 
-```{r BirdsSightingsPlot, echo=FALSE, fig.height=10, fig.width=8}
-Birds_4check<-Animals_1check %>% filter(Taxa=='Birds')
-Birds_5check<-Birds_4check %>% 
+### Marine mammal sighthings
+
+```{r MammalsSightingsPlot, echo=FALSE, fig.height=10, fig.width=8}
+Mammals_4check<-Animals_1check %>% filter(Taxa=="Mammals")
+Mammals_5check<-Mammals_4check %>% 
   group_by(ENGLISH_NAME,OBSERVATION,Artificial_tax_class) %>%
   count()
-ggplot(Birds_5check, aes(x=paste(str_pad(OBSERVATION, 6, pad = "0"),
+ggplot(Mammals_5check, aes(x=paste(str_pad(OBSERVATION, 6, pad = "0"),
                                  ENGLISH_NAME), 
                          y=n,
                          fill=Artificial_tax_class)) +
@@ -875,7 +931,7 @@ ggplot(Birds_5check, aes(x=paste(str_pad(OBSERVATION, 6, pad = "0"),
   coord_flip() +
   ylab("Sightings")+xlab("Species")+
   scale_y_continuous(expand = c(0,0),
-                     limits=c(-0.5,max(Birds_5check$n)+mean(Birds_5check$n)))+
+                     limits=c(0,max(Mammals_5check$n)+mean(Mammals_5check$n)))+
   theme_classic()+ 
   theme(axis.title = element_text(size=10),
         axis.text.x = element_text(size=10),
@@ -886,6 +942,35 @@ ggplot(Birds_5check, aes(x=paste(str_pad(OBSERVATION, 6, pad = "0"),
                              "#fb8b24","#e36414","#0f4c5c","#05668d"))
 ```
 
+\newpage
+
+### Other species
+
+Includes terrestrial birds, fish, sharks and some animals names are probably misspelled and could be corrected (either in the quality check or in the excel sheet), and therefore included.
+
+```{r MissingSightingsPlot, echo=FALSE, fig.height=10, fig.width=8}
+Missing_4check<-Animals_1check %>% filter(Taxa=="Others")
+Missing_5check<-Missing_4check %>% 
+  group_by(ENGLISH_NAME,OBSERVATION,Artificial_tax_class) %>%
+  count()
+ggplot(Missing_5check, aes(x=paste(str_pad(OBSERVATION, 6, pad = "0"),
+                                 ENGLISH_NAME), 
+                         y=n,
+                         fill=Artificial_tax_class)) +
+  geom_bar(stat='identity')+
+  coord_flip() +
+  ylab("Sightings")+xlab("Species")+
+  scale_y_continuous(expand = c(0,0),
+                     limits=c(-0.5,max(Missing_5check$n)+mean(Missing_5check$n)))+
+  theme_classic()+ 
+  theme(axis.title = element_text(size=10),
+        axis.text.x = element_text(size=10),
+        axis.text.y = element_text(size=10),
+        legend.position='none')+
+  scale_fill_manual(values=c("#5f0f40","#9a031e","#fb8b24","#e36414",
+                             "#0f4c5c","#05668d","#5f0f40","#9a031e",
+                             "#fb8b24","#e36414","#0f4c5c","#05668d"))
+```
 
 \newpage
 
@@ -933,14 +1018,14 @@ Table_Activity<- set_table_properties(Table_Activity, width = 1, layout = "autof
 Table_Activity
 ```
 
-Expected that birds are flying or swimming. Marine mammals swimming or porpoising. Undeclared for animals is not allowed. 
+Expected that birds are flying or swimming. Marine mammals swimming or porpoising. Missing activities are not allowed (please check if Missing = TRUE)
 
 ```{r ActivityTable,echo=FALSE}
-Activity_Table<-Observations %>%
+Activity_1df<-Observations %>%
   group_by(ENGLISH_NAME,ACTIVITY)%>%
   tally()%>%
   pivot_wider(names_from=ACTIVITY,values_from=n)
-Activity_Table<-Activity_Table %>%
+Activity_2df<-Activity_1df %>%
    mutate(
     `3` = if (!"3" %in% names(.)) 0 else `3`,
     `4` = if (!"4" %in% names(.)) 0 else `4`,
@@ -952,21 +1037,23 @@ Activity_Table<-Activity_Table %>%
          Submerged="3",
          Breaching_surface="4",
          Associated_with_platform="5",
-         Undeclared="0")%>%
+         Missing="0")%>%
   mutate(Swimming = replace_na(Swimming, 0),
          Flying= replace_na(Flying, 0),
          Submerged= replace_na(Submerged, 0),
          Breaching_surface= replace_na(Breaching_surface, 0),
          Associated_with_platform= replace_na(Associated_with_platform, 0),
-         Undeclared= replace_na(Undeclared, 0)
+         Missing= replace_na(Missing, 0)
          )%>%
   relocate(ENGLISH_NAME,Swimming,Flying,Submerged,Breaching_surface,Associated_with_platform)%>%
   rename('Swimming'=Swimming,
          'Flying'=Flying,
          'Submerged'=Submerged,
          'Breaching'=Breaching_surface,
-         'Association'=Associated_with_platform)
-Activity_Table <- flextable(Activity_Table)
+         'Association'=Associated_with_platform) 
+Activity_3df<-Activity_2df%>% 
+  select(-Missing)
+Activity_Table <- flextable(Activity_3df)
 # Set column widths manually (in inches)
 Activity_Table<- set_table_properties(Activity_Table, width = 1, layout = "autofit") %>%
   width(j = 1, width = 2) %>%   
@@ -976,12 +1063,26 @@ Activity_Table
 ```
 
 
+## Missing
+
+```{r ActivityTableMissing,echo=FALSE}
+Activity_TableMissing <- Activity_2df %>% filter(Missing==TRUE)
+if (nrow(Activity_TableMissing) == 0) {
+  cat("Information from Activity was completly filled.\n")
+} else {
+cat("These species are missing Activity information:\n")
+Activity_TableMissing<- set_table_properties(Activity_TableMissing, width = 1, layout = "autofit") %>%
+  width(j = 1, width = 2) %>%   
+  width(j = 2, width = 2) %>% 
+  width(j = 3, width = 2.5)
+}
+```
 
 \newpage
 
 ## Age class
 
-AGE_CLASS: Expected A- Adult, IM- Immature; AGE_YEARS: Expected numeric from 1 to 5. 
+AGE_CLASS: Expected A- Adult, IM- Immature; AGE_YEARS: Expected numeric from 1 to 5. Missing refers to those immature individuals where age was not declared in AGE_YEARS. In birds, age can be determined due to plumage patters.
 
 ```{r CheckAge,echo=FALSE}
 if ("IM" %in% Observations$AGE_CLASS==FALSE){
@@ -999,10 +1100,10 @@ Age_table <- Age_table %>%
     values_from = IM,
     names_prefix = "IM_"
   ) %>%
-  rename_with(~gsub("IM_NA", "Undeclared", .x)) %>%
+  rename_with(~gsub("IM_NA", "Missing_YEARS", .x)) %>%
   group_by(ENGLISH_NAME) %>%
   summarise(across(everything(), ~sum(.x, na.rm = TRUE))) %>%
-  relocate(ENGLISH_NAME, starts_with("IM_"), A, Undeclared)
+  relocate(ENGLISH_NAME, A, starts_with("IM_"), Missing_YEARS)
 Age_table <- flextable(Age_table)
 # Set column widths manually (in inches)
 Age_table<- set_table_properties(Age_table, width = 1, layout = "autofit") 
@@ -1023,11 +1124,14 @@ if (!any(c("F", "M") %in% Observations$SEX)) {
     group_by(ENGLISH_NAME,SEX)%>%
     tally()%>%
     pivot_wider(names_from = SEX,values_from=n)%>%
-    drop_na(F)%>%
-    select(ENGLISH_NAME,F,M)
-  Table_Sex
+    mutate(
+      F = if (!"F" %in% colnames(.)) 0 else F,
+      M = if (!"M" %in% colnames(.)) 0 else M
+    ) %>%
+    select(ENGLISH_NAME, F, M)%>%
+    filter(!is.na(F) | !is.na(M))
+Table_Sex
 Table_Sex <- flextable(Table_Sex)
-# Set column widths manually (in inches)
 Table_Sex<- set_table_properties(Table_Sex, width = 1, layout = "autofit") 
 Table_Sex
 } 
@@ -1048,11 +1152,11 @@ x_end<-max(as.numeric(Plausability_Basis$LON_PIC_CENTER), na.rm = TRUE)+1
 ```
 
 ```{r SpatialPlotFunction, echo=FALSE}
-CheckGroup <- function(Group) {
-  SelectedBirds <- subset(Animals_1check, Artificial_tax_class == Group)
+CheckGroup <- function(Morphological_group) {
+  SelectedBirds <- subset(Animals_1check, Artificial_tax_class == Morphological_group)
   
   if(nrow(SelectedBirds) == 0) {
-        print(paste("No",Group,"occurred in the survey, therefore there is nothing to be plotted"))
+        print(paste("No",Morphological_group,"occurred in the survey, therefore there is nothing to be plotted"))
    } else {
           
   SelectedBirds$lat<-as.numeric(SelectedBirds$LAT_OBJECT)
@@ -1089,12 +1193,13 @@ CheckGroup <- function(Group) {
 
 ```
 
+## Birds
 ### Gulls
 
 Species occurring in the survey
 
 ```{r GullsMap, echo=FALSE, comment=NA,fig.width=14, fig.height=10}
-CheckGroup(Group="Gulls")
+CheckGroup(Morphological_group="Gulls")
 ```
 
 \newpage
@@ -1103,7 +1208,7 @@ CheckGroup(Group="Gulls")
 Species occurring in the survey
 
 ```{r SkuasMap, echo=F, comment=NA, fig.width=14, fig.height=10}
-CheckGroup(Group="Skuas")
+CheckGroup(Morphological_group="Skuas")
 ```
 
 \newpage
@@ -1112,7 +1217,7 @@ CheckGroup(Group="Skuas")
 Species of occurring in the survey
 
 ```{r GannetMap, echo=FALSE, eval=TRUE, fig.width=14, fig.height=10}
-CheckGroup(Group="Gannets_Cormorants")
+CheckGroup(Morphological_group="Gannets_Cormorants")
 ```
 
 \newpage
@@ -1121,7 +1226,7 @@ CheckGroup(Group="Gannets_Cormorants")
 Species  occurring in the survey
 
 ```{r AuksMap, echo=FALSE,comment=NA, fig.width=14, fig.height=10}
-CheckGroup(Group='Auks')
+CheckGroup(Morphological_group='Auks')
 ```
 
 \newpage
@@ -1131,8 +1236,9 @@ CheckGroup(Group='Auks')
 Species occurring in the survey
 
 ```{r TernsMap, echo=FALSE, comment=NA,fig.width=14, fig.height=10}
-CheckGroup(Group='Terns')
+CheckGroup(Morphological_group='Terns')
 ```
+
 \newpage
 
 ### Ducks and Shelducks
@@ -1140,7 +1246,7 @@ CheckGroup(Group='Terns')
 Species of occurring in the survey
 
 ```{r AnatidaeMap, echo=FALSE,comment=NA, fig.width=14, fig.height=10}
-CheckGroup(Group="Ducks_Shelducks")
+CheckGroup(Morphological_group="Ducks_Shelducks")
 ```
 
 \newpage
@@ -1149,7 +1255,7 @@ CheckGroup(Group="Ducks_Shelducks")
 Species occurring in the survey
 
 ```{r GesseMap, echo=FALSE, eval=TRUE, fig.width=14, fig.height=10, comment=NA}
-CheckGroup(Group="Swan_Geese")
+CheckGroup(Morphological_group="Swan_Geese")
 ```
 
 \newpage
@@ -1158,7 +1264,7 @@ CheckGroup(Group="Swan_Geese")
 Species occurring in the survey
 
 ```{r DiverMap, echo=FALSE, eval=TRUE, fig.width=14, fig.height=10, comment=NA}
-CheckGroup(Group='Divers')
+CheckGroup(Morphological_group='Divers')
 ```
 
 \newpage
@@ -1167,7 +1273,7 @@ CheckGroup(Group='Divers')
 Species occurring in the survey
 
 ```{r GrebesMap, echo=FALSE, comment=NA,fig.width=14, fig.height=10}
-CheckGroup(Group='Grebes')
+CheckGroup(Morphological_group='Grebes')
 ```
 
 \newpage
@@ -1176,16 +1282,7 @@ CheckGroup(Group='Grebes')
 Species occurring in the survey
 
 ```{r WadersMap, echo=FALSE, comment=NA,fig.width=14, fig.height=10}
-CheckGroup(Group='Waders')
-```
-
-\newpage
-
-### Marine mammals
-Species occurring in the survey
-
-```{r MammalsMap, echo=FALSE,comment=NA, fig.width=14, fig.height=10}
-CheckGroup(Group='Marine_mammals')
+CheckGroup(Morphological_group='Waders')
 ```
 
 \newpage
@@ -1194,18 +1291,105 @@ CheckGroup(Group='Marine_mammals')
 Species occurring in the survey
 
 ```{r SeabirdsMap, comment=NA,echo=FALSE, fig.width=14, fig.height=10}
-CheckGroup(Group='Other_seabirds')
+CheckGroup(Morphological_group='Other_seabirds')
 ```
 
 \newpage
 
-### Other bird species
+## Marine mammals
 Species occurring in the survey
 
-```{r OthersMap, comment=NA,echo=FALSE, fig.width=14, fig.height=10}
-CheckGroup(Group='Other_species')
+```{r MammalsMap, echo=FALSE,comment=NA, fig.width=14, fig.height=10}
+CheckGroup(Morphological_group='Marine_mammals')
 ```
 
+\newpage
 
+### Harbour porpoise
+Species occurring in the survey
+
+```{r PorpoiseMap, echo=FALSE,comment=NA, fig.width=14, fig.height=10}
+HarbourPorpoise <- Animals_1check %>% filter(OBSERVATION==63510)
+  if(nrow(HarbourPorpoise) == 0) {
+        print(paste("No Harbour porpoise occurred in the survey, therefore there is nothing to be plotted"))
+   } else {
+          
+  HarbourPorpoise$lat<-as.numeric(HarbourPorpoise$LAT_OBJECT)
+  HarbourPorpoise$lon<-as.numeric(HarbourPorpoise$LON_OBJECT)
+  
+  HarbourPorpoise <- HarbourPorpoise[!is.na(HarbourPorpoise$lat) & !is.na(HarbourPorpoise$lon), ]
+  HarbourPorpoise_sf <- st_as_sf(HarbourPorpoise, coords = c("lon", "lat"),crs = 4326, agr = "constant")
+  
+  ggplot(data = HarbourPorpoise_sf) +
+    geom_sf(data = Study_areas,colour = 'black', alpha=0.1)+
+    geom_sf(data = Land, colour = 'black', fill = '#e5e5e5')+
+    
+    geom_point(data=HarbourPorpoise,aes(x=lon, y= lat, fill = ENGLISH_NAME), 
+             size=3, shape=21,color='black') +
+    
+    scale_fill_manual(values= c(
+      "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
+      "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf",
+      "#393b79", "#637939", "#8c6d31", "#843c39", "#7b4173",
+      "#3182bd", "#31a354", "#756bb1", "#636363", "#e6550d",
+      "#fd8d3c", "#fdae6b", "#fdd0a2", "#9ecae1", "#6baed6",
+      "#4292c6", "#2171b5", "#08519c", "#08306b", "#c7e9c0",
+      "#fa9fb5", "#a1d99b"
+))+
+    theme_bw()+
+    xlab('Longitude')+ylab('Latitude')+
+    theme(legend.text=element_text(size=20),
+          axis.text = element_text(size=20),
+          axis.title = element_blank())+
+    coord_sf(xlim = c(x_start, x_end), ylim = c(y_start, y_end), expand = FALSE)+
+    scale_x_continuous(labels = function(x) paste0(x, '\u00B0', "W")) +
+    scale_y_continuous(labels = function(x) paste0(x, '\u00B0', "N"))}
+```
+
+\newpage
+
+## Other species
+
+Here, species that were not included in the previous classification. If there are species that should have been included, check that the spelling is identical as those in the Euring.
+
+```{r MissingMap, comment=NA,echo=FALSE, fig.width=14, fig.height=10}
+MissingBirds <- subset(Animals_1check, is.na(Artificial_tax_class))
+Other_species <- subset(Animals_1check, Artificial_tax_class == 'Other_species')
+MissingSpecies<-rbind(Other_species,MissingBirds)
+if(nrow(MissingSpecies) == 0) {
+        print(paste("No missing birds occurred in the survey, therefore there is nothing to be plotted"))
+   } else {
+          
+  MissingSpecies$lat<-as.numeric(MissingSpecies$LAT_OBJECT)
+  MissingSpecies$lon<-as.numeric(MissingSpecies$LON_OBJECT)
+  
+  MissingSpecies <- MissingSpecies[!is.na(MissingSpecies$lat) & !is.na(MissingSpecies$lon), ]
+  MissingSpecies_sf <- st_as_sf(MissingSpecies, coords = c("lon", "lat"),crs = 4326, agr = "constant")
+  
+  ggplot(data = MissingSpecies_sf) +
+    geom_sf(data = Study_areas,colour = 'black', alpha=0.1)+
+    geom_sf(data = Land, colour = 'black', fill = '#e5e5e5')+
+    
+    geom_point(data=MissingSpecies,aes(x=lon, y= lat, fill = ENGLISH_NAME), 
+             size=3, shape=21,color='black') +
+    
+    scale_fill_manual(values= c(
+      "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
+      "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf",
+      "#393b79", "#637939", "#8c6d31", "#843c39", "#7b4173",
+      "#3182bd", "#31a354", "#756bb1", "#636363", "#e6550d",
+      "#fd8d3c", "#fdae6b", "#fdd0a2", "#9ecae1", "#6baed6",
+      "#4292c6", "#2171b5", "#08519c", "#08306b", "#c7e9c0",
+      "#fa9fb5", "#a1d99b"))+
+    theme_bw()+
+    xlab('Longitude')+ylab('Latitude')+
+    theme(legend.text=element_text(size=20),
+          axis.text = element_text(size=20),
+          axis.title = element_blank())+
+    coord_sf(xlim = c(x_start, x_end), ylim = c(y_start, y_end), expand = FALSE)+
+    scale_x_continuous(labels = function(x) paste0(x, '\u00B0', "W")) +
+    scale_y_continuous(labels = function(x) paste0(x, '\u00B0', "N"))
+  }
+```
 
  ***End of the document. ***

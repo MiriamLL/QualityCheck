@@ -82,12 +82,10 @@ ComparisonTripDaten<-ComparisonColumns %>% dplyr::select(Expected,Provided)
 colnames(ComparisonTripDaten)<-c("Expected","Provided")
 ```
 
-Check if the name of the columns in the documents coincide, if 'TRUE' they coincide, if 'FALSE' please check.
+
 
 ```{r, echo=FALSE, include=FALSE}
 TripDatenColumns<-colnames(TripDaten)
-class(TripDatenExpectedColumns)
-class(TripDatenColumns)
 ```
 
 ```{r, echo=FALSE}
@@ -105,7 +103,12 @@ CheckColumnNames<-function(DatenColumns=DatenColumns,DatenOriginalColumns=DatenO
 CheckColumnNames(DatenColumns=TripDatenColumns,DatenOriginalColumns=TripDatenExpectedColumns)
 ```
 
-Values **NA** indicate if the columns were provided or are missing. 
+```{r}
+ComparisonTripDaten<-ComparisonTripDaten %>%
+  mutate(Check = (Expected == Provided)) %>%
+  mutate(Check = case_when(is.na(Check) ~ FALSE,
+                           TRUE ~ Check))
+```
 
 ```{r TableCol, echo=FALSE}
 knitr::kable(ComparisonTripDaten)
@@ -117,8 +120,7 @@ Missing columns include:
 if((nrow(ComparisonTripDaten %>%
   filter(is.na(Provided)))>0)==FALSE){
          cat(("There are no missing columns"))
-        }else{knitr::kable(ComparisonTripDaten %>%
-  filter(is.na(Provided)))}
+        }else{knitr::kable(ComparisonTripDaten %>% filter(Check==FALSE))}
 ```
 
 **TRIP_ID** is a mandatory field. There must be 0% missing values, otherwise please check.
@@ -127,7 +129,7 @@ if((nrow(ComparisonTripDaten %>%
 cat(paste(round(100*sum(is.na(TripDaten$TRIP_ID))/nrow(TripDaten),1),"%","missing values",sep=" "))
 ```
 
-Values provided in TRIP_ID. 
+Values provided in **TRIP_ID**. 
 
 ```{r}
 unique(TripDaten$TRIP_ID)
@@ -153,7 +155,7 @@ unique(TripDaten$DATE)
 cat(paste(round(100*sum(is.na(TripDaten$STARTTIME))/nrow(TripDaten),1),"%","missing values",sep=" "))
 ```
 
-Values provided for TIME. Format expected (hh:mm:ss). Format provided
+Values provided for **START_TIME**. Format expected (hh:mm:ss). Format provided:
 
 ```{r}
 unique(TripDaten$STARTTIME,na.rm=TRUE)
@@ -165,7 +167,7 @@ unique(TripDaten$STARTTIME,na.rm=TRUE)
 cat(paste(round(100*sum(is.na(TripDaten$ENDTIME))/nrow(TripDaten),1),"%","missing values",sep=" "))
 ```
 
-Values provided for TIME. Format expected (hh:mm:ss). Format provided:
+Values provided for **END_TIME**. Format expected (hh:mm:ss). Format provided:
 
 ```{r}
 unique(TripDaten$ENDTIME,na.rm=TRUE)
@@ -177,7 +179,7 @@ unique(TripDaten$ENDTIME,na.rm=TRUE)
 cat(paste(round(100*sum(is.na(TripDaten$STRIP_WIDTH))/nrow(TripDaten),1),"%","missing values",sep=" "))
 ```
 
-Values provided for STRIP_WIDTH
+Values provided for **STRIP_WIDTH**
 
 ```{r}
 unique(TripDaten$STRIP_WIDTH)
@@ -189,7 +191,7 @@ unique(TripDaten$STRIP_WIDTH)
 cat(paste(round(100*sum(is.na(TripDaten$AREA_ANALYSED))/nrow(TripDaten),1),"%","missing values",sep=" "))
 ```
 
-Values provided for AREA_ANALYSED
+Values provided for **AREA_ANALYSED**
 
 ```{r}
 unique(TripDaten$AREA_ANALYSED)
@@ -201,7 +203,7 @@ unique(TripDaten$AREA_ANALYSED)
 cat(paste(round(100*sum(is.na(TripDaten$AREA_CONTROLLED))/nrow(TripDaten),1),"%","missing values",sep=" "))
 ```
 
-Values provided for AREA_CONTROLLED  
+Values provided for **AREA_CONTROLLED**  
 
 ```{r}
 unique(TripDaten$AREA_CONTROLLED)
@@ -248,9 +250,13 @@ ComparisonColumns<-ComparisonColumns %>% drop_na(Name)
 ```{r, echo=FALSE}
 ComparisonBasisDaten<-ComparisonColumns %>% dplyr::select(Expected,Provided)
 colnames(ComparisonBasisDaten)<-c("Expected","Provided")
+ComparisonBasisDaten<-ComparisonBasisDaten %>%
+  mutate(Check = (Expected == Provided)) %>%
+  mutate(Check = case_when(is.na(Check) ~ FALSE,
+                           TRUE ~ Check))
 ```
 
-Values **NA** indicate if the columns were provided or are missing. 
+Check if the name of the columns in the documents coincide, if 'TRUE' they coincide, if 'FALSE' please check.
 
 ```{r TableColBasis, echo=FALSE}
 knitr::kable(ComparisonBasisDaten)
@@ -263,8 +269,7 @@ Missing columns include:
 if((nrow(ComparisonBasisDaten %>%
   filter(is.na(Provided)))>0)==FALSE){
          cat(("There are no missing columns"))
-        }else{knitr::kable(ComparisonBasisDaten %>%
-  filter(is.na(Provided)))}
+        }else{knitr::kable(ComparisonBasisDaten %>% filter(Check==FALSE))}
 ```
 
 **POSITION_ID** is a mandatory field. There must be 0% missing values, otherwise please check.
@@ -273,7 +278,7 @@ if((nrow(ComparisonBasisDaten %>%
 cat(paste(round(100*sum(is.na(BasisDaten$POSITION_ID))/nrow(BasisDaten),1),"%","missing values",sep=" "))
 ```
 
-Values provided:
+Values provided for **POSITION_ID**:
 
 ```{r}
 range(BasisDaten$POSITION_ID)
@@ -300,7 +305,7 @@ if ("POSITION_ID_CONTROLLED" %in% colnames(BasisDaten)) {
   unique(BasisDaten$POSITION_ID_CONTROLLED,na.rm=TRUE)
 } else {
   # Column does not exist
-  print("Column POSITION_ID_CONTROLLED_is missing. Check names of the columns. ")
+  print("Column POSITION_ID_CONTROLLED is missing. Check names of the columns. ")
 }
 ```
 
@@ -310,7 +315,7 @@ if ("POSITION_ID_CONTROLLED" %in% colnames(BasisDaten)) {
 cat(paste(round(100*sum(is.na(BasisDaten$DATE))/nrow(BasisDaten),1),"%","missing values",sep=" "))
 ```
 
-Values provided for DATE. Format expected (YYYYMMDD). Format provided:
+Values provided for **DATE**. Format expected (YYYYMMDD). Format provided:
 
 ```{r}
 unique(BasisDaten$DATE,na.rm=TRUE)
@@ -322,7 +327,7 @@ unique(BasisDaten$DATE,na.rm=TRUE)
 cat(paste(round(100*sum(is.na(BasisDaten$TIME))/nrow(BasisDaten),1),"%","missing values",sep=" "))
 ```
 
-Values provided for TIME. Format expected (hh:mm:ss). Format provided
+Values provided for **TIME**. Format expected (hh:mm:ss). Format provided:
 
 ```{r}
 range(BasisDaten$TIME,na.rm=TRUE)
@@ -481,9 +486,13 @@ colnames(ComparisonColumns)<-c('Name','Expected','Provided')
 ComparisonColumns<-ComparisonColumns %>% drop_na(Name)
 ComparisonObservations<-ComparisonColumns %>% dplyr::select(Expected,Provided)
 colnames(ComparisonObservations)<-c("Expected","Provided")
+ComparisonObservations<-ComparisonObservations %>%
+  mutate(Check = (Expected == Provided)) %>%
+  mutate(Check = case_when(is.na(Check) ~ FALSE,
+                           TRUE ~ Check))
 ```
 
-Values **NA** indicate if the columns were provided or are missing. 
+Check if the name of the columns in the documents coincide, if 'TRUE' they coincide, if 'FALSE' please check.
 
 ```{r TableObs, echo=FALSE}
 knitr::kable(ComparisonObservations)
@@ -495,9 +504,10 @@ Missing columns include:
 if((nrow(ComparisonObservations %>%
   filter(is.na(Provided)))>0)==FALSE){
          cat(("There are no missing columns"))
-        }else{knitr::kable(ComparisonObservations %>%
-  filter(is.na(Provided)))}
+        }else{knitr::kable(ComparisonObservations %>% filter(Check==FALSE))}
 ```
+
+
 
 **OBSERVATION_ID** is a mandatory field. There must be 0% missing values, otherwise please check.
 
@@ -514,8 +524,14 @@ if ("OBSERVATION_ID" %in% colnames(Observations)) {
 Values provided for OBSERVATION_ID
 
 ```{r}
-Observations$OBSERVATION_ID<-as.numeric(Observations$OBSERVATION_ID)
-range(Observations$OBSERVATION_ID,na.rm=TRUE)
+if ("OBSERVATION_ID" %in% colnames(Observations)) {
+  # Column exists
+  Observations$OBSERVATION_ID<-as.numeric(Observations$OBSERVATION_ID)
+  range(Observations$OBSERVATION_ID,na.rm=TRUE)
+} else {
+  # Column does not exist
+  print("Column OBSERVATION_ID is missing. Check names of the columns. ")
+}
 ```
 
 **POSITION_ID** is a mandatory field. There must be 0% missing values, otherwise please check. 
@@ -527,8 +543,16 @@ cat(paste(round(100*sum(is.na(Observations$POSITION_ID))/nrow(Observations),1),"
 Values provided for POSITION_ID.
 
 ```{r}
-Observations$POSITION_ID<-as.numeric(Observations$POSITION_ID)
-range(Observations$POSITION_ID,na.rm=TRUE)
+class(Observations$POSITION_ID)
+```
+
+```{r}
+#numeric
+if (class(Observations$POSITION_ID) == "numeric") {
+range(Observations$POSITION_ID,na.rm=TRUE)}else {
+#not numeric
+cat(paste0(first(Observations$POSITION_ID),'-',last(Observations$POSITION_ID)))
+}
 ```
 
 **OBSERVATION** is a mandatory field, but there might be missing values if there are **ABIOTIC_OBSERVATION** or **ABIOTIC_STRUCTURE**.
@@ -551,18 +575,18 @@ cat(paste(round(((Observations %>%
   count())$n)),"values in ABIOTIC_STRUCTURES",sep=" "))
 ```
 
+Values provided in ABIOTIC_STRUCTURES.
+
+```{r}
+unique(Observations$ABIOTIC_STRUCTURES,na.rm=TRUE)
+```
+
 Number of **ABIOTIC_OBSERVATION** observations.
 
 ```{r, include=T,comment=NA}
 cat(paste(((Observations %>%
   drop_na(ABIOTIC_OBSERVATION)%>%
   count())$n)),"values in ABIOTIC_OBSERVATION",sep=" ")
-```
-
-Values provided in ABIOTIC_STRUCTURES.
-
-```{r}
-unique(Observations$ABIOTIC_STRUCTURES,na.rm=TRUE)
 ```
 
 Values provided in ABIOTIC_OBSERVATION.

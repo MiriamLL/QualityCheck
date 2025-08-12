@@ -13,7 +13,6 @@ params:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
-library(fontawesome)
 ```
 
 # Intro
@@ -32,6 +31,7 @@ library(sf)
 library(tmap)
 library(ggplot2)
 library(tidyverse)
+library(fontawesome)
 ```
 
 ## Position accuracy
@@ -79,9 +79,39 @@ Observations_df <- Observations_df[!is.na(Observations_df$lat) & !is.na(Observat
 Observations_sf <- st_as_sf(Observations_df, coords = c("lon", "lat"),crs = 4326, agr = "constant")
 ```
 
-```{r DisplayedInformation, echo=FALSE, eval=FALSE}
-BasisDaten_positions<-BasisDaten_sf[,c("POSITION_ID","CAMERA_NUMBER")]
+```{r DisplayedInformation, echo=FALSE, eval=TRUE}
+# check that columns exist
+if (all(c("POSITION_ID", "CAMERA_NUMBER") %in% colnames(BasisDaten_sf))) {
+  BasisDaten_positions<-BasisDaten_sf[,c("POSITION_ID","CAMERA_NUMBER")]
+#check if position id exist
+  } else {
+  if ("POSITION_ID" %in% colnames(BasisDaten_positions) && any(!is.na(BasisDaten_positions$POSITION_ID))) {
+  cat("POSITION_ID in BasisDaten exists and is not empty.\n")
+} else {
+  cat("POSITION_ID in BasisDaten is missing or empty.. Please check if there was a problem during the import to R.\n")
+}
+#check if camera number exists
+  if ("CAMERA_NUMBER" %in% colnames(BasisDaten_positions) && any(!is.na(BasisDaten_positions$CAMERA_NUMBER))) {
+  cat("CAMERA_NUMBER in BasisDaten exists and is not empty.\n")
+} else {
+  cat("CAMERA_NUMBER in BasisDaten is missing or empty. Please check if there was a problem during the import to R.\n")
+}
+}
+```
+
+```{r DisplayedInformationObservations, echo=FALSE, eval=TRUE}
+#check that columns exist
+if ("OBSERVATION_ID" %in% colnames(Observations_sf)){
+  Observations_positions<-Observations_sf[,c("OBSERVATION_ID","ENGLISH_NAME")]
+}else if ("Observation_ID" %in% colnames(Observations_sf)){
+#rename if different name
+Observations_sf <- Observations_sf %>%
+  rename(OBSERVATION_ID = Observation_ID)
 Observations_positions<-Observations_sf[,c("OBSERVATION_ID","ENGLISH_NAME")]
+} else {
+#if column doesnt exist show error
+  cat("A column named Observation_ID or OBSERVATION_ID is missing. Please include")
+}
 ```
 
 ```{r View, echo=FALSE, include=FALSE, eval=TRUE}
@@ -107,19 +137,20 @@ tm_shape(BasisDaten_positions) +
 This map displays all **observations**, grouped by morphological/taxonomic category.
 Each taxonomic group is represented by a distinct color:
 
+Gulls in <span style="color: #565aa0;">light purple</span>; 
+Skuas in <span style="color: #8ac926;">green</span>; 
+Gannets and cormorants <span style="color: #ff924c;">orange</span>; 
+Auks in <span style="color: #36949d;">grey blue</span>; 
+Terns in <span style="color: #6a4c93;">purple</span>; 
 Ducks and Shelducks in <span style="color: #ffca3a;">yellow</span>; 
 Swans and Geese in <span style="color: #c5ca30;">green-yellow</span>; 
 Divers in <span style="color: #ff595e;">red</span>; 
 Grebes in <span style="color: #1982c4;">light blue</span>; 
-Gannets and cormorants <span style="color: #ff924c;">orange</span>; 
-Auks in <span style="color: #36949d;">grey blue</span>; 
-Gulls in <span style="color: #565aa0;">light purple</span>; 
-Skuas in <span style="color: #8ac926;">green</span>; 
-Terns in <span style="color: #6a4c93;">purple</span>; 
 Waders in <span style="color: #4267ac;">darkblue</span>; 
 Other seabirds and other species in  <span style="color: #333533;">grey</span>; 
-Marine mammals in  <span style="color: #202020;">black</span>.
-
+Marine mammals in  <span style="color: #a53860;">dark pink</span>.
+Harbour porpoises in  <span style="color: #fb6f92;">pink</span>.
+Other species in  <span style="color: #fb6f92;">pink</span>; 
 
 ```{r TaxGroup, include=FALSE, echo=FALSE, warnings=FALSE}
 Euring_Tax<-seamonas::Code_Euring %>%
@@ -128,13 +159,13 @@ Observations_animals<- Observations_sf %>% filter (ENGLISH_NAME != "0")
 Observations_tax<-Observations_animals %>%
   left_join(Euring_Tax,by='ENGLISH_NAME')
 Observations_tax<-Observations_tax %>%
-  rename(Groups=Artificial_tax_class)
+  rename(Morphological_group=Artificial_tax_class)
 ```
 
 ```{r CheckGroups, include=FALSE, echo=FALSE}
 Observations_tax %>%
-  group_by(Groups) %>%
-  count(Groups)
+  group_by(Morphological_group) %>%
+  count(Morphological_group)
 ```
 
 ```{r LoadShapefiles, echo=FALSE, include=FALSE, eval=TRUE}
@@ -158,16 +189,16 @@ Base_map<- tm_shape(Areas)+
 
 
 ```{r AddGulls, echo=FALSE}
-Add_gulls<-function(Group=Group){
+Add_gulls<-function(This_group=This_group){
   Gulls_positions<-Observations_tax %>%
-    filter(Observations_tax$Groups==Group)
+    filter(Observations_tax$Morphological_group==This_group)
     if(nrow(Gulls_positions) == 0) {
-        print(paste("No",Group,"occurred in the survey"))
+        print(paste("No",This_group,"occurred in the survey"))
         } else {
-         print(paste(Group,"will be included in the map"))
+        print(paste(This_group,"will be included in the map"))
         Base_map<-Base_map+
            tm_shape(Gulls_positions) + 
-             tm_dots(id = "TaxGroups",
+             tm_dots(id = "Morphological group",
                        col="#565aa0",
                         popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME"))
   assign('Base_map',Base_map,envir=globalenv())}
@@ -175,41 +206,41 @@ Add_gulls<-function(Group=Group){
 ```
 
 ```{r AssignGulls, echo=FALSE, comment=NA}
-Add_gulls(Group='Gulls')
+Add_gulls(This_group='Gulls')
 ```
 
 ```{r AddSkuas, echo=FALSE}
-Add_skuas<-function(Group=Group){
+Add_skuas<-function(This_group=This_group){
   Skuas_positions<-Observations_tax %>%
-    filter(Observations_tax$Groups==Group)
+    filter(Observations_tax$Morphological_group==This_group)
     if(nrow(Skuas_positions) == 0) {
-        print(paste("No",Group,"occurred in the survey"))
+        print(paste("No",This_group,"occurred in the survey"))
         } else {
-         print(paste(Group,"will be included in the map"))
+         print(paste(This_group,"will be included in the map"))
           Base_map<-Base_map+
            tm_shape(Skuas_positions) + 
-            tm_dots(id = "TaxGroups",
+            tm_dots(id = "Morphological_group",
               col="#8ac926",
                 popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME"))
-  assign('BasMap',Base_map,envir=globalenv())}
+  assign('Base_map',Base_map,envir=globalenv())}
   }
 ```
 
 ```{r AssignSkuas, echo=FALSE, comment=NA}
-Add_skuas(Group="Skuas")
+Add_skuas(This_group="Skuas")
 ```
 
 ```{r AddGannets, echo=FALSE}
-Add_gannets<-function(Group=Group){
+Add_gannets<-function(This_group=This_group){
   Gannets_positions<-Observations_tax %>%
-    filter(Observations_tax$Groups==Group)
+    filter(Observations_tax$Morphological_group==This_group)
     if(nrow(Gannets_positions) == 0) {
-        print(paste("No",Group,"occurred in the survey"))
+        print(paste("No",This_group,"occurred in the survey"))
         } else {
-          print(paste(Group,"will be included in the map"))
+          print(paste(This_group,"will be included in the map"))
          Base_map<-Base_map+
            tm_shape(Gannets_positions) + 
-             tm_dots(id = "TaxGroups",
+             tm_dots(id = "Morphological group",
                        col="#ff924c",
                         popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME"))
   assign('Base_map',Base_map,envir=globalenv())}
@@ -217,20 +248,20 @@ Add_gannets<-function(Group=Group){
 ```
 
 ```{r AssignGannets, echo=FALSE, comment=NA}
-Add_gannets(Group='Gannets_Cormorants')
+Add_gannets(This_group='Gannets_Cormorants')
 ```
 
 ```{r AddAuks, echo=FALSE}
-Add_auks<-function(Group=Group){
+Add_auks<-function(This_group=This_group){
   Auks_positions<-Observations_tax %>%
-    filter(Observations_tax$Groups==Group)
+    filter(Observations_tax$Morphological_group==This_group)
     if(nrow(Auks_positions) == 0) {
-        print(paste("No",Group,"occurred in the survey"))
+        print(paste("No",This_group,"occurred in the survey"))
         } else {
-         print(paste(Group,"will be included in the map"))
+         print(paste(This_group,"will be included in the map"))
          Base_map<-Base_map+
            tm_shape(Auks_positions) + 
-            tm_dots(id = "TaxGroups",
+            tm_dots(id = "Morphological group",
               col="#36949d",
                 popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME"))
     assign('Base_map',Base_map,envir=globalenv())}
@@ -238,20 +269,20 @@ Add_auks<-function(Group=Group){
 ```
 
 ```{r AssignAuks, echo=FALSE, comment=NA}
-Add_auks(Group="Auks")
+Add_auks(This_group="Auks")
 ```
 
 ```{r AddTerns, echo=FALSE}
-Add_terns<-function(Group=Group){
+Add_terns<-function(This_group=This_group){
   Terns_positions<-Observations_tax %>%
-    filter(Observations_tax$Groups==Group)
+    filter(Observations_tax$Morphological_group==This_group)
     if(nrow(Terns_positions) == 0) {
-        print(paste("No",Group,"occurred in the survey"))
+        print(paste("No",This_group,"occurred in the survey"))
         } else {
-          print(paste(Group,"will be included in the map"))
+          print(paste(This_group,"will be included in the map"))
          Base_map<-Base_map+
            tm_shape(Terns_positions) + 
-            tm_dots(id = "TaxGroups",
+            tm_dots(id = "Morphological group",
                      col="#6a4c93",
                       popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME"))
   assign('Base_map',Base_map,envir=globalenv())}
@@ -259,42 +290,41 @@ Add_terns<-function(Group=Group){
 ```
 
 ```{r AssignTerns, echo=FALSE, comment=NA}
-Add_terns(Group='Terns')
+Add_terns(This_group='Terns')
 ```
 
 ```{r AddDucks, echo=FALSE}
-Add_ducks<-function(Group=Group){
+Add_ducks<-function(This_group=This_group){
   DucksShelducks_positions<-Observations_tax %>%
-    filter(Observations_tax$Groups==Group)
+    filter(Observations_tax$Morphological_group==This_group)
     if(nrow(DucksShelducks_positions) == 0) {
-        print(paste("No",Group,"occurred in the survey"))
+        print(paste("No",This_group,"occurred in the survey"))
         } else {
-           print(paste(Group,"will be included in the map"))
+           print(paste(This_group,"will be included in the map"))
          Base_map<-Base_map+
            tm_shape(DucksShelducks_positions) + 
-            tm_dots(id = "TaxGroups",
+            tm_dots(id = "Morphological group",
                      col="#ffca3a",
                       popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME"))
-         #_positionsstitutes base map adding the layer
   assign('Base_map',Base_map,envir=globalenv())}
   }
 ```
 
 ```{r AssignDucks,  echo=FALSE, comment=NA}
-Add_ducks(Group="Ducks_Shelducks")
+Add_ducks(This_group="Ducks_Shelducks")
 ```
 
 ```{r AddGeeseSwan,echo=FALSE}
-Add_geese<-function(Group=Group){
+Add_geese<-function(This_group=This_group){
  SwanGeese_positions<-Observations_tax %>%
-    filter(Observations_tax$Groups==Group)
+    filter(Observations_tax$Morphological_group==This_group)
     if(nrow(SwanGeese_positions) == 0) {
-        print(paste("No",Group,"occurred in the survey"))
+        print(paste("No",This_group,"occurred in the survey"))
         } else {
-           print(paste(Group,"will be included in the map"))
+           print(paste(This_group,"will be included in the map"))
          Base_map<-Base_map+
            tm_shape(SwanGeese_positions) + 
-            tm_dots(id = "TaxGroups",
+            tm_dots(id = "Morphological group",
                      col="#c5ca30",
                      popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME"))
   assign('Base_map',Base_map,envir=globalenv())}
@@ -302,20 +332,20 @@ Add_geese<-function(Group=Group){
 ```
 
 ```{r AssignGesseSwan,  echo=FALSE, comment=NA}
-Add_geese(Group="Swan_Geese")
+Add_geese(This_group="Swan_Geese")
 ```
 
 ```{r AddDivers, echo=FALSE}
-Add_divers<-function(Group=Group){
+Add_divers<-function(This_group=This_group){
  Divers_positions<-Observations_tax %>%
-    filter(Observations_tax$Groups==Group)
+    filter(Observations_tax$Morphological_group==This_group)
     if(nrow(Divers_positions) == 0) {
-        print(paste("No",Group,"occurred in the survey"))
+        print(paste("No",This_group,"occurred in the survey"))
         } else {
-           print(paste(Group,"will be included in the map"))
+           print(paste(This_group,"will be included in the map"))
          Base_map<-Base_map+
            tm_shape(Divers_positions) + 
-            tm_dots(id = "TaxGroups",
+            tm_dots(id = "Morphological group",
                      col="#ff595e",
                       popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME"))
   assign('Base_map',Base_map,envir=globalenv())}
@@ -323,20 +353,20 @@ Add_divers<-function(Group=Group){
 ```
 
 ```{r AssignDivers, echo=FALSE, comment=NA}
-Add_divers(Group='Divers')
+Add_divers(This_group='Divers')
 ```
 
 ```{r AddGrebes, echo=FALSE}
-Add_grebes<-function(Group=Group){
+Add_grebes<-function(This_group=This_group){
   Grebes_positions<-Observations_tax %>%
-    filter(Observations_tax$Groups==Group)
+    filter(Observations_tax$Morphological_group==This_group)
     if(nrow(Grebes_positions) == 0) {
-        print(paste("No",Group,"occurred in the survey"))
+        print(paste("No",This_group,"occurred in the survey"))
         } else {
-          print(paste(Group,"will be included in the map"))
+         print(paste(This_group,"will be included in the map"))
          Base_map<-Base_map+
            tm_shape(Grebes_positions) + 
-             tm_dots(id = "TaxGroups",
+             tm_dots(id = "Morphological group",
                        col="#1982c4",
                        popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME"))
   assign('Base_map',Base_map,envir=globalenv())}
@@ -344,19 +374,20 @@ Add_grebes<-function(Group=Group){
 ```
 
 ```{r AssignGrebes,  echo=FALSE, comment=NA}
-Add_grebes(Group='Grebes')
+Add_grebes(This_group='Grebes')
 ```
 
 ```{r AddWaders, echo=FALSE}
-Add_waders<-function(Group=Group){
+Add_waders<-function(This_group=This_group){
   Waders_positions<-Observations_tax %>%
-    filter(Observations_tax$Groups==Group)
+    filter(Observations_tax$Morphological_group==This_group)
     if(nrow(Waders_positions) == 0) {
-        print(paste("No",Group,"occurred in the survey"))
+        print(paste("No",This_group,"occurred in the survey"))
         } else {
+          print(paste(This_group,"will be included in the map"))
          Base_map<-Base_map+
            tm_shape(Waders_positions) + 
-             tm_dots(id = "TaxGroups",
+             tm_dots(id = "Morphological group",
                        col="#4267ac",
                         popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME"))
   assign('Base_map',Base_map,envir=globalenv())}
@@ -364,20 +395,20 @@ Add_waders<-function(Group=Group){
 ```
 
 ```{r AssignWaders, echo=FALSE, comment=NA}
-Add_waders(Group='Waders')
+Add_waders(This_group='Waders')
 ```
 
 ```{r AddSeabirds, echo=FALSE}
-Add_seabirds<-function(Group=Group){
+Add_seabirds<-function(This_group=This_group){
   OtherSeabirds_positions<-Observations_tax %>%
-    filter(Observations_tax$Groups==Group)
+    filter(Observations_tax$Morphological_group==This_group)
     if(nrow(OtherSeabirds_positions) == 0) {
-        print(paste("No",Group,"occurred in the survey"))
+        print(paste("No",This_group,"occurred in the survey"))
         } else {
-         print(paste(Group,"will be included in the map"))
+         print(paste(This_group,"will be included in the map"))
           Base_map<-Base_map+
            tm_shape(OtherSeabirds_positions) + 
-            tm_dots(id = "TaxGroups",
+            tm_dots(id = "Morphological group",
                      col="#333533",
                       popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME"))
    assign('Base_map',Base_map,envir=globalenv())}
@@ -385,50 +416,62 @@ Add_seabirds<-function(Group=Group){
 ```
 
 ```{r AssingSeabirds,  echo=FALSE, comment=NA}
-Add_seabirds(Group='Other_seabirds')
-```
-
-```{r AddOthers, echo=FALSE}
-Add_others<-function(Group=Group){
-  OtherBirds_positions<-Observations_tax %>%
-    filter(Observations_tax$Groups==Group)
-    if(nrow(OtherBirds_positions) == 0) {
-        print(paste("No",Group,"occurred in the survey"))
-        } else {
-         print(paste(Group,"will be included in the map"))
-          Base_map<-Base_map+
-           tm_shape(OtherBirds_positions) + 
-            tm_dots(id = "TaxGroups",
-                     col="#333533",
-                     popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME"))
-  assign('Base_map',Base_map,envir=globalenv())}
-  }
-```
-
-```{r AssignOthers,  echo=FALSE, comment=NA}
-Add_others(Group='Other_species')
+Add_seabirds(This_group='Other_seabirds')
 ```
 
 ```{r AddMammals, echo=FALSE}
-Add_mammals<-function(Group=Group){
+Add_mammals<-function(This_group=This_group){
  MarineMammals_positions<-Observations_tax %>%
-    filter(Observations_tax$Groups==Group)
+   filter(Observations_tax$Morphological_group==This_group)%>%
+   filter(OBSERVATION!=63510)
     if(nrow(MarineMammals_positions) == 0) {
-        print(paste("No",Group,"occurred in the survey"))
+        print(paste("No",This_group,"occurred in the survey"))
         } else {
-          print(paste(Group,"will be included in the map"))
+          print(paste(This_group,"will be included in the map"))
           Base_map<-Base_map+
            tm_shape(MarineMammals_positions) + 
-            tm_dots(id = "TaxGroups",
-                     col="#202020",
+            tm_dots(id = "Morphological group",
+                     col="#a53860",
                      popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME"))
   assign('Base_map',Base_map,envir=globalenv())}
   }
 ```
 
 ```{r AssignMarineMammals,  echo=FALSE, comment=NA}
-Add_mammals(Group="Marine_mammals")
+Add_mammals(This_group="Marine_mammals")
 ```
+
+```{r AddHarbourPorpoise, echo=FALSE}
+HarbourPorpoise_positions<-Observations_tax %>% filter(OBSERVATION==63510)
+if(nrow(HarbourPorpoise_positions) == 0) {
+        print(paste("No Harbour porpoise occurred in the survey"))
+        } else {
+          print(paste("Harbour Porpoise will be included in the map"))
+          Base_map<-Base_map+
+           tm_shape(HarbourPorpoise_positions) + 
+            tm_dots(id = "Morphological group",
+                     col="#fb6f92",
+                     popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME"))
+  assign('Base_map',Base_map,envir=globalenv())}
+```
+
+```{r AddOthers, echo=FALSE}
+NotIncluded <- subset(Observations_tax, is.na(Morphological_group))
+Other_species <- subset(Observations_tax, Morphological_group == 'Other_species')
+MissingSpecies_positions<-rbind(NotIncluded,Other_species)
+
+if(nrow(MissingSpecies_positions) == 0) {
+        print(paste("No other species occurred in the survey"))
+        } else {
+         print(paste("Other species will be included in the map"))
+          Base_map<-Base_map+
+           tm_shape(MissingSpecies_positions) + 
+            tm_dots(id = "Morphological group",
+                     col="#000814",
+                     popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME"))
+  assign('Base_map',Base_map,envir=globalenv())}
+```
+
 
 You can interact with the map using the following controls:<br> 
 Using `r fa("layer-group", fill = 'black')` to toogle **morphological** groups on and off.<br> 
