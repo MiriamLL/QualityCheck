@@ -598,7 +598,7 @@ ggplot(data=Audited_1check,aes(x=as.numeric(OBSERVATION_ID),y=as.numeric(ID_MATC
   scale_color_manual(values=c("0"="black",
                               "1"="#457b9d",
                               "2"="#e63946"))+
-  scale_x_continuous(breaks=Audited_1check$OBSERVATION_ID[seq(1,length(Audited_1check$OBSERVATION_ID),by=200)])+
+  scale_x_continuous(breaks=as.numeric(Audited_1check$OBSERVATION_ID)[seq(1,length(as.numeric(Audited_1check$OBSERVATION_ID)),by=200)])+
   theme(axis.text.x = element_text(angle=90,size=8))+
   NULL
   
@@ -642,7 +642,8 @@ Table_Identification<-Observations %>%
   mutate(Prop_checked=(Match+Mismatch)*100/(Unchecked+Match+Mismatch))%>%
   mutate(Prop_checked=round(Prop_checked,2))%>%
   mutate(Proportion_matched=(Match*100)/(Match+Mismatch))%>%
-  mutate(Proportion_matched=round(Proportion_matched,2))
+  mutate(Proportion_matched=round(Proportion_matched,2))%>%
+  select(Match,Mismatch,Unchecked,Prop_checked,Proportion_matched)
 names(Table_Identification)<-c('Match','Mismatch','Not Audited','Audited [%]','Matched [%]')
 Table_Identification<- flextable(Table_Identification)
 # Set column widths manually (in inches)
@@ -751,7 +752,7 @@ Screening_1check<-Plausability_Observations %>%
                                DETECTION_STEP == 3 ~ 'DETECTED_3AGREEMENT',
                                DETECTION_STEP == 4 ~ 'DETECTED_4ID',
                                DETECTION_STEP == 5 ~ 'DETECTED_5ID_CONTROL',
-                               DETECTION_STEP == 0 ~ 'NO_SCREENING_CONTROL',
+                               DETECTION_STEP == 0 ~ 'NOT_CHECKED',
                                TRUE  ~ 'NOT_CHECKED'))
 
 Screening_2check<-Screening_1check %>%
@@ -1306,7 +1307,8 @@ CheckGroup(Morphological_group='Marine_mammals')
 \newpage
 
 ### Harbour porpoise
-Species occurring in the survey
+
+Separated by age class.
 
 ```{r PorpoiseMap, echo=FALSE,comment=NA, fig.width=14, fig.height=10}
 HarbourPorpoise <- Animals_1check %>% filter(OBSERVATION==63510)
@@ -1318,24 +1320,16 @@ HarbourPorpoise <- Animals_1check %>% filter(OBSERVATION==63510)
   HarbourPorpoise$lon<-as.numeric(HarbourPorpoise$LON_OBJECT)
   
   HarbourPorpoise <- HarbourPorpoise[!is.na(HarbourPorpoise$lat) & !is.na(HarbourPorpoise$lon), ]
+  HarbourPorpoise <-HarbourPorpoise %>%   replace_na(list(AGE_CLASS = "Unknown"))
   HarbourPorpoise_sf <- st_as_sf(HarbourPorpoise, coords = c("lon", "lat"),crs = 4326, agr = "constant")
   
   ggplot(data = HarbourPorpoise_sf) +
     geom_sf(data = Study_areas,colour = 'black', alpha=0.1)+
     geom_sf(data = Land, colour = 'black', fill = '#e5e5e5')+
     
-    geom_point(data=HarbourPorpoise,aes(x=lon, y= lat, fill = ENGLISH_NAME), 
-             size=3, shape=21,color='black') +
-    
-    scale_fill_manual(values= c(
-      "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
-      "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf",
-      "#393b79", "#637939", "#8c6d31", "#843c39", "#7b4173",
-      "#3182bd", "#31a354", "#756bb1", "#636363", "#e6550d",
-      "#fd8d3c", "#fdae6b", "#fdd0a2", "#9ecae1", "#6baed6",
-      "#4292c6", "#2171b5", "#08519c", "#08306b", "#c7e9c0",
-      "#fa9fb5", "#a1d99b"
-))+
+    geom_point(data=HarbourPorpoise,aes(x=lon, y= lat, color = AGE_CLASS, shape=AGE_CLASS), size=3) +
+    scale_shape_manual(values=c(16, 17, 3))+
+    scale_color_manual(values=c('#c1121f','#ffe100','#000000'))+
     theme_bw()+
     xlab('Longitude')+ylab('Latitude')+
     theme(legend.text=element_text(size=20),
@@ -1343,7 +1337,8 @@ HarbourPorpoise <- Animals_1check %>% filter(OBSERVATION==63510)
           axis.title = element_blank())+
     coord_sf(xlim = c(x_start, x_end), ylim = c(y_start, y_end), expand = FALSE)+
     scale_x_continuous(labels = function(x) paste0(x, '\u00B0', "W")) +
-    scale_y_continuous(labels = function(x) paste0(x, '\u00B0', "N"))}
+    scale_y_continuous(labels = function(x) paste0(x, '\u00B0', "N"))
+  }
 ```
 
 \newpage

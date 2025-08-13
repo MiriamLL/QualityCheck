@@ -669,27 +669,46 @@ unique(Observations$SEX)
 **LON_OBJECT** is a mandatory field. There must be 0% missing values, otherwise please check.
 
 ```{r, include=T,comment=NA}
-Observations$LON_OBJECT<-as.numeric(Observations$LON_OBJECT)
-cat(paste(round(100*sum(is.na(Observations$LON_OBJECT))/nrow(Observations),1),"%","missing values",sep=" "))
+if("LON_OBJECT" %in% colnames(Observations)){
+         cat(paste(round(100*sum(is.na(Observations$LON_OBJECT))/nrow(Observations),1),"%","missing values",sep=" "))
+        }else{  
+          print(paste0("The column LON_OBJECT is missing"))
+        }
 ```
 
 Values should be numerical. 
 
 ```{r}
-range(Observations$LON_OBJECT)
+if("LON_OBJECT" %in% colnames(Observations)){
+         Observations$LON_OBJECT<-as.numeric(Observations$LON_OBJECT)
+         range(Observations$LON_OBJECT)
+        }else{  
+          print(paste0("The column LON_OBJECT is missing"))
+        }
+
 ```
 
 **LAT_OBJECT** is a mandatory field. There must be 0% missing values, otherwise please check.
 
 ```{r, include=T,comment=NA}
-Observations$LAT_OBJECT<-as.numeric(Observations$LAT_OBJECT)
-cat(paste(round(100*sum(is.na(Observations$LAT_OBJECT))/nrow(Observations),1),"%","missing values",sep=" "))
+if("LAT_OBJECT" %in% colnames(Observations)){
+         cat(paste(round(100*sum(is.na(Observations$LAT_OBJECT))/nrow(Observations),1),"%","missing values",sep=" "))
+        }else{  
+          print(paste0("The column LAT_OBJECT is missing"))
+        }
 ```
 
 Values should be numerical. 
 
 ```{r}
-range(Observations$LAT_OBJECT)
+if("LAT_OBJECT" %in% colnames(Observations)){
+  class(Observations$LAT_OBJECT)
+  Observations$LAT_OBJECT<-as.numeric(Observations$LAT_OBJECT)
+  range(Observations$LAT_OBJECT)
+        }else{  
+          print(paste0("The column LAT_OBJECT is missing"))
+        }
+
 ```
 
 ## English names

@@ -148,9 +148,9 @@ Divers in <span style="color: #ff595e;">red</span>;
 Grebes in <span style="color: #1982c4;">light blue</span>; 
 Waders in <span style="color: #4267ac;">darkblue</span>; 
 Other seabirds and other species in  <span style="color: #333533;">grey</span>; 
-Marine mammals in  <span style="color: #a53860;">dark pink</span>.
-Harbour porpoises in  <span style="color: #fb6f92;">pink</span>.
-Other species in  <span style="color: #fb6f92;">pink</span>; 
+Marine mammals in  <span style="color: #a53860;">dark pink</span>;
+Harbour porpoises in  <span style="color: #3c6e71;">dark green</span>, and also shown separated by adults and calves;
+Other species in  <span style="color: #fb6f92;">pink</span>. 
 
 ```{r TaxGroup, include=FALSE, echo=FALSE, warnings=FALSE}
 Euring_Tax<-seamonas::Code_Euring %>%
@@ -442,7 +442,7 @@ Add_mammals(This_group="Marine_mammals")
 ```
 
 ```{r AddHarbourPorpoise, echo=FALSE}
-HarbourPorpoise_positions<-Observations_tax %>% filter(OBSERVATION==63510)
+HarbourPorpoise_positions<-Observations_tax %>% filter(OBSERVATION==63510) 
 if(nrow(HarbourPorpoise_positions) == 0) {
         print(paste("No Harbour porpoise occurred in the survey"))
         } else {
@@ -450,8 +450,37 @@ if(nrow(HarbourPorpoise_positions) == 0) {
           Base_map<-Base_map+
            tm_shape(HarbourPorpoise_positions) + 
             tm_dots(id = "Morphological group",
-                     col="#fb6f92",
+                     col="#3c6e71",
                      popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME"))
+  assign('Base_map',Base_map,envir=globalenv())}
+```
+```{r AddHarbourPorpoiseAdults, echo=FALSE}
+HarbourPorpoise_adults<-Observations_tax %>% filter(OBSERVATION==63510)%>%filter(AGE_CLASS=='A')
+if(nrow(HarbourPorpoise_adults) == 0) {
+        print(paste("No Harbour porpoise occurred in the survey"))
+        } else {
+          print(paste("Harbour Porpoise Adults will be included in the map"))
+          Base_map<-Base_map+
+           tm_shape(HarbourPorpoise_adults) + 
+            tm_dots(id = "Morphological group",
+                    shapes=16,
+                     col='#c1121f',
+                     popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME","Age_class"="AGE_CLASS"))
+  assign('Base_map',Base_map,envir=globalenv())}
+```
+
+```{r AddHarbourPorpoiseCalves, echo=FALSE}
+HarbourPorpoise_calves<-Observations_tax %>% filter(OBSERVATION==63510)%>%filter(AGE_CLASS=='IM')
+if(nrow(HarbourPorpoise_calves) == 0) {
+        print(paste("No Harbour porpoise calves occurred in the survey"))
+        } else {
+          print(paste("Harbour Porpoise calves will be included in the map"))
+          Base_map<-Base_map+
+           tm_shape(HarbourPorpoise_calves) + 
+            tm_dots(id = "Morphological group",
+                    shapes=17,
+                     col="#ffe100",
+                     popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME","Age_class"="AGE_CLASS"))
   assign('Base_map',Base_map,envir=globalenv())}
 ```
 
