@@ -885,9 +885,8 @@ ggplot(Birds_5check, aes(x=paste(str_pad(OBSERVATION, 6, pad = "0"),
                              "#fb8b24","#e36414","#0f4c5c","#05668d"))
 ```
 
-### Most common birds per survey
 
-```{r CommonBirdsPlot, echo=F, fig.width=12, fig.height=4}
+```{r CommonBirdsPlot, fig.width=12, fig.height=4, eval=FALSE, echo=FALSE}
 #Calculate number of observations per species
 Birds_1check<-Animals_1check %>% filter(Taxa=='Birds')
 Birds_2check<-Birds_1check %>% 
@@ -910,9 +909,7 @@ ggplot(Birds_3check, aes(x=ENGLISH_NAME,
         axis.text.x = element_text(size=20, angle=45,hjust=1),
         axis.text.y = element_text(size=20),
         legend.position='none')+
-  scale_fill_manual(values=c("#5f0f40","#9a031e","#fb8b24","#e36414",
-                             "#0f4c5c","#05668d","#d9ed92","#ff9f1c",
-                             "#e71d36","#2ec4b6","#43aa8b","#277da1"))
+  scale_fill_manual(values=c("#264653"))
 ```
 
 \newpage
@@ -938,9 +935,7 @@ ggplot(Mammals_5check, aes(x=paste(str_pad(OBSERVATION, 6, pad = "0"),
         axis.text.x = element_text(size=10),
         axis.text.y = element_text(size=10),
         legend.position='none')+
-  scale_fill_manual(values=c("#5f0f40","#9a031e","#fb8b24","#e36414",
-                             "#0f4c5c","#05668d","#5f0f40","#9a031e",
-                             "#fb8b24","#e36414","#0f4c5c","#05668d"))
+  scale_fill_manual(values=c("#669bbc"))
 ```
 
 \newpage
@@ -1083,7 +1078,7 @@ Activity_TableMissing<- set_table_properties(Activity_TableMissing, width = 1, l
 
 ## Age class
 
-AGE_CLASS: Expected A- Adult, IM- Immature; AGE_YEARS: Expected numeric from 1 to 5. Missing refers to those immature individuals where age was not declared in AGE_YEARS. In birds, age can be determined due to plumage patters.
+AGE_CLASS: Expected A- Adult, IM- Immature; AGE_YEARS: Expected numeric from 1 to 5. Missing refers to those immature individuals where age was not declared in AGE_YEARS. In birds, age can be determined by plumage. 
 
 ```{r CheckAge,echo=FALSE}
 if ("IM" %in% Observations$AGE_CLASS==FALSE){

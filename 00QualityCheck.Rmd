@@ -1,7 +1,7 @@
 ---
 title: "Quality checks"
-author: "Seabird Monitoring"
-date: "Last update: 16/06/2025"
+author: "Marine Vertebrate Monitoring"
+date: "Last update: 14/08/2025"
 output: html_document
 ---
 

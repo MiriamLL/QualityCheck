@@ -1,7 +1,7 @@
 ---
 title: "Quality checks"
-author: "Seabird Monitoring"
-date: "Last update: 16/06/2025"
+author: "Marine Vertebrate Monitoring"
+date: "Last update: 14/08/2025"
 output: html_document
 ---
 
@@ -27,13 +27,13 @@ ThisDirectory<-(here::here('00Data'))
 Run me to show you the files in the folder
 
 ```{r}
-list.files(ThisDirectory,pattern = ".xlsx")
+list.files(ThisDirectory,pattern = "***.xlsx")
 ```
 
 Tell me which file do you want to report
 
 ```{r}
-ThisFile<- ""
+ThisFile<- "....xlsx"
 ```
 
 ## Tripdaten
@@ -87,9 +87,6 @@ BasisDaten<-BasisDaten[-(1:7),]
 
 ```{r}
 Corrections<-'No manual corrections were needed'
-Corrections<-'POSITION ID_CONTROLLED renamed as POSITION_ID_CONTROLLED'
-BasisDaten <- BasisDaten %>%
-  rename(POSITION_ID_CONTROLLED=`POSITION ID_CONTROLLED`)
 ```
 
 # ~~~~~~~~~~~
@@ -152,6 +149,41 @@ rmarkdown::render(
 beep(sound = 1, expr = NULL)
 ```
 
+# Estandarization
+
+Please check before continue and if corrections are needed, add and re-run.
+
+```{r}
+BasisDaten <- BasisDaten %>%
+  rename(POSITION_ID_CONTROLLED=`POSITION ID_CONTROLLED`)
+Observations <- Observations %>%
+  rename(ENGLISH_NAME_BEFORE_CONTROL=`ENGLISH_NAME_BEFORE CONTROL`,
+         ENGLISH_NAME_CONTROL_ID=`ENGLISH_NAME_CONTROL ID`,
+         OBSERVATION_ID=Observation_ID
+         )
+Corrections<-'In BasisDaten, renamed POSITION ID_CONTROLLED as POSITION_ID_CONTROLLED,\n
+In Observations, renamed to ENGLISH_NAME_BEFORE_CONTROL,ENGLISH_NAME_CONTROL_ID and OBSERVATION_ID'
+```
+
+Re-run to export document
+
+```{r render validation, include=FALSE, cache=TRUE}
+rmarkdown::render(
+  input= FormalCheck_input_file, 
+  output_format = "html_document",
+  output_dir = FormalCheck_output_folder,
+  params = list(
+    ThisDirectory = ThisDirectory,
+    ThisFile = ThisFile,
+    TripDaten = TripDaten,
+    BasisDaten = BasisDaten,
+    Observations = Observations
+  ),
+  run_pandoc = TRUE,
+  output_file = FormalCheck_output_name  
+)
+beep(sound = 1, expr = NULL)
+```
 
 # ~~~~~~~~~
 

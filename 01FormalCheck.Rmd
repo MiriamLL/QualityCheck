@@ -48,23 +48,23 @@ TripDaten<-TripDaten
 # 1.Trip Data
 At this part we would check that all the columns have information, and what type of information they contain. 
 
-```{r Elements on the document, include=T, comment=NA, echo=FALSE}
+```{r Elements in TripDaten, include=T, comment=NA, echo=FALSE}
 cat(paste('The document contains',nrow(TripDaten),'rows, and',ncol(TripDaten),'columns.'))
-cat(paste('The columns names are: '))
-cat(colnames(TripDaten))
+#cat(paste('The columns names are: '))
+#cat(colnames(TripDaten))
 ```
 
 ## Column checks
 
-```{r, include=FALSE, echo=FALSE}
+```{r Expected columns in TripDaten, include=FALSE, echo=FALSE}
 TripDatenExpectedColumns<-c("TRIP","TRIP_ID","Dataset_ID","CRUISENO","OWPAS","PROJECT","CLUSTER","LAB","SCIENTIST","DATATYPE","TECHNIQUE","OBSERVER","PLANE","NUMBER_OF_PLANES","DOUBLE_PLATFORM","DATE","STARTTIME","ENDTIME","CAMERA_SYSTEM","RESOLUTION","PLANE_FLIGHT_HEIGHT_PLANED" ,"STRIP_WIDTH","PLANE_SPEED","POSITION_ACCURACY","METHOD_ID","AREA_OBSERVED","AREA_ANALYSED","AREA_CONTROLLED", "ID_CONTROLLED","SCREENING_CONTROL_DIFFERENCE","ID_CONTROL_DIFFERENCE","QUALITY_IMPROVEMENT","POSITIONSYSTEM","POSIT_PRECISION_CODE","REFSYSTEM","NOTES")
 ```
 
-```{r Check columns1, include=T, echo=F, comment=NA}
-cat(paste('\n Expected',length(TripDatenExpectedColumns),'columns and',ncol(TripDaten),'provided', sep=" "))
+```{r Number of Column in TripDaten, include=T, echo=F, comment=NA}
+cat(paste('\n Expected',length(TripDatenExpectedColumns),'columns and',ncol(TripDaten),'provided.', sep=" "))
 ```
 
-```{r, echo=FALSE}
+```{r Checking column names in TripDaten, echo=FALSE}
 ExpectedColumns<-TripDatenExpectedColumns
 ProvidedColumns<-colnames(TripDaten)
 MaxColumns <- max(length(ExpectedColumns), length(ProvidedColumns))
@@ -75,20 +75,17 @@ ProvidedColumns<-data.frame(name=c(ProvidedColumns),provided=ProvidedColumns)
 ComparisonColumns<-merge(ExpectedColumns,ProvidedColumns,by='name',all=TRUE)
 colnames(ComparisonColumns)<-c('Name','Expected','Provided')
 ComparisonColumns<-ComparisonColumns %>% drop_na(Name)
-```
-
-```{r, echo=FALSE}
 ComparisonTripDaten<-ComparisonColumns %>% dplyr::select(Expected,Provided)
 colnames(ComparisonTripDaten)<-c("Expected","Provided")
-```
-
-
-
-```{r, echo=FALSE, include=FALSE}
 TripDatenColumns<-colnames(TripDaten)
+ComparisonTripDaten<-ComparisonTripDaten %>%
+  mutate(Check = (Expected == Provided)) %>%
+  mutate(Check = case_when(is.na(Check) ~ FALSE,
+                           TRUE ~ Check))
+knitr::kable(ComparisonTripDaten)
 ```
 
-```{r, echo=FALSE}
+```{r Missing Columns in TripDaten, echo=FALSE}
 CheckColumnNames<-function(DatenColumns=DatenColumns,DatenOriginalColumns=DatenOriginalColumns){
     DifferentTripDaten<-setdiff(TripDatenExpectedColumns,TripDatenColumns)
       if(length(DifferentTripDaten==0)==FALSE){
@@ -97,26 +94,12 @@ CheckColumnNames<-function(DatenColumns=DatenColumns,DatenOriginalColumns=DatenO
            print(paste0("Please check that all columns are correct named. ",DifferentTripDaten," does not coincide with expected names."))
       }
 }
-```
-
-```{r, echo=FALSE}
 CheckColumnNames(DatenColumns=TripDatenColumns,DatenOriginalColumns=TripDatenExpectedColumns)
-```
-
-```{r}
-ComparisonTripDaten<-ComparisonTripDaten %>%
-  mutate(Check = (Expected == Provided)) %>%
-  mutate(Check = case_when(is.na(Check) ~ FALSE,
-                           TRUE ~ Check))
-```
-
-```{r TableCol, echo=FALSE}
-knitr::kable(ComparisonTripDaten)
 ```
 
 Missing columns include:
 
-```{r}
+```{r Check spelling in TripDaten, echo=FALSE}
 if((nrow(ComparisonTripDaten %>%
   filter(is.na(Provided)))>0)==FALSE){
          cat(("There are no missing columns"))
@@ -125,116 +108,124 @@ if((nrow(ComparisonTripDaten %>%
 
 **TRIP_ID** is a mandatory field. There must be 0% missing values, otherwise please check.
 
-```{r, include=T,comment=NA}
-cat(paste(round(100*sum(is.na(TripDaten$TRIP_ID))/nrow(TripDaten),1),"%","missing values",sep=" "))
-```
-
-Values provided in **TRIP_ID**. 
-
-```{r}
-unique(TripDaten$TRIP_ID)
+```{r TRIP_ID in TripDaten, include=T,comment=NA}
+if ("TRIP_ID" %in% colnames(TripDaten)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(TripDaten$TRIP_ID))/nrow(TripDaten),1),"%","missing values.\n",sep=" "))
+  cat(paste("Values provided in TRIP_ID: ",unique(TripDaten$TRIP_ID)))
+} else {
+  # Column does not exist
+  print("Column TRIP_ID is missing. Check names of the columns.")
+}
 ```
 
 **DATE** is a mandatory field. There must be 0% missing values, otherwise please check.
 
-```{r, include=T,comment=NA}
-cat(paste(round(100*sum(is.na(TripDaten$DATE))/nrow(TripDaten),1),"%","missing values",sep=" "))
+```{r DATE in TripDaten, include=T,comment=NA}
+if ("DATE" %in% colnames(TripDaten)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(TripDaten$DATE))/nrow(TripDaten),1),"%","missing values.\n",sep=" "))
+  cat(paste("Format expected (YYYYMMDD) for DATE. Format provided: ",unique(TripDaten$DATE)))
+} else {
+  # Column does not exist
+  print("Column DATE is missing. Check names of the columns.")
+}
 ```
 
-Values provided for **DATE**.
-Format expected (YYYYMMDD).
-Format provided:
+**STARTTIME** is a mandatory field. There must be 0% missing values, otherwise please check.
 
-```{r}
-unique(TripDaten$DATE)
+```{r STARTTIME in TripDaten, include=T,comment=NA}
+if ("STARTTIME" %in% colnames(TripDaten)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(TripDaten$STARTTIME))/nrow(TripDaten),1),"%","missing values.\n",sep=" "))
+  cat(paste("Format expected for STARTTIME (hh:mm:ss). Format provided:",unique(TripDaten$STARTTIME,na.rm=TRUE)))
+} else {
+  # Column does not exist
+  print("Column STARTTIME is missing. Check names of the columns. ")
+}
 ```
 
-**START_TIME** is a mandatory field. There must be 0% missing values, otherwise please check.
 
-```{r timecolumn2, include=T,comment=NA}
-cat(paste(round(100*sum(is.na(TripDaten$STARTTIME))/nrow(TripDaten),1),"%","missing values",sep=" "))
-```
 
-Values provided for **START_TIME**. Format expected (hh:mm:ss). Format provided:
+**ENDTIME** is a mandatory field. There must be 0% missing values, otherwise please check.
 
-```{r}
-unique(TripDaten$STARTTIME,na.rm=TRUE)
-```
-
-**END_TIME** is a mandatory field. There must be 0% missing values, otherwise please check.
-
-```{r timecolumn3, include=T,comment=NA}
-cat(paste(round(100*sum(is.na(TripDaten$ENDTIME))/nrow(TripDaten),1),"%","missing values",sep=" "))
-```
-
-Values provided for **END_TIME**. Format expected (hh:mm:ss). Format provided:
-
-```{r}
-unique(TripDaten$ENDTIME,na.rm=TRUE)
+```{r ENDTIME in TripDaten, include=T,comment=NA}
+if ("ENDTIME" %in% colnames(TripDaten)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(TripDaten$ENDTIME))/nrow(TripDaten),1),"%","missing values.\n",sep=" "))
+  cat(paste("Format expected for ENDTIME (hh:mm:ss). Format provided:",unique(TripDaten$ENDTIME,na.rm=TRUE)))
+} else {
+  # Column does not exist
+  print("Column ENDTIME is missing. Check names of the columns. ")
+}
 ```
 
 **STRIP_WIDTH** is a mandatory field. There must be 0% missing values, otherwise please check.
 
-```{r, include=T,comment=NA}
-cat(paste(round(100*sum(is.na(TripDaten$STRIP_WIDTH))/nrow(TripDaten),1),"%","missing values",sep=" "))
-```
-
-Values provided for **STRIP_WIDTH**
-
-```{r}
-unique(TripDaten$STRIP_WIDTH)
+```{r STRIP_WIDTH in TripDaten, include=T,comment=NA}
+if ("STRIP_WIDTH" %in% colnames(TripDaten)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(TripDaten$STRIP_WIDTH))/nrow(TripDaten),1),"%","missing values.\n",sep=" "))
+  cat(paste("Values provided for STRIP_WIDTH:",unique(TripDaten$STRIP_WIDTH,na.rm=TRUE)))
+} else {
+  # Column does not exist
+  print("Column STRIP_WIDTH is missing. Check names of the columns. ")
+}
 ```
 
 **AREA_ANALYSED** is a mandatory field. There must be 0% missing values, otherwise please check.
 
-```{r, include=T,comment=NA}
-cat(paste(round(100*sum(is.na(TripDaten$AREA_ANALYSED))/nrow(TripDaten),1),"%","missing values",sep=" "))
-```
-
-Values provided for **AREA_ANALYSED**
-
-```{r}
-unique(TripDaten$AREA_ANALYSED)
+```{r AREA_ANALYSED in TripDaten, include=T,comment=NA}
+if ("AREA_ANALYSED" %in% colnames(TripDaten)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(TripDaten$AREA_ANALYSED))/nrow(TripDaten),1),"%","missing values.\n",sep=" "))
+  cat(paste("Values provided for AREA_ANALYSED:",unique(TripDaten$AREA_ANALYSED,na.rm=TRUE)))
+} else {
+  # Column does not exist
+  print("Column AREA_ANALYSED is missing. Check names of the columns. ")
+}
 ```
 
 **AREA_CONTROLLED** is a mandatory field. There must be 0% missing values, otherwise please check.
 
-```{r, include=T,comment=NA}
-cat(paste(round(100*sum(is.na(TripDaten$AREA_CONTROLLED))/nrow(TripDaten),1),"%","missing values",sep=" "))
+```{r AREA_CONTROLLED in TripDaten, include=T,comment=NA}
+if ("AREA_CONTROLLED" %in% colnames(TripDaten)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(TripDaten$AREA_CONTROLLED))/nrow(TripDaten),1),"%","missing values.\n",sep=" "))
+  cat(paste("Values provided for AREA_CONTROLLED:",unique(TripDaten$AREA_CONTROLLED,na.rm=TRUE)))
+} else {
+  # Column does not exist
+  print("Column AREA_CONTROLLED is missing. Check names of the columns. ")
+}
 ```
-
-Values provided for **AREA_CONTROLLED**  
-
-```{r}
-unique(TripDaten$AREA_CONTROLLED)
-```
-
 #  2. BasisDaten
 
-```{r PosFolder, include=F, echo=FALSE}
+```{r Column Names in BasisDaten, include=F, echo=FALSE}
 BasisDaten
 BasisDatenColumns<-colnames(BasisDaten)
 ```
 
-```{r, include=F, echo=FALSE}
+```{r Expected Column Names in BasisDaten, include=F, echo=FALSE}
 BasisDatenExpectedColumns<-c("POSITIONS","POSITION_ID","POSITION_ID_CONTROLLED", "Dataset_ID","TRIP_ID","CRUISENO","CAMERA_NUMBER","TRANSECT_NUMBER","DATE","TIME","LAT_PIC_CENTER","LON_PIC_CENTER","PLANE_FLIGHT_HEIGHT","PIC_AREA_ANALYSED","GLARE","SEASTATE","TURBIDITY","ICE","CLARITY","PIC_QUALITY","PIC_FILENAME","NOTES")
 ```
 
 In this part we would check that all the columns are correctly imported.
 
-```{r,error=TRUE, comment=NA, include=TRUE, echo=FALSE}
+```{r Number of Columns in BasisDaten,error=TRUE, comment=NA, include=TRUE, echo=FALSE}
 cat(paste('The Basisdaten contains',nrow(BasisDaten),'rows, and',ncol(BasisDaten),'columns.'))
-cat(paste('The columns names are: '))
-cat(colnames(BasisDaten))
+#cat(paste('The columns names are: '))
+#cat(colnames(BasisDaten))
 ```
 
 ## Column checks
 
-```{r Check columns2, include=T, echo=F, comment=NA}
+```{r Check columns in BasisDaten, include=T, echo=F, comment=NA}
 cat(paste('\n Expected',length(BasisDatenExpectedColumns),'columns and',ncol(BasisDaten),'provided', sep=" "))
 ```
 
-```{r, echo=FALSE}
+Check if the name of the columns in the documents coincide, if 'TRUE' they coincide, if 'FALSE' please check.
+
+```{r Table Comparison in BasisDaten, echo=FALSE}
 ExpectedColumns<-BasisDatenExpectedColumns
 ProvidedColumns<-colnames(BasisDaten)
 MaxColumns <- max(length(ExpectedColumns), length(ProvidedColumns))
@@ -245,27 +236,27 @@ ProvidedColumns<-data.frame(name=c(ProvidedColumns),provided=ProvidedColumns)
 ComparisonColumns<-merge(ExpectedColumns,ProvidedColumns,by='name',all=TRUE)
 colnames(ComparisonColumns)<-c('Name','Expected','Provided')
 ComparisonColumns<-ComparisonColumns %>% drop_na(Name)
-```
-
-```{r, echo=FALSE}
 ComparisonBasisDaten<-ComparisonColumns %>% dplyr::select(Expected,Provided)
 colnames(ComparisonBasisDaten)<-c("Expected","Provided")
 ComparisonBasisDaten<-ComparisonBasisDaten %>%
   mutate(Check = (Expected == Provided)) %>%
   mutate(Check = case_when(is.na(Check) ~ FALSE,
                            TRUE ~ Check))
-```
-
-Check if the name of the columns in the documents coincide, if 'TRUE' they coincide, if 'FALSE' please check.
-
-```{r TableColBasis, echo=FALSE}
 knitr::kable(ComparisonBasisDaten)
 ```
 
 
+```{r Missing Columns in BasisDaten, echo=FALSE}
+DifferentBasisDaten<-setdiff(BasisDatenExpectedColumns,BasisDatenColumns)
+      if(length(DifferentBasisDaten==0)==FALSE){
+         print(paste0("All columns names seem to be correct or were corrected manually"))
+        }else{  
+           print(paste0("Please check that all columns are correct named. ",DifferentBasisDaten," does not coincide with expected names."))}
+```
+
 Missing columns include:
 
-```{r}
+```{r Missing Column in BasisDaten}
 if((nrow(ComparisonBasisDaten %>%
   filter(is.na(Provided)))>0)==FALSE){
          cat(("There are no missing columns"))
@@ -274,181 +265,197 @@ if((nrow(ComparisonBasisDaten %>%
 
 **POSITION_ID** is a mandatory field. There must be 0% missing values, otherwise please check.
 
-```{r, include=T,comment=NA}
-cat(paste(round(100*sum(is.na(BasisDaten$POSITION_ID))/nrow(BasisDaten),1),"%","missing values",sep=" "))
+```{r POSITION_ID in BasisDaten, include=T,comment=NA}
+if ("POSITION_ID" %in% colnames(BasisDaten)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(BasisDaten$POSITION_ID))/nrow(BasisDaten),1),"%","missing values.\n",sep=" "))
+  cat(paste("Values provided for POSITION_ID:",min(BasisDaten$POSITION_ID,na.rm=TRUE),"to", max(BasisDaten$POSITION_ID,na.rm=TRUE)))
+} else {
+  # Column does not exist
+  print("Column POSITION_ID is missing. Check names of the columns. ")
+}
 ```
+**POSITION_ID_CONTROLLED** is not a mandatory field. There can be missing values. Enter if an image has been controlled during the screening control = 1, ID control = 2, or during both working steps = 3.
 
-Values provided for **POSITION_ID**:
-
-```{r}
-range(BasisDaten$POSITION_ID)
-```
-
-
-**POSITION_ID_CONTROLLED** is not a mandatory field. There can be missing values.
-
-```{r, include=T,comment=NA}
+```{r POSITION_ID_CONTROLLED in BasisDaten, include=T,comment=NA}
 if ("POSITION_ID_CONTROLLED" %in% colnames(BasisDaten)) {
   # Column exists
-  cat(paste(round(100*sum(is.na(BasisDaten$POSITION_ID_CONTROLLED))/nrow(BasisDaten),1),"%","missing values",sep=" "))
+  cat(paste(round(100*sum(is.na(BasisDaten$POSITION_ID_CONTROLLED))/nrow(BasisDaten),1),"%","missing values.\n",sep=" "))
+  cat(paste("Values provided for POSITION_ID_CONTROLLED:\n"))
+  cat(unique(BasisDaten$POSITION_ID_CONTROLLED,na.rm=TRUE))
 } else {
   # Column does not exist
   print("Column POSITION_ID_CONTROLLED is missing. Check names of the columns. ")
 }
 ```
-
-Enter if an image has been controlled during the screening control = 1, ID control = 2, or during both working steps = 3.
-
-```{r}
-if ("POSITION_ID_CONTROLLED" %in% colnames(BasisDaten)) {
-  # Column exists
-  unique(BasisDaten$POSITION_ID_CONTROLLED,na.rm=TRUE)
-} else {
-  # Column does not exist
-  print("Column POSITION_ID_CONTROLLED is missing. Check names of the columns. ")
-}
-```
-
 **DATE** is a mandatory field. There must be 0% missing values, otherwise please check.
 
-```{r, include=T,comment=NA}
-cat(paste(round(100*sum(is.na(BasisDaten$DATE))/nrow(BasisDaten),1),"%","missing values",sep=" "))
+```{r DATE in BasisDaten, include=T,comment=NA}
+if ("DATE" %in% colnames(BasisDaten)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(BasisDaten$DATE))/nrow(BasisDaten),1),"%","missing values. \n",sep=" "))
+  cat(paste("Format expected (YYYYMMDD) for DATE. Format provided:\n"))
+  cat(unique(BasisDaten$DATE,na.rm=TRUE))
+} else {
+  # Column does not exist
+  print("Column DATE is missing. Check names of the columns. ")
+}
 ```
 
-Values provided for **DATE**. Format expected (YYYYMMDD). Format provided:
-
-```{r}
-unique(BasisDaten$DATE,na.rm=TRUE)
-```
 
 **TIME** is a mandatory field. There must be 0% missing values, otherwise please check.
 
-```{r timecolumn, include=T,comment=NA}
-cat(paste(round(100*sum(is.na(BasisDaten$TIME))/nrow(BasisDaten),1),"%","missing values",sep=" "))
+```{r TIME in BasisDaten, include=T,comment=NA}
+if ("TIME" %in% colnames(BasisDaten)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(BasisDaten$TIME))/nrow(BasisDaten),1),"%","missing values. \n",sep=" "))
+  cat(paste("Format expected (YYYYMMDD)for TIME. Format provided:\n"))
+  cat(range(BasisDaten$TIME,na.rm=TRUE))
+} else {
+  # Column does not exist
+  print("Column TIME is missing. Check names of the columns.")
+}
 ```
 
-Values provided for **TIME**. Format expected (hh:mm:ss). Format provided:
-
-```{r}
-range(BasisDaten$TIME,na.rm=TRUE)
-```
 
 **LAT_PIC_CENTER** is a mandatory field. There must be 0% missing values, otherwise please check.
 
-```{r, include=T,comment=NA}
-cat(paste(round(100*sum(is.na(BasisDaten$LAT_PIC_CENTER))/nrow(BasisDaten),1),"%","missing values",sep=" "))
-```
-Values provided:
-
-```{r}
-range(BasisDaten$LAT_PIC_CENTER)
+```{r LAT_PIC_CENTER in BasisDaten, include=T,comment=NA}
+if ("LAT_PIC_CENTER" %in% colnames(BasisDaten)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(BasisDaten$LAT_PIC_CENTER))/nrow(BasisDaten),1),"%","missing values.\n",sep=" "))
+  cat(paste("Values provided for LAT_PIC_CENTER:\n"))
+  cat(range(BasisDaten$LAT_PIC_CENTER))
+} else {
+  # Column does not exist
+  print("Column LAT_PIC_CENTER is missing. Check names of the columns.")
+}
 ```
 
 **LON_PIC_CENTER** is a mandatory field. There must be 0% missing values, otherwise please check.
 
-```{r, include=T,comment=NA}
-cat(paste(round(100*sum(is.na(BasisDaten$LON_PIC_CENTER))/nrow(BasisDaten),1),"%","missing values",sep=" "))
+```{r LON_PIC_CENTER in BasisDaten, include=T,comment=NA}
+if ("LON_PIC_CENTER" %in% colnames(BasisDaten)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(BasisDaten$LON_PIC_CENTER))/nrow(BasisDaten),1),"%","missing values.\n",sep=" "))
+  cat(paste("Values provided for LON_PIC_CENTER:\n"))
+  cat(range(BasisDaten$LON_PIC_CENTER))
+} else {
+  # Column does not exist
+  print("Column LON_PIC_CENTER is missing. Check names of the columns.")
+}
 ```
 
-Values provided:
-
-```{r}
-range(BasisDaten$LON_PIC_CENTER)
-```
 
 **PLANE_FLIGHT_HEIGHT** is a mandatory field. There must be 0% missing values, otherwise please check.
 
-```{r, include=T,comment=NA}
-cat(paste(round(100*sum(is.na(BasisDaten$PLANE_FLIGHT_HEIGHT))/nrow(BasisDaten),1),"%","missing values",sep=" "))
+```{r PLANE_FLIGHT_HEIGHT in BasisDaten, include=T,comment=NA}
+if ("PLANE_FLIGHT_HEIGHT" %in% colnames(BasisDaten)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(BasisDaten$PLANE_FLIGHT_HEIGHT))/nrow(BasisDaten),1),"%","missing values.\n",sep=" "))
+  cat(paste("Values provided for PLANE_FLIGHT_HEIGHT:\n"))
+  cat(range(BasisDaten$PLANE_FLIGHT_HEIGHT))
+} else {
+  # Column does not exist
+  print("Column PLANE_FLIGHT_HEIGHT is missing. Check names of the columns.")
+}
 ```
 
-Values provided for PLANE_FLIGHT_HEIGHT. Variation is expected.
-
-```{r}
-range(BasisDaten$PLANE_FLIGHT_HEIGHT)
-```
 
 **PIC_AREA_ANALYSED** is a mandatory field. There must be 0% missing values, otherwise please check.
 
-```{r, include=T,comment=NA}
-cat(paste(round(100*sum(is.na(BasisDaten$PIC_AREA_ANALYSED))/nrow(BasisDaten),1),"%","missing values",sep=" "))
-```
-
-Values provided for PIC_AREA_ANALYSED. Variation is expected. 
-
-```{r}
-range(BasisDaten$PIC_AREA_ANALYSED)
+```{r PIC_AREA_ANALYSED in BasisDaten, include=T,comment=NA}
+if ("PIC_AREA_ANALYSED" %in% colnames(BasisDaten)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(BasisDaten$PIC_AREA_ANALYSED))/nrow(BasisDaten),1),"%","missing values.\n",sep=" "))
+  cat(paste("Values provided for PIC_AREA_ANALYSED:\n"))
+  cat(range(BasisDaten$PIC_AREA_ANALYSED))
+} else {
+  # Column does not exist
+  print("Column PIC_AREA_ANALYSED is missing. Check names of the columns.")
+}
 ```
 
 ## Environmental conditions during the surveys
 
-**GLARE** is a mandatory field. There must be 0% missing values, otherwise please check.
+**GLARE** is a mandatory field. There must be 0% missing values, otherwise please check. Values 0 to 3 are allowed. 
 
-```{r, include=T,comment=NA}
-cat(paste(round(100*sum(is.na(BasisDaten$GLARE))/nrow(BasisDaten),1),"%","missing values",sep=" "))
+```{r GLARE in BasisDaten, include=T,comment=NA}
+if ("GLARE" %in% colnames(BasisDaten)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(BasisDaten$GLARE))/nrow(BasisDaten),1),"%","missing values.\n",sep=" "))
+  cat(paste("Values provided for GLARE:\n"))
+  cat(unique(BasisDaten$GLARE))
+} else {
+  # Column does not exist
+  print("Column GLARE is missing. Check names of the columns.")
+}
 ```
 
-Values provided for GLARE. Values 0 to 3 are allowed. 
 
-```{r}
-unique(BasisDaten$GLARE)
+**SEASTATE** is a mandatory field. There must be 0% missing values, otherwise please check.Values 0 to 7 are allowed. 
+
+```{r SEASTATE in BasisDaten, include=T,comment=NA}
+if ("SEASTATE" %in% colnames(BasisDaten)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(BasisDaten$SEASTATE))/nrow(BasisDaten),1),"%","missing values.\n",sep=" "))
+  cat(paste("Values provided for SEASTATE:\n"))
+  cat(unique(BasisDaten$SEASTATE))
+} else {
+  # Column does not exist
+  print("Column SEASTATE is missing. Check names of the columns.")
+}
 ```
 
-**SEASTATE** is a mandatory field. There must be 0% missing values, otherwise please check.
+**TURBIDITY** is a mandatory field. There must be 0% missing values, otherwise please check. Only 1 to 3 are allowed. 
 
-```{r, include=T,comment=NA}
-cat(paste(round(100*sum(is.na(BasisDaten$SEASTATE))/nrow(BasisDaten),1),"%","missing values",sep=" "))
+```{r TURBIDITY in BasisDaten, include=T,comment=NA}
+if ("TURBIDITY" %in% colnames(BasisDaten)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(BasisDaten$TURBIDITY))/nrow(BasisDaten),1),"%","missing values.\n",sep=" "))
+  cat(paste("Values provided for TURBIDITY:\n"))
+  cat(unique(BasisDaten$TURBIDITY))
+} else {
+  # Column does not exist
+  print("Column TURBIDITY is missing. Check names of the columns.")
+}
 ```
 
-Values provided for SEASTATE. Values 0 to 7 are allowed. 
+**CLARITY** is a mandatory field. There must be 0% missing values, otherwise please check. Only 0 to 3 are allowed. 
 
-```{r}
-unique(BasisDaten$SEASTATE)
+```{r CLARITY in BasisDaten, include=T,comment=NA}
+if ("CLARITY" %in% colnames(BasisDaten)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(BasisDaten$CLARITY))/nrow(BasisDaten),1),"%","missing values.\n",sep=" "))
+  cat(paste("Values provided for CLARITY:\n"))
+  cat(unique(BasisDaten$CLARITY))
+} else {
+  # Column does not exist
+  print("Column CLARITY is missing. Check names of the columns.")
+}
 ```
 
-**TURBIDITY** is a mandatory field. There must be 0% missing values, otherwise please check.
+**PIC_QUALITY** is a mandatory field. There must be 0% missing values, otherwise please check. Only 1 and 2 are allowed. 
 
-```{r, include=T,comment=NA}
-cat(paste(round(100*sum(is.na(BasisDaten$TURBIDITY))/nrow(BasisDaten),1),"%","missing values",sep=" "))
-```
-
-Values provided for TURBIDITY. Only 1 to 3 are allowed. 
-
-```{r}
-unique(BasisDaten$TURBIDITY)
-```
-
-**CLARITY** is a mandatory field. There must be 0% missing values, otherwise please check.
-
-```{r, include=T,comment=NA}
-cat(paste(round(100*sum(is.na(BasisDaten$CLARITY))/nrow(BasisDaten),1),"%","missing values",sep=" "))
-```
-
-Values provided for CLARITY. Only 0 to 3 are allowed. 
-
-```{r}
-unique(BasisDaten$CLARITY)
-```
-
-**PIC_QUALITY** is a mandatory field. There must be 0% missing values, otherwise please check.
-
-```{r, include=T,comment=NA}
-cat(paste(round(100*sum(is.na(BasisDaten$PIC_QUALITY))/nrow(BasisDaten),1),"%","missing values",sep=" "))
-```
-
-Values provided for PIC_QUALITY. Only 1 and 2 are allowed. 
-
-```{r}
-range(BasisDaten$PIC_QUALITY)
+```{r PIC_QUALITY in BasisDaten, include=T,comment=NA}
+if ("PIC_QUALITY" %in% colnames(BasisDaten)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(BasisDaten$PIC_QUALITY))/nrow(BasisDaten),1),"%","missing values.\n",sep=" "))
+  cat(paste("Values provided for PIC_QUALITY:\n"))
+  cat(unique(BasisDaten$PIC_QUALITY))
+} else {
+  # Column does not exist
+  print("Column PIC_QUALITY is missing. Check names of the columns.")
+}
 ```
 
 # 3.Observations
 
-```{r ObsFolder, include=F, echo=FALSE}
+```{r Observation Columns, include=F, echo=FALSE}
 ObservationsColumns<-colnames(Observations)
 ```
 
-```{r, include=F, echo=FALSE}
+```{r Expected in Observation, include=F, echo=FALSE}
 ObservationsExpectedColumns<-c("OBSERVATIONS","OBSERVATION_ID","POSITION_ID","Dataset_ID","CRUISENO",
                                "ABIOTIC_STRUCTURES","ABIOTIC_OBSERVATION","OBSERVATION",
                                "ENGLISH_NAME_BEFORE_CONTROL","ENGLISH_NAME_CONTROL_ID",
@@ -461,19 +468,20 @@ ObservationsExpectedColumns<-c("OBSERVATIONS","OBSERVATION_ID","POSITION_ID","Da
 
 In this part we would check that all the columns are correctly imported.
 
-```{r,error=TRUE, comment=NA, include=TRUE, echo=FALSE}
+```{r Observation Information,error=TRUE, comment=NA, include=TRUE, echo=FALSE}
 cat(paste('The Observations contains',nrow(Observations),'rows, and',ncol(Observations),'columns.'))
-cat(paste('The columns names are: '))
-cat(colnames(Observations))
+#cat(paste('The columns names are: '))
+#cat(colnames(Observations))
 ```
 
 ## Column checks
 
-```{r Check columns3, include=T, echo=F, comment=NA}
+```{r Number of Columns in Observations, include=T, echo=F, comment=NA}
 cat(paste('\n Expected',length(ObservationsExpectedColumns),'columns and',ncol(Observations),'provided', sep=" "))
 ```
+Check if the name of the columns in the documents coincide, if 'TRUE' they coincide, if 'FALSE' please check.
 
-```{r, echo=FALSE}
+```{r Comparing Column Names in Observations, echo=FALSE}
 ExpectedColumns<-ObservationsExpectedColumns
 ProvidedColumns<-colnames(Observations)
 MaxColumns <- max(length(ExpectedColumns), length(ProvidedColumns))
@@ -490,17 +498,21 @@ ComparisonObservations<-ComparisonObservations %>%
   mutate(Check = (Expected == Provided)) %>%
   mutate(Check = case_when(is.na(Check) ~ FALSE,
                            TRUE ~ Check))
+knitr::kable(ComparisonObservations)
 ```
 
-Check if the name of the columns in the documents coincide, if 'TRUE' they coincide, if 'FALSE' please check.
 
-```{r TableObs, echo=FALSE}
-knitr::kable(ComparisonObservations)
+```{r Missing Columns in Observations, echo=FALSE}
+DifferentObservations<-setdiff(ObservationsExpectedColumns,ObservationsColumns)
+      if(length(DifferentObservations==0)==FALSE){
+         print(paste0("All columns names seem to be correct or were corrected manually"))
+        }else{  
+           print(paste0("Please check that all columns are correct named. ",DifferentObservations," does not coincide with expected names."))}
 ```
 
 Missing columns include:
 
-```{r}
+```{r Missing Columns in Observation, echo=FALSE}
 if((nrow(ComparisonObservations %>%
   filter(is.na(Provided)))>0)==FALSE){
          cat(("There are no missing columns"))
@@ -511,211 +523,266 @@ if((nrow(ComparisonObservations %>%
 
 **OBSERVATION_ID** is a mandatory field. There must be 0% missing values, otherwise please check.
 
-```{r, include=T,comment=NA}
+```{r OBSERVATION_ID in Observations, include=T,comment=NA, echo=FALSE}
 if ("OBSERVATION_ID" %in% colnames(Observations)) {
   # Column exists
-  cat(paste(round(100*sum(is.na(Observations$OBSERVATION_ID))/nrow(Observations),1),"%","missing values",sep=" "))
-} else {
-  # Column does not exist
-  print("Column OBSERVATION_ID is missing. Check names of the columns. ")
-}
-```
-
-Values provided for OBSERVATION_ID
-
-```{r}
-if ("OBSERVATION_ID" %in% colnames(Observations)) {
-  # Column exists
+  cat(paste(round(100*sum(is.na(Observations$OBSERVATION_ID))/nrow(Observations),1),"%","missing values.\n",sep=" "))
+  cat(paste("Values provided for OBSERVATION_ID:\n"))
   Observations$OBSERVATION_ID<-as.numeric(Observations$OBSERVATION_ID)
-  range(Observations$OBSERVATION_ID,na.rm=TRUE)
+  cat(range(Observations$OBSERVATION_ID,na.rm=TRUE))
 } else {
   # Column does not exist
-  print("Column OBSERVATION_ID is missing. Check names of the columns. ")
+  print("Column OBSERVATION_ID is missing. Check names of the columns.")
 }
 ```
 
 **POSITION_ID** is a mandatory field. There must be 0% missing values, otherwise please check. 
 
-```{r, include=T,comment=NA}
-cat(paste(round(100*sum(is.na(Observations$POSITION_ID))/nrow(Observations),1),"%","missing values",sep=" "))
-```
-
-Values provided for POSITION_ID.
-
-```{r}
-class(Observations$POSITION_ID)
-```
-
-```{r}
-#numeric
-if (class(Observations$POSITION_ID) == "numeric") {
-range(Observations$POSITION_ID,na.rm=TRUE)}else {
-#not numeric
-cat(paste0(first(Observations$POSITION_ID),'-',last(Observations$POSITION_ID)))
+```{r POSITION_ID in Observations, include=T,comment=NA, echo=FALSE}
+if ("POSITION_ID" %in% colnames(Observations)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(Observations$POSITION_ID))/nrow(Observations),1),"%","missing values.\n",sep=" "))
+  cat(paste("Values provided for POSITION_ID:\n"))
+  #numeric
+  if (class(Observations$POSITION_ID) == "numeric") {
+  cat(range(Observations$POSITION_ID,na.rm=TRUE))}else {
+  #not numeric
+  cat(paste0(first(Observations$POSITION_ID),'-',last(Observations$POSITION_ID)))
+}
+} else {
+  # Column does not exist
+  print("Column POSITION_ID is missing. Check names of the columns.")
 }
 ```
-
 **OBSERVATION** is a mandatory field, but there might be missing values if there are **ABIOTIC_OBSERVATION** or **ABIOTIC_STRUCTURE**.
 
-```{r, include=T,comment=NA}
-cat(paste(round(100*sum(is.na(Observations$OBSERVATION))/nrow(Observations),1),"%","missing values",sep=" "))
-```
-
-Number of values missing: 
-
-```{r}
-sum(is.na(Observations$OBSERVATION))
+```{r OBSERVATION in Observations, include=T,comment=NA, echo=FALSE}
+if ("OBSERVATION" %in% colnames(Observations)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(Observations$OBSERVATION))/nrow(Observations),1),"%","missing values.\n",sep=" "))
+  cat(paste("Values provided for OBSERVATION:\n"))
+  Observations$OBSERVATION<-as.numeric(Observations$OBSERVATION)
+  cat(range(Observations$OBSERVATION,na.rm=TRUE))
+} else {
+  # Column does not exist
+  print("Column OBSERVATION is missing. Check names of the columns.")
+}
 ```
 
 Number of **ABIOTIC_STRUCTURE** observations.
 
-```{r, include=T,comment=NA}
-cat(paste(round(((Observations %>%
-  drop_na(ABIOTIC_STRUCTURES)%>%
-  count())$n)),"values in ABIOTIC_STRUCTURES",sep=" "))
-```
-
-Values provided in ABIOTIC_STRUCTURES.
-
-```{r}
-unique(Observations$ABIOTIC_STRUCTURES,na.rm=TRUE)
+```{r ABIOTIC_STRUCTURES in Observations, include=T,comment=NA, echo=FALSE}
+if ("ABIOTIC_STRUCTURES" %in% colnames(Observations)) {
+  # Column exists
+  cat(paste(round(((Observations %>%drop_na(ABIOTIC_STRUCTURES)%>%count())$n)),"values in ABIOTIC_STRUCTURES.\n",sep=" "))
+  cat(paste("Values provided for ABIOTIC_STRUCTURES:\n"))
+  cat(unique(Observations$ABIOTIC_STRUCTURES,na.rm=TRUE))
+} else {
+  # Column does not exist
+  print("Column ABIOTIC_STRUCTURES is missing. Check names of the columns.")
+}
 ```
 
 Number of **ABIOTIC_OBSERVATION** observations.
 
-```{r, include=T,comment=NA}
-cat(paste(((Observations %>%
-  drop_na(ABIOTIC_OBSERVATION)%>%
-  count())$n)),"values in ABIOTIC_OBSERVATION",sep=" ")
+```{r ABIOTIC_OBSERVATION in Observations, include=T,comment=NA, echo=FALSE}
+if ("ABIOTIC_OBSERVATION" %in% colnames(Observations)) {
+  # Column exists
+  cat(paste(round(((Observations %>%drop_na(ABIOTIC_OBSERVATION)%>%count())$n)),"values in ABIOTIC_OBSERVATION.\n",sep=" "))
+  cat(paste("Values provided for ABIOTIC_OBSERVATION:\n"))
+  cat(unique(Observations$ABIOTIC_OBSERVATION,na.rm=TRUE))
+} else {
+  # Column does not exist
+  print("Column ABIOTIC_OBSERVATION is missing. Check names of the columns.")
+}
 ```
 
-Values provided in ABIOTIC_OBSERVATION.
 
-```{r}
-unique(Observations$ABIOTIC_OBSERVATION,na.rm=TRUE)
-```
+**ID_MATCH_MISMATCH** is a not mandatory field. There can be missing values. Values allowed **ID_MATCH_MISMATCH** are: 1 = Matches between the identifier and the auditor, 2 = Mismatches between identifier and the auditor. 
 
-**ID_MATCH_MISMATCH** is a not mandatory field. There can be missing values.
-
-```{r, include=T,comment=NA}
-if("ID_MATCH_MISMATCH" %in% colnames(Observations)){
-         cat(paste(round(100*sum(is.na(Observations$ID_MATCH_MISMATCH))/nrow(Observations),1),"%","missing values",sep=" "))
-        }else{  
-          print(paste0("The column ID_MATCH_MISSMATCH is missing"))
-           }
-```
-
-Values provided in **ID_MATCH_MISMATCH**. 1 = Matches between the identifier and the auditor, 2 = Mismatches between identifier and the auditor. 
-
-```{r}
-unique(Observations$ID_MATCH_MISMATCH,na.rm=TRUE)
+```{r ID_MATCH_MISMATCH in Observations, include=T,comment=NA, echo=FALSE}
+if ("ID_MATCH_MISMATCH" %in% colnames(Observations)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(Observations$ID_MATCH_MISMATCH))/nrow(Observations),1),"%","missing values.\n",sep=" "))
+  cat(paste("Values provided for ID_MATCH_MISMATCH:\n"))
+  cat(unique(Observations$ID_MATCH_MISMATCH,na.rm=TRUE))
+} else {
+  # Column does not exist
+  print("Column ID_MATCH_MISMATCH is missing. Check names of the columns.")
+}
 ```
 
 **BEHAVIOUR** is not mandatory field. Values are presented as numerical codes.
 
-```{r}
-unique(Observations$BEHAVIOUR)
+```{r BEHAVIOUR in Observations, include=T,comment=NA, echo=FALSE}
+if ("BEHAVIOUR" %in% colnames(Observations)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(Observations$BEHAVIOUR))/nrow(Observations),1),"%","missing values.\n",sep=" "))
+  cat(paste("Values provided for BEHAVIOUR:\n"))
+  cat(unique(Observations$BEHAVIOUR))
+} else {
+  # Column does not exist
+  print("Column BEHAVIOUR is missing. Check names of the columns.")
+}
 ```
 
 **ACTIVITY** is not mandatory field. Values should be 1 = Swimming, 2 = Flying, 3 = Submerged, 4 = Breaching surface, 5 = On artificial platform, 0 = Unknown. 0s are only allowed for abiotic structures.
 
-```{r}
-unique(Observations$ACTIVITY)
+```{r ACTIVITY in Observations, include=T,comment=NA, echo=FALSE}
+if ("ACTIVITY" %in% colnames(Observations)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(Observations$ACTIVITY))/nrow(Observations),1),"%","missing values.\n",sep=" "))
+  cat(paste("Values provided for ACTIVITY:\n"))
+  cat(unique(Observations$ACTIVITY))
+} else {
+  # Column does not exist
+  print("Column ACTIVITY is missing. Check names of the columns.")
+}
 ```
 
 **GROUP** is not mandatory field. Values should be Consecutive number of groups; same number for all individuals of the same group.
 
-```{r}
-unique(Observations$GROUP)
+```{r GROUP in Observations, include=T,comment=NA, echo=FALSE}
+if ("GROUP" %in% colnames(Observations)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(Observations$GROUP))/nrow(Observations),1),"%","missing values.\n",sep=" "))
+  cat(paste("Values provided for GROUP:\n"))
+  cat(unique(Observations$GROUP))
+} else {
+  # Column does not exist
+  print("Column GROUP is missing. Check names of the columns.")
+}
 ```
 
 **ASSOCIATIONS** is not mandatory field. Values are presented as numerical codes.
 
-```{r}
-unique(Observations$ASSOCIATIONS)
+```{r ASSOCIATIONS in Observations, include=T,comment=NA, echo=FALSE}
+if ("ASSOCIATIONS" %in% colnames(Observations)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(Observations$ASSOCIATIONS))/nrow(Observations),1),"%","missing values.\n",sep=" "))
+  cat(paste("Values provided for ASSOCIATIONS:\n"))
+  cat(unique(Observations$ASSOCIATIONS))
+} else {
+  # Column does not exist
+  print("Column ASSOCIATIONS is missing. Check names of the columns.")
+}
 ```
 
 **HEADING** is not mandatory field. Values should be 45, 90, 135, 180, 225, 270, 315, 360.
 
-```{r}
-unique(Observations$HEADING)
+```{r HEADING in Observations, include=T,comment=NA, echo=FALSE}
+if ("HEADING" %in% colnames(Observations)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(Observations$HEADING))/nrow(Observations),1),"%","missing values.\n",sep=" "))
+  cat(paste("Values provided for HEADING:\n"))
+  cat(unique(Observations$HEADING))
+} else {
+  # Column does not exist
+  print("Column HEADING is missing. Check names of the columns.")
+}
 ```
 
 **SUBMERGE** is not mandatory field. If filled values should be o,u,x.
 
-```{r}
-unique(Observations$SUBMERGED)
+```{r SUBMERGED in Observations, include=T,comment=NA, echo=FALSE}
+if ("SUBMERGED" %in% colnames(Observations)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(Observations$SUBMERGED))/nrow(Observations),1),"%","missing values.\n",sep=" "))
+  cat(paste("Values provided for SUBMERGED:\n"))
+  cat(unique(Observations$SUBMERGED))
+} else {
+  # Column does not exist
+  print("Column SUBMERGED is missing. Check names of the columns.")
+}
 ```
 
 **AGE_CLASS** is not mandatory field. If filled values should be age of the bird; A (adult), IM (immature). 
 
-```{r}
-unique(Observations$AGE_CLASS)
+```{r AGE_CLASS in Observations, include=T,comment=NA, echo=FALSE}
+if ("AGE_CLASS" %in% colnames(Observations)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(Observations$AGE_CLASS))/nrow(Observations),1),"%","missing values.\n",sep=" "))
+  cat(paste("Values provided for AGE_CLASS:\n"))
+  cat(unique(Observations$AGE_CLASS))
+} else {
+  # Column does not exist
+  print("Column AGE_CLASS is missing. Check names of the columns.")
+}
 ```
+
 
 **AGE_YEARS** is not mandatory field. If filled values should be numeric. Specification of the calender-year of the bird. 
 Values expected 1 to 5.
 
-```{r}
-unique(Observations$AGE_YEARS)
+```{r AGE_YEARS in Observations, include=T,comment=NA, echo=FALSE}
+if ("AGE_YEARS" %in% colnames(Observations)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(Observations$AGE_YEARS))/nrow(Observations),1),"%","missing values.\n",sep=" "))
+  cat(paste("Values provided for AGE_YEARS:\n"))
+  cat(unique(Observations$AGE_YEARS))
+} else {
+  # Column does not exist
+  print("Column AGE_YEARS is missing. Check names of the columns.")
+}
 ```
 
 **SEX** is not mandatory field. If filled values should be F or M.  
 
-```{r}
-unique(Observations$SEX)
+```{r SEX in Observations, include=T,comment=NA, echo=FALSE}
+if ("SEX" %in% colnames(Observations)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(Observations$SEX))/nrow(Observations),1),"%","missing values.\n",sep=" "))
+  cat(paste("Values provided for SEX:\n"))
+  cat(unique(Observations$SEX))
+} else {
+  # Column does not exist
+  print("Column SEX is missing. Check names of the columns.")
+}
 ```
 
-**LON_OBJECT** is a mandatory field. There must be 0% missing values, otherwise please check.
+**LON_OBJECT** is a mandatory field. There must be 0% missing values, otherwise please check.Values should be numerical. 
 
-```{r, include=T,comment=NA}
-if("LON_OBJECT" %in% colnames(Observations)){
-         cat(paste(round(100*sum(is.na(Observations$LON_OBJECT))/nrow(Observations),1),"%","missing values",sep=" "))
-        }else{  
-          print(paste0("The column LON_OBJECT is missing"))
-        }
+```{r LON_OBJECT in Observations, include=T,comment=NA, echo=FALSE}
+if ("LON_OBJECT" %in% colnames(Observations)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(Observations$LON_OBJECT))/nrow(Observations),1),"%","missing values.\n",sep=" "))
+  cat(paste("Values provided for LON_OBJECT:\n"))
+  #numeric
+  if (class(Observations$LON_OBJECT) == "numeric") {
+  range(Observations$LON_OBJECT,na.rm=TRUE)}else {
+  #not numeric
+  cat(paste0(first(Observations$LON_OBJECT),'-',last(Observations$LON_OBJECT)))
+}
+} else {
+  # Column does not exist
+  print("Column LON_OBJECT is missing. Check names of the columns.")
+}
 ```
 
-Values should be numerical. 
+**LAT_OBJECT** is a mandatory field. There must be 0% missing values, otherwise please check.Values should be numerical. 
 
-```{r}
-if("LON_OBJECT" %in% colnames(Observations)){
-         Observations$LON_OBJECT<-as.numeric(Observations$LON_OBJECT)
-         range(Observations$LON_OBJECT)
-        }else{  
-          print(paste0("The column LON_OBJECT is missing"))
-        }
-
-```
-
-**LAT_OBJECT** is a mandatory field. There must be 0% missing values, otherwise please check.
-
-```{r, include=T,comment=NA}
-if("LAT_OBJECT" %in% colnames(Observations)){
-         cat(paste(round(100*sum(is.na(Observations$LAT_OBJECT))/nrow(Observations),1),"%","missing values",sep=" "))
-        }else{  
-          print(paste0("The column LAT_OBJECT is missing"))
-        }
-```
-
-Values should be numerical. 
-
-```{r}
-if("LAT_OBJECT" %in% colnames(Observations)){
-  class(Observations$LAT_OBJECT)
-  Observations$LAT_OBJECT<-as.numeric(Observations$LAT_OBJECT)
-  range(Observations$LAT_OBJECT)
-        }else{  
-          print(paste0("The column LAT_OBJECT is missing"))
-        }
-
+```{r LAT_OBJECT in Observations, include=T,comment=NA, echo=FALSE}
+if ("LAT_OBJECT" %in% colnames(Observations)) {
+  # Column exists
+  cat(paste(round(100*sum(is.na(Observations$LAT_OBJECT))/nrow(Observations),1),"%","missing values.\n",sep=" "))
+  cat(paste("Values provided for LAT_OBJECT:\n"))
+  #numeric
+  if (class(Observations$LAT_OBJECT) == "numeric") {
+  range(Observations$LAT_OBJECT,na.rm=TRUE)}else {
+  #not numeric
+  cat(paste0(first(Observations$LAT_OBJECT),'-',last(Observations$LAT_OBJECT)))
+}
+} else {
+  # Column does not exist
+  print("Column LAT_OBJECT is missing. Check names of the columns.")
+}
 ```
 
 ## English names
 
 List all **species** sighted during the surveys with number of sightings and check the codes.
 
-```{r SpeciesList, echo=FALSE, comment=NA}
+```{r ENGLISH_NAME in Observations, echo=FALSE, comment=NA}
 Names_1check<-Observations %>% drop_na(OBSERVATION)
 Names_2check<-Names_1check %>% 
     group_by(ENGLISH_NAME,OBSERVATION) %>%
@@ -752,7 +819,7 @@ knitr::kable(Names_4check)
 
 Often names are not equal as there is no space between the diagonals (e.g.  seal / small cetacean provided and  seal/small cetacean expected) or missing a word (e.g. Red-necked/Great Crested Grebe provided and Red-necked Grebe/Great Crested Grebe expected, the word Grebe is missing). 
 
-```{r CodesInternalCheck, echo=FALSE}
+```{r Names provided in observations, echo=FALSE}
 # Check names not fitting
 if (nrow(filter(Names_3check, `Name fitting` == FALSE)) == 0) {
   cat("There are no missing names")
@@ -768,7 +835,7 @@ if (nrow(filter(Names_3check, `Name fitting` == FALSE)) == 0) {
 
 Check that all species names are part of a morphological/taxonomic group. Otherwise they wont be plotted in the maps in the Plausability Check. Usually the problem is that the name doesnt fit the Euring. 
 
-```{r CodesTax, echo=FALSE}
+```{r Names Missing Classification, echo=FALSE}
 Euring_Tax<-seamonas::Code_Euring %>%
   rename(ENGLISH_NAME=English_name)%>%
   mutate(Code=as.numeric(Code))%>%

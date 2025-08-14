@@ -1,7 +1,7 @@
 ---
 title: "Quality checks"
-author: "Seabird Monitoring"
-date: "Last update: 16/06/2025"
+author: "Marine Vertebrate Monitoring"
+date: "Last update: 14/08/2025"
 output: html_document
 ---
 
@@ -27,76 +27,43 @@ ThisDirectory<-(here::here('00Data'))
 Run me to show you the files in the folder
 
 ```{r}
-list.files(ThisDirectory,pattern = ".xlsx")
+list.files(ThisDirectory,pattern = "***.xlsx")
 ```
 
 Tell me which file do you want to report
 
 ```{r}
-ThisFile<- ""
+ThisFile<- "....xlsx"
 ```
 
 ## Tripdaten
 
 ```{r}
-TripDaten<-read_excel(path=paste0(ThisDirectory,'\\',ThisFile),sheet="Tripdata",col_names = TRUE)
+TripDaten<-read_excel(path=paste0(ThisDirectory,'\\',ThisFile),sheet="Tripdaten",col_names = TRUE)
 ```
 
 ## BasisDaten
 
 ```{r}
-BasisDaten<-read_excel(path=paste0(ThisDirectory,'\\',ThisFile),sheet = "Basisdata",col_names = TRUE)
+BasisDaten<-read_excel(path=paste0(ThisDirectory,'\\',ThisFile),sheet = "Basisdaten",col_names = TRUE,
+                         col_types = c("guess","text","guess","guess","guess",
+                                       "guess","guess","guess","guess","guess",
+                                       "guess","guess","guess","guess","guess",
+                                       "guess","guess","guess","text","guess"))
 ```
 
 ## Observations
 
 ```{r, warning=FALSE}
-Observations<-read_excel(path=paste0(ThisDirectory,'\\',ThisFile),sheet="Observations", col_types = "text")
+Observations<-read_excel(path=paste0(ThisDirectory,'\\',ThisFile),sheet="Observation", col_types = "text")
 ```
 
 ## Corrections
 
 ```{r}
 Corrections<-'No manual corrections were needed'
-Corrections<-"In Trip, renamed AREA_OBERSERVED with AREA_OBSERVED. STARTTIME substr. 
-In Basis, renamed `POSITION ID_CONTROLLED` with POSITION_ID_CONTROLLED (added underscore). DATE removed minus using gsub.
-In Observations, renamed Observation_ID with OBSERVATION_ID, and Group_ with GROUP, ENGLISH_NAME changed to fit as in Euring"
 ```
 
-
-```{r}
-# if corrections were needed, add and re-run. 
-TripDaten   <- TripDaten%>% 
-  rename(AREA_OBSERVED=AREA_OBERSERVED)%>%
-  mutate(DATE=gsub("-","",DATE))%>%
-  mutate(DATE=substr(DATE,1,10))%>%
-  mutate(STARTTIME=substr(STARTTIME,12,19))%>%
-  mutate(ENDTIME=substr(ENDTIME,12,19))
-```
-
-```{r}
-BasisDaten  <- BasisDaten %>% 
-  rename(POSITION_ID_CONTROLLED=`POSITION ID_CONTROLLED`)%>%
-  mutate(DATE=gsub("-","",DATE))
-```
-
-```{r}
-Observations<- Observations %>%
-  rename(OBSERVATION_ID = Observation_ID,
-         GROUP=Group_)%>%
-    mutate(ENGLISH_NAME=
-             case_when(ENGLISH_NAME=='Northern fulmar'~'Northern Fulmar',
-                       ENGLISH_NAME=='Northern gannet'~'Northern Gannet',
-                       ENGLISH_NAME=='Common gull'~'Common Gull',
-                       ENGLISH_NAME=='Black-legged kittiwake'~'Black-legged Kittiwake',
-                       ENGLISH_NAME=='Unidentified gull'~'unidentified gull',
-                       ENGLISH_NAME=='Common Guillemot'~'Common Guillemot/Razorbill',
-                       ENGLISH_NAME=='Common guillemot / Razorbill'~'Common Guillemot/Razorbill',
-                       ENGLISH_NAME=='Harbour porpoise'~'Harbour Porpoise',
-                       ENGLISH_NAME=='unidentified pinniped (Grey Seal / Harbour Seal)'~
-                         'unidentified pinniped (Grey Seal/Harbour Seal)',
-                       TRUE ~ ENGLISH_NAME))
-```
 
 # ~~~~~~~~~~~
 # Formal Check
@@ -127,11 +94,12 @@ Define the name of the file using the information provided in the Trip informati
 ```{r}
 FormalCheck_file_date<-as.character(TripDaten$DATE[1])
 FormalCheck_file_date
-FormalCheck_file_area<-"A"#as.character(TripDaten$CLUSTER[1])
-FormalCheck_file_area
-FormalCheck_output_name<-paste0(FormalCheck_output_folder,
-                                "FormalCheck_DATE_",FormalCheck_file_date,
-                                "_AREA_",FormalCheck_file_area,".html")
+Company<-substr(as.character(TripDaten$LAB[1]),1,7) #the number of characters included for company name can be modified here
+FormalCheck_file_area<-as.character(TripDaten$CLUSTER[1])
+FormalCheck_file_area<-"DC"
+FormalCheck_output_name<-paste0("DAS_",FormalCheck_file_date,
+                                "_",Company,
+                                "_Area",FormalCheck_file_area,"_1Check.html")
 FormalCheck_output_name 
 ```
 
@@ -157,6 +125,59 @@ rmarkdown::render(
 beep(sound = 1, expr = NULL)
 ```
 
+# Estandarization
+
+Please check before continue and if corrections are needed, add and re-run.
+
+```{r}
+# correct start time format
+TripDaten   <- TripDaten%>% 
+  mutate(STARTTIME=substr(STARTTIME,12,19))%>%
+  mutate(ENDTIME=substr(ENDTIME,12,19))
+```
+
+```{r}
+BasisDaten  <- BasisDaten %>% 
+  rename(POSITION_ID_CONTROLLED=`POSITION ID_CONTROLLED`)%>% 
+  mutate(TIME=substr(TIME,12,19))
+```
+
+```{r}
+Observations<- Observations %>%
+  rename(OBSERVATION_ID = Observation_ID,
+         GROUP=Group,
+         LAT_OBJECT=LAT_PIC_CENTER,
+         LON_OBJECT=LON_PIC_CENTER)%>%
+    mutate(ENGLISH_NAME=
+             case_when(ENGLISH_NAME=='Common guillemot / Razorbill'~'Common Guillemot/Razorbill',
+                       TRUE ~ ENGLISH_NAME))
+```
+
+```{r}
+Corrections<-"In Trip, STARTTIME and ENDTIME were corrected. \n
+In Basis, renamed `POSITION ID_CONTROLLED` with POSITION_ID_CONTROLLED (added underscore).\n
+In Observations, renamed Observation_ID with OBSERVATION_ID, and Group with GROUP, ENGLISH_NAME changed to fit as in Euring"
+```
+
+Re-run to export document
+
+```{r render validation, include=FALSE, cache=TRUE}
+rmarkdown::render(
+  input= FormalCheck_input_file, 
+  output_format = "html_document",
+  output_dir = FormalCheck_output_folder,
+  params = list(
+    ThisDirectory = ThisDirectory,
+    ThisFile = ThisFile,
+    TripDaten = TripDaten,
+    BasisDaten = BasisDaten,
+    Observations = Observations
+  ),
+  run_pandoc = TRUE,
+  output_file = FormalCheck_output_name  
+)
+beep(sound = 1, expr = NULL)
+```
 
 # ~~~~~~~~~
 
@@ -188,13 +209,11 @@ If there are several TRIP_IDs, make reports separately by TRIP_ID
 
 ```{r}
 Plausability_output_folder<-paste0(Plausability_input_folder,"\\02PlausabilityCheck\\") 
-Plausability_file_date<-as.character(TripDaten$DATE[1])
-Plausability_file_date
-Plausability_file_area<-'A'#as.character(TripDaten$CLUSTER[1])
-Plausability_file_area
-Plausability_output_name<-paste0(Plausability_output_folder,
-                                "Plausability_DATE_",Plausability_file_date,
-                                "_AREA_",Plausability_file_area,".doc")
+Plausability_file_date<-FormalCheck_file_date
+Plausability_file_area<-FormalCheck_file_area
+Plausability_output_name<-paste0("DAS",Plausability_file_date,
+                                 "_",Company,
+                                 "_Area",Plausability_file_area,"_2Report.doc")
 Plausability_output_name 
 ```
 
@@ -240,12 +259,10 @@ Maps_output_folder <- paste0(Maps_input_folder,"\\03Maps\\")
 ```
 
 ```{r}
-Maps_output_name <- paste0(Maps_output_folder,
-                           "03Maps_DATE_",
-                           as.character(TripDaten$DATE[1]),
-                           "_AREA_",
-                           'A',#as.character(TripDaten$CLUSTER[1]),
-                           ".html") 
+Maps_output_name <- paste0("DAS",Plausability_file_date,
+                           "_",Company,
+                           "_Area",Plausability_file_area,
+                           "_3Maps.html") 
 Maps_output_name 
 ```
 
