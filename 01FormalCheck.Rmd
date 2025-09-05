@@ -393,7 +393,7 @@ if ("GLARE" %in% colnames(BasisDaten)) {
 ```
 
 
-**SEASTATE** is a mandatory field. There must be 0% missing values, otherwise please check.Values 0 to 7 are allowed. 
+**SEASTATE** is a mandatory field. There must be 0% missing values, otherwise please check. Values 0 to 7 are allowed. 
 
 ```{r SEASTATE in BasisDaten, include=T,comment=NA}
 if ("SEASTATE" %in% colnames(BasisDaten)) {
