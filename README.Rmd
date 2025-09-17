@@ -53,7 +53,7 @@ install.packages("sf") #for plotting shapefiles
 
 install.packages("devtools")
 devtools::install_github("MiriamLL/GermanNorthSea") #for loading shapefiles
-devtools::install_github("MiriamLL/seamonas") #for accessing Euring information
+devtools::install_github("MiriamLL/seamonas") #for accessing Euring and Artificial_tax_group information
 
 #For Dinamic maps 
 install.packages("tmap") #for creating maps with layers

@@ -838,8 +838,10 @@ How many **marine mammals** and **birds** were sighted?
 ```{r Taxa, echo=FALSE}
 Animals_1check<-Names_5tax %>%
   mutate(Taxa=case_when(Artificial_tax_class == 'Marine_mammals' ~ "Mammals",
-                        Artificial_tax_class %in% c("Gulls","Skuas","Ducks_Shelducks","Swan_Geese","Terns","Waders","Gannets_Cormorants",
-                                                    "Divers","Auks","Grebes","Other_seabirds")  ~ "Birds",
+                        Artificial_tax_class %in% c("Gulls","Skuas","Ducks_Shelducks",
+                                                    "Geese","Terns","Waders","Gannets_Swans",
+                                                    "Divers","Auks","Grebes","Cormorants",
+                                                    "Other_seabirds")  ~ "Birds",
                         TRUE ~ "Others"))
 ```
 
@@ -897,7 +899,6 @@ Birds_3check<-Birds_2check %>%
   head(5)
 ggplot(Birds_3check, aes(x=ENGLISH_NAME, 
                          y=n, 
-                         fill=ENGLISH_NAME,
                          order = -as.numeric(n))) +
   geom_bar(stat='identity',position = position_dodge())+
   ylab("Sightings")+xlab("")+
@@ -909,7 +910,7 @@ ggplot(Birds_3check, aes(x=ENGLISH_NAME,
         axis.text.x = element_text(size=20, angle=45,hjust=1),
         axis.text.y = element_text(size=20),
         legend.position='none')+
-  scale_fill_manual(values=c("#264653"))
+  scale_fill_manual(values=c("#264653","#264653","#264653","#264653","#264653"))
 ```
 
 \newpage
@@ -1209,11 +1210,11 @@ CheckGroup(Morphological_group="Skuas")
 
 \newpage
 
-### Gannets and Cormorants
+### Gannets and Swans
 Species of occurring in the survey
 
 ```{r GannetMap, echo=FALSE, eval=TRUE, fig.width=14, fig.height=10}
-CheckGroup(Morphological_group="Gannets_Cormorants")
+CheckGroup(Morphological_group="Gannets_Swans")
 ```
 
 \newpage
@@ -1247,12 +1248,14 @@ CheckGroup(Morphological_group="Ducks_Shelducks")
 
 \newpage
 
-### Geese and Swans
+### Geese
 Species occurring in the survey
 
 ```{r GesseMap, echo=FALSE, eval=TRUE, fig.width=14, fig.height=10, comment=NA}
-CheckGroup(Morphological_group="Swan_Geese")
+CheckGroup(Morphological_group="Geese")
 ```
+
+
 
 \newpage
 

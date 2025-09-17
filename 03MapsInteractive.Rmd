@@ -139,11 +139,11 @@ Each taxonomic group is represented by a distinct color:
 
 Gulls in <span style="color: #565aa0;">light purple</span>; 
 Skuas in <span style="color: #8ac926;">green</span>; 
-Gannets and cormorants <span style="color: #ff924c;">orange</span>; 
+Gannets and swans <span style="color: #ff924c;">orange</span>; 
 Auks in <span style="color: #36949d;">grey blue</span>; 
 Terns in <span style="color: #6a4c93;">purple</span>; 
 Ducks and Shelducks in <span style="color: #ffca3a;">yellow</span>; 
-Swans and Geese in <span style="color: #c5ca30;">green-yellow</span>; 
+Geese in <span style="color: #c5ca30;">green-yellow</span>; 
 Divers in <span style="color: #ff595e;">red</span>; 
 Grebes in <span style="color: #1982c4;">light blue</span>; 
 Waders in <span style="color: #4267ac;">darkblue</span>; 
@@ -248,7 +248,7 @@ Add_gannets<-function(This_group=This_group){
 ```
 
 ```{r AssignGannets, echo=FALSE, comment=NA}
-Add_gannets(This_group='Gannets_Cormorants')
+Add_gannets(This_group='Gannets_Swans')
 ```
 
 ```{r AddAuks, echo=FALSE}
@@ -332,7 +332,7 @@ Add_geese<-function(This_group=This_group){
 ```
 
 ```{r AssignGesseSwan,  echo=FALSE, comment=NA}
-Add_geese(This_group="Swan_Geese")
+Add_geese(This_group="Geese")
 ```
 
 ```{r AddDivers, echo=FALSE}
@@ -375,6 +375,27 @@ Add_grebes<-function(This_group=This_group){
 
 ```{r AssignGrebes,  echo=FALSE, comment=NA}
 Add_grebes(This_group='Grebes')
+```
+
+```{r AddCormorants, echo=FALSE}
+Add_cormorants<-function(This_group=This_group){
+  Cormorants_positions<-Observations_tax %>%
+    filter(Observations_tax$Morphological_group==This_group)
+    if(nrow(Cormorants_positions) == 0) {
+        print(paste("No",This_group,"occurred in the survey"))
+        } else {
+         print(paste(This_group,"will be included in the map"))
+         Base_map<-Base_map+
+           tm_shape(Cormorants_positions) + 
+             tm_dots(id = "Morphological group",
+                       col="#1982c4",
+                       popup.vars=c("Position_ID"="POSITION_ID","Specie"="ENGLISH_NAME"))
+  assign('Base_map',Base_map,envir=globalenv())}
+  }
+```
+
+```{r AssignCormorants,  echo=FALSE, comment=NA}
+Add_cormorants(This_group='Cormorants')
 ```
 
 ```{r AddWaders, echo=FALSE}
