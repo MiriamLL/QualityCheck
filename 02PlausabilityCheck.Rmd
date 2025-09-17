@@ -1210,7 +1210,7 @@ CheckGroup(Morphological_group="Skuas")
 
 \newpage
 
-### Gannets and Swans
+### Gannets
 Species of occurring in the survey
 
 ```{r GannetMap, echo=FALSE, eval=TRUE, fig.width=14, fig.height=10}
@@ -1248,7 +1248,7 @@ CheckGroup(Morphological_group="Ducks_Shelducks")
 
 \newpage
 
-### Geese
+### Geese and Swans
 Species occurring in the survey
 
 ```{r GesseMap, echo=FALSE, eval=TRUE, fig.width=14, fig.height=10, comment=NA}
