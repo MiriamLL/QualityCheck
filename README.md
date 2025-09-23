@@ -39,7 +39,7 @@ install.packages("sf") #for plotting shapefiles
 
 install.packages("devtools")
 devtools::install_github("MiriamLL/GermanNorthSea") #for loading shapefiles
-devtools::install_github("MiriamLL/seamonas") #for accessing Euring information
+devtools::install_github("MiriamLL/seamonas") #for accessing Euring and Artificial_tax_group information
 
 #For Dinamic maps 
 install.packages("tmap") #for creating maps with layers
@@ -111,7 +111,7 @@ The following column names and some relevant fields are checked:
 - `DOUBLE_PLATFORM`: This field is mandatory.<br>
 - `DATE`: This field is mandatory.<br>
 - `STARTTIME`: This field is mandatory.<br>
-- `STARTTIME`: This field is mandatory.<br>
+- `ENDTIME`: This field is mandatory.<br>
 - `CAMERA_SYSTEM`: This field is mandatory. <br>
 - `RESOLUTION`: This field is mandatory.<br>
 - `PLANE_FLIGHT_HEIGHT_PLANNED`: This field is mandatory. <br>
@@ -246,7 +246,7 @@ TripDaten   <- TripDaten%>%
   rename(AREA_OBSERVED=AREA_OBERSERVED)%>%
 # Format import
   mutate(STARTTIME=substr(STARTTIME,12,19))%>%
-  mutate(ENDTIME=substr(STARTTIME,12,19))
+  mutate(ENDTIME=substr(ENDTIME,12,19))
 
 BasisDaten  <- BasisDaten %>% 
 # Misspelling column names

@@ -193,7 +193,7 @@ ggplot(data=Plausability_Basis,aes(x=POSITION_ID,y=as.numeric(PLANE_FLIGHT_HEIGH
         axis.ticks.x = element_blank(),
         axis.text.y = element_text(size=15),
         legend.position='none')+
-  scale_x_discrete(limits=Plausability_Basis$POSITION_ID,breaks=Plausability_Basis$POSITION_ID[seq(1,length(Plausability_Basis$POSITION_ID),by=1000)])+
+  scale_x_discrete(limits=Plausability_Basis$POSITION_ID,breaks=Plausability_Basis$POSITION_ID[seq(1,length(Plausability_Basis$POSITION_ID),by=5000)])+
   theme(axis.text.x = element_text(angle=90,size=8))
 ```
 
@@ -861,7 +861,7 @@ ggplot(Animals_2check, aes(x=Taxa, y=n, fill=Taxa))+
   scale_fill_manual(values=c("#2a9d8f","#264653","#669bbc"))
 ```
 
-### Bird sighthings
+### Bird observations
 
 ```{r BirdsSightingsPlot, echo=FALSE, fig.height=10, fig.width=8}
 Birds_4check<-Animals_1check %>% filter(Taxa == 'Birds')
@@ -915,7 +915,7 @@ ggplot(Birds_3check, aes(x=ENGLISH_NAME,
 
 \newpage
 
-### Marine mammal sighthings
+### Marine mammal observations
 
 ```{r MammalsSightingsPlot, echo=FALSE, fig.height=10, fig.width=8}
 Mammals_4check<-Animals_1check %>% filter(Taxa=="Mammals")

@@ -143,7 +143,7 @@ The following column names and some relevant fields are checked:
 - `DOUBLE_PLATFORM`: This field is mandatory.<br>
 - `DATE`: This field is mandatory.<br>
 - `STARTTIME`: This field is mandatory.<br>
-- `STARTTIME`: This field is mandatory.<br>
+- `ENDTIME`: This field is mandatory.<br>
 - `CAMERA_SYSTEM`: This field is mandatory. <br>
 - `RESOLUTION`:  This field is mandatory.<br>
 - `PLANE_FLIGHT_HEIGHT_PLANNED`: This field is mandatory. <br>
@@ -272,7 +272,7 @@ TripDaten   <- TripDaten%>%
   rename(AREA_OBSERVED=AREA_OBERSERVED)%>%
 # Format import
   mutate(STARTTIME=substr(STARTTIME,12,19))%>%
-  mutate(ENDTIME=substr(STARTTIME,12,19))
+  mutate(ENDTIME=substr(ENDTIME,12,19))
 
 BasisDaten  <- BasisDaten %>% 
 # Misspelling column names
