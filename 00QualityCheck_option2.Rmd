@@ -27,13 +27,13 @@ ThisDirectory<-(here::here('00Data'))
 Run me to show you the files in the folder
 
 ```{r}
-list.files(ThisDirectory,pattern = "***.xlsx")
+list.files(ThisDirectory,pattern = "*.xlsx")
 ```
 
 Tell me which file do you want to report
 
 ```{r}
-ThisFile<- "....xlsx"
+ThisFile<- ".xlsx"
 ```
 
 ## Tripdaten
@@ -46,14 +46,29 @@ The Excel file should contain the following sheets, using these exact names and 
 
 Kindly ensure that the sheet names and their order are as indicated above. Alternatively, please adjust the script to align with your file’s structure. 
 
-```{r}
-TripDaten<-read_excel(path=paste0(ThisDirectory,'\\',ThisFile),sheet="Tripdaten",col_names = TRUE)
+```{r, warning=FALSE}
+TripDaten<-read_excel(path=paste0(ThisDirectory,'\\',ThisFile),sheet="Tripdaten",
+                      col_names = TRUE,                      
+                      col_types =c("guess","text","guess","guess","guess",
+                                   "guess","guess","guess","guess","guess",
+                                   "guess","guess","guess","guess","guess", 
+                                   "guess","text","text","guess","guess", #columns 17 and 18 is time
+                                   "guess","guess","guess","guess","guess",
+                                   "guess","guess","guess","guess","guess",
+                                   "guess","guess","guess","guess","guess",
+                                   "guess"))
 ```
 
 ## BasisDaten
 
 ```{r}
-BasisDaten<-read_excel(path=paste0(ThisDirectory,'\\',ThisFile),sheet = "Basisdaten",col_names = TRUE)
+BasisDaten<-read_excel(path=paste0(ThisDirectory,'\\',ThisFile),sheet = "Basisdaten",
+                       col_names = TRUE,
+                       col_types =c("guess","text","guess","guess","guess",
+                       "guess","guess","guess","guess","guess",
+                       "guess","guess","guess","guess","guess",
+                       "guess","guess","guess","text","guess", 
+                       "text","guess"))
 ```
 
 ## Observations
@@ -87,6 +102,34 @@ BasisDaten<-BasisDaten[-(1:7),]
 
 ```{r}
 Corrections<-'No manual corrections were needed'
+```
+
+```{r}
+TripDaten   <- TripDaten
+
+BasisDaten <- BasisDaten %>%
+  rename(POSITION_ID_CONTROLLED=`POSITION ID_CONTROLLED`)
+
+Observations <- Observations %>%
+  rename(ENGLISH_NAME_BEFORE_CONTROL=`ENGLISH_NAME_BEFORE CONTROL`,
+         ENGLISH_NAME_CONTROL_ID=`ENGLISH_NAME_CONTROL ID`,
+         OBSERVATION_ID=Observation_ID
+         )%>%
+  rename(GROUP=Group)
+
+
+Corrections<-'In BasisDaten, renamed POSITION ID_CONTROLLED as POSITION_ID_CONTROLLED,\n
+In Observations, renamed to ENGLISH_NAME_BEFORE_CONTROL,ENGLISH_NAME_CONTROL_ID and OBSERVATION_ID'
+```
+
+```{r}
+Observations <- Observations %>%
+    mutate(ENGLISH_NAME=
+             case_when(# Missing words
+               ENGLISH_NAME=='unidentified pinniped (Grey/Harbour Seal)'~'unidentified pinniped (Grey Seal/Harbour Seal)',
+               ENGLISH_NAME=='Great / Lesser Black-backed Gull'~'Great Black-backed Gull/Lesser Black-backed Gull',
+               ENGLISH_NAME=='Common/Arctic Tern'~"Common Tern/Arctic Tern",
+               TRUE ~ ENGLISH_NAME))
 ```
 
 # ~~~~~~~~~~~
@@ -130,42 +173,6 @@ FormalCheck_output_name
 ## Run 
 
 Run to export document
-
-```{r render validation, include=FALSE, cache=TRUE}
-rmarkdown::render(
-  input= FormalCheck_input_file, 
-  output_format = "html_document",
-  output_dir = FormalCheck_output_folder,
-  params = list(
-    ThisDirectory = ThisDirectory,
-    ThisFile = ThisFile,
-    TripDaten = TripDaten,
-    BasisDaten = BasisDaten,
-    Observations = Observations
-  ),
-  run_pandoc = TRUE,
-  output_file = FormalCheck_output_name  
-)
-beep(sound = 1, expr = NULL)
-```
-
-# Estandarization
-
-Please check before continue and if corrections are needed, add and re-run.
-
-```{r}
-BasisDaten <- BasisDaten %>%
-  rename(POSITION_ID_CONTROLLED=`POSITION ID_CONTROLLED`)
-Observations <- Observations %>%
-  rename(ENGLISH_NAME_BEFORE_CONTROL=`ENGLISH_NAME_BEFORE CONTROL`,
-         ENGLISH_NAME_CONTROL_ID=`ENGLISH_NAME_CONTROL ID`,
-         OBSERVATION_ID=Observation_ID
-         )
-Corrections<-'In BasisDaten, renamed POSITION ID_CONTROLLED as POSITION_ID_CONTROLLED,\n
-In Observations, renamed to ENGLISH_NAME_BEFORE_CONTROL,ENGLISH_NAME_CONTROL_ID and OBSERVATION_ID'
-```
-
-Re-run to export document
 
 ```{r render validation, include=FALSE, cache=TRUE}
 rmarkdown::render(

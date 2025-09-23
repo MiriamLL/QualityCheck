@@ -27,13 +27,13 @@ ThisDirectory<-(here::here('00Data'))
 Run me to show you the files in the folder
 
 ```{r}
-list.files(ThisDirectory,pattern = "***.xlsx")
+list.files(ThisDirectory,pattern = "*.xlsx")
 ```
 
 Tell me which file do you want to report
 
 ```{r}
-ThisFile<- "....xlsx"
+ThisFile<- ".xlsx"
 ```
 
 ## Tripdaten

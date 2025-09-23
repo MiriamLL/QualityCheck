@@ -216,7 +216,7 @@ Maps_output_folder <- paste0(Maps_input_folder,"\\03Maps\\")
 ```{r}
 Maps_output_name <- paste0("DAS",as.character(TripDaten$DATE[1]),
                            "_",Company,
-                           "_Area",substr(as.character(TripDaten$CLUSTER[1]),5,5),
+                           "_Area",substr(as.character(TripDaten$CLUSTER[1]),1,1),
                            "_3Maps.html") 
 Maps_output_name 
 ```

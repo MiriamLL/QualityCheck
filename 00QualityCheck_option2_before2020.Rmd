@@ -1,0 +1,306 @@
+---
+title: "Quality checks"
+author: "Marine Vertebrate Monitoring"
+date: "Last update: 14/08/2025"
+output: html_document
+---
+
+# Packages
+
+Load the packages.
+
+```{r, warning=FALSE, include=FALSE}
+library(tidyverse)
+library(readxl)
+library(beepr)
+library(here)
+```
+
+# Data
+
+Please tell me where is the data
+
+```{r}
+ThisDirectory<-(here::here('00Data')) 
+```
+
+Run me to show you the files in the folder
+
+```{r}
+list.files(ThisDirectory,pattern = "*.xlsx")
+```
+
+Tell me which file do you want to report
+
+```{r}
+ThisFile<- ".xlsx"
+```
+
+## Tripdaten
+
+The Excel file should contain the following sheets, using these exact names and in the specified order:
+
+- Tripdaten
+- Basisdaten
+- Observations
+
+Kindly ensure that the sheet names and their order are as indicated above. Alternatively, please adjust the script to align with your file’s structure. 
+
+```{r, warning=FALSE}
+TripDaten<-read_excel(path=paste0(ThisDirectory,'\\',ThisFile),sheet="Tripdaten",
+                      col_names = TRUE,                      
+                      col_types =c("guess","text","guess","guess","guess",
+                                   "guess","guess","guess","guess","guess",
+                                   "guess","guess","guess","guess","guess", 
+                                   "guess","date","date","guess","guess", #columns 17 and 18 is time
+                                   "guess","guess","guess","guess","guess",
+                                   "guess","guess","guess","guess","guess",
+                                   "guess","guess","guess","guess","guess",
+                                   "guess"))
+```
+
+## BasisDaten
+
+```{r, warning=FALSE}
+BasisDaten<-read_excel(path=paste0(ThisDirectory,'\\',ThisFile),sheet = "Basisdaten",
+                       col_names = TRUE,
+                       col_types=c("guess","text","guess","guess","guess",
+                       "guess","guess","guess","guess","date",#column 9 is time
+                       "guess","guess","guess","guess","guess",
+                       "guess","guess","guess","text","guess", 
+                       "text","guess"))
+```
+
+## Observations
+
+### Column types
+
+```{r, warning=FALSE}
+Observations<-read_excel(path=paste0(ThisDirectory,'\\',ThisFile),sheet="Observations", 
+                         col_types = c("guess","guess","guess","guess","guess",
+                                       "guess","guess","guess","guess","guess",
+                                       "guess","guess","guess","guess","guess",
+                                       "guess","guess","guess","guess","guess",
+                                       "guess","guess","guess","guess","guess",
+                                       "guess","guess","guess","guess","guess",
+                                       "guess","guess"))
+```
+
+
+## Explanatory lines 
+
+If the Excel sheet contains initial explanatory rows, they can be removed using the following command. 
+Please note that this approach is only applicable to files where such explanatory rows are present, otherwise ignore.
+
+```{r}
+TripDaten<-TripDaten[-(1:7),]
+Observations<-Observations[-(1:7),] 
+BasisDaten<-BasisDaten[-(1:7),] 
+```
+
+## Corrections
+
+```{r}
+TripDaten   <- TripDaten%>% 
+  rename(AREA_OBSERVED=AREA_OBERSERVED)%>%
+  mutate(STARTTIME=substr(STARTTIME,12,19))%>%
+  mutate(ENDTIME=substr(ENDTIME,12,19))
+
+BasisDaten <- BasisDaten %>%
+  rename(POSITION_ID_CONTROLLED=`POSITION ID_CONTROLLED`)%>%
+  mutate(TIME=substr(TIME,12,19))
+
+Observations <- Observations %>%
+  rename(ENGLISH_NAME_BEFORE_CONTROL=`ENGLISH_NAME_BEFORE CONTROL`,
+         ENGLISH_NAME_CONTROL_ID=`ENGLISH_NAME_CONTROL ID`,
+         OBSERVATION_ID=Observation_ID
+         )%>%
+  rename(GROUP=Group)
+
+Corrections<-'In TripDaten, columna name AREA_OBSERSERVED changed to AREA_OBSERVED.\n
+In BasisDaten, renamed POSITION ID_CONTROLLED as POSITION_ID_CONTROLLED,\n
+In Observations, renamed to ENGLISH_NAME_BEFORE_CONTROL,ENGLISH_NAME_CONTROL_ID, GROUP, and OBSERVATION_ID'
+```
+
+```{r}
+Observations <- Observations %>%
+    mutate(ENGLISH_NAME=
+             case_when(# Missing words
+               ENGLISH_NAME=='unidentified pinniped (Grey/Harbour Seal)'~'unidentified pinniped (Grey Seal/Harbour Seal)',
+               ENGLISH_NAME=='Great / Lesser Black-backed Gull'~'Great Black-backed Gull/Lesser Black-backed Gull',
+               ENGLISH_NAME=='Common/Arctic Tern'~"Common Tern/Arctic Tern",
+               TRUE ~ ENGLISH_NAME))
+```
+
+# ~~~~~~~~~~~
+# Formal Check
+
+This part checks that all columns are correct and whether NA's occurred. 
+
+## Define folder
+
+Where is the function?
+
+```{r input1}
+FormalCheck_input_folder <- here() 
+FormalCheck_input_file <- paste0(FormalCheck_input_folder,"\\01FormalCheck.Rmd") 
+FormalCheck_input_file
+```
+
+Where should the output be saved?
+Ideally there would be a folder 01FormalCheck to store the results.
+
+```{r}
+FormalCheck_output_folder <-paste0(FormalCheck_input_folder,"\\01FormalCheck\\") 
+```
+
+## Define names
+
+Define the name of the file using the information provided in the Trip information. 
+
+```{r}
+FormalCheck_file_date<-as.character(TripDaten$DATE[1])
+FormalCheck_file_date
+FormalCheck_file_area<-substr(as.character(TripDaten$CLUSTER[1]),1,1)
+FormalCheck_file_area
+Company<-substr(as.character(TripDaten$LAB[1]),1,10)
+FormalCheck_output_name<-paste0("DAS_",FormalCheck_file_date,
+                                "_",Company,
+                                "_Area",FormalCheck_file_area,"_1Check.html")
+FormalCheck_output_name 
+```
+
+## Run 
+
+Run to export document
+
+```{r render validation, include=FALSE, cache=TRUE}
+rmarkdown::render(
+  input= FormalCheck_input_file, 
+  output_format = "html_document",
+  output_dir = FormalCheck_output_folder,
+  params = list(
+    ThisDirectory = ThisDirectory,
+    ThisFile = ThisFile,
+    TripDaten = TripDaten,
+    BasisDaten = BasisDaten,
+    Observations = Observations
+  ),
+  run_pandoc = TRUE,
+  output_file = FormalCheck_output_name  
+)
+beep(sound = 1, expr = NULL)
+```
+
+# ~~~~~~~~~
+
+# Report
+
+## Define folder
+
+What base to use?
+
+```{r}
+Plausability_input_folder<-here() 
+Plausability_input_file<- paste0(Plausability_input_folder,"\\02PlausabilityCheck.Rmd") 
+```
+
+How do you want the output to be saved?
+
+```{r input}
+PlausabilityCheck_output_folder <- paste0(Plausability_input_folder,"\\02PlausabilityCheck\\") 
+PlausabilityCheck_output_folder
+```
+
+## Define names
+
+```{r}
+unique(TripDaten$TRIP_ID)
+```
+
+If there are several TRIP_IDs, make reports separately by TRIP_ID
+
+```{r}
+Plausability_output_folder<-paste0(Plausability_input_folder,"\\02PlausabilityCheck\\") 
+Plausability_file_date<-as.character(TripDaten$DATE[1])
+Plausability_file_date
+Plausability_file_area<-substr(as.character(TripDaten$CLUSTER[1]),1,1)
+Plausability_file_area
+Plausability_output_name<-paste0("DAS",Plausability_file_date,
+                                 "_",Company,
+                                 "_Area",Plausability_file_area,"_2Report.doc")
+Plausability_output_name 
+```
+
+## Run
+
+Run to export document
+
+```{r render validation, include=FALSE}
+rmarkdown::render(
+  input= Plausability_input_file, 
+  output_format = "word_document", #can be changed to html document
+  output_dir = Plausability_output_folder,
+  params = list(
+    ThisDirectory = ThisDirectory,
+    ThisFile = ThisFile,
+    TripDaten = TripDaten,
+    BasisDaten = BasisDaten,
+    Observations = Observations
+  ),
+  run_pandoc = TRUE,
+  output_file = Plausability_output_name 
+)
+beep(sound = 1, expr = NULL)
+```
+
+# ~~~~~~~~~~
+
+# Maps
+
+## Define folder
+Where is the function?
+
+```{r input}
+Maps_input_folder<-here() #Where is the parametrization file
+Maps_input_file <- paste0(Maps_input_folder,"\\03MapsInteractive.Rmd") 
+```
+
+## Define names
+How do you want the output to be named?
+
+```{r input}
+Maps_output_folder <- paste0(Maps_input_folder,"\\03Maps\\") 
+```
+
+```{r}
+Maps_output_name <- paste0("DAS",as.character(TripDaten$DATE[1]),
+                           "_",Company,
+                           "_Area",substr(as.character(TripDaten$CLUSTER[1]),1,1),
+                           "_3Maps.html") 
+Maps_output_name 
+```
+
+## Run
+
+Run to export maps
+
+```{r render validation, include=FALSE}
+rmarkdown::render(
+  input= Maps_input_file, 
+  output_format = "html_document",
+  output_dir = Maps_output_folder,
+  params = list(
+    ThisDirectory = ThisDirectory,
+    ThisFile = ThisFile,
+    BasisDaten = BasisDaten,
+    Observations = Observations
+  ),
+  run_pandoc = TRUE,
+  output_file = Maps_output_name
+)
+beep(sound = 1, expr = NULL)
+```
+
+
+**End of document**
