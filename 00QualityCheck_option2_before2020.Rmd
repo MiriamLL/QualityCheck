@@ -117,7 +117,7 @@ Observations <- Observations %>%
          )%>%
   rename(GROUP=Group)
 
-Corrections<-'In TripDaten, columna name AREA_OBSERSERVED changed to AREA_OBSERVED.\n
+Corrections<-'In TripDaten, columns name AREA_OBSERSERVED changed to AREA_OBSERVED.\n
 In BasisDaten, renamed POSITION ID_CONTROLLED as POSITION_ID_CONTROLLED,\n
 In Observations, renamed to ENGLISH_NAME_BEFORE_CONTROL,ENGLISH_NAME_CONTROL_ID, GROUP, and OBSERVATION_ID'
 ```
