@@ -164,7 +164,7 @@ FormalCheck_file_date
 FormalCheck_file_area<-substr(as.character(TripDaten$CLUSTER[1]),5,5)
 FormalCheck_file_area
 Company<-substr(as.character(TripDaten$LAB[1]),1,10)
-FormalCheck_output_name<-paste0("DAS_",FormalCheck_file_date,
+FormalCheck_output_name<-paste0("DAS",FormalCheck_file_date,
                                 "_",Company,
                                 "_Area",FormalCheck_file_area,"_1Check.html")
 FormalCheck_output_name 
